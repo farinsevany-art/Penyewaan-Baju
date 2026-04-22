@@ -1,3 +1,4 @@
+import '../../auth/widgets/auth_background.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../widgets/costume_card.dart';
