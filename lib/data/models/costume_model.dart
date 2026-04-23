@@ -1,11 +1,13 @@
 class Costume {
   final String id;
   final String name;
-  final String category; // Misal: Tradisional, Karnaval, Jas
+  final String category;
   final double price;
   final int stock;
   final String imageUrl;
   final String description;
+  final String size;
+  bool isWishlisted;
 
   Costume({
     required this.id,
@@ -15,5 +17,15 @@ class Costume {
     required this.stock,
     required this.imageUrl,
     required this.description,
+    this.size = 'M - XL',
+    this.isWishlisted = false,
   });
+
+  String get formattedPrice {
+    final formatted = price.toInt().toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+$)'),
+      (m) => '${m[1]}.',
+    );
+    return 'Rp. $formatted';
+  }
 }
