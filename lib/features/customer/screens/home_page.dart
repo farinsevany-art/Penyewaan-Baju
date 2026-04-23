@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../widgets/costume_card.dart';
+import 'category_detail_page.dart'; // Import halaman detail kategori
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key});
@@ -14,7 +15,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
   // Daftar halaman untuk BottomNav
   final List<Widget> _pages = [
-    const HomeContent(), // Widget isi Home
+    const HomeContent(),
     const Center(child: Text("Halaman Wishlist")),
     const Center(child: Text("Halaman Pesanan")),
     const Center(child: Text("Halaman Cari")),
@@ -54,7 +55,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 }
 
-// Konten Utama Home
 class HomeContent extends StatelessWidget {
   const HomeContent({super.key});
 
@@ -63,7 +63,7 @@ class HomeContent extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Header Navy dengan Lengkungan
+          // Header Navy dengan Lengkungan (Clipper)
           Stack(
             children: [
               Container(height: 280, color: AppColors.offWhite),
@@ -116,7 +116,7 @@ class HomeContent extends StatelessWidget {
             ],
           ),
 
-          // Kategori
+          // Barisan Kategori
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
@@ -136,7 +136,7 @@ class HomeContent extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // Section Populer
+          // Label Populer
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
@@ -160,7 +160,7 @@ class HomeContent extends StatelessWidget {
             ),
           ),
 
-          // Grid Kostum
+          // Grid Kostum (Home)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: GridView.builder(
@@ -192,13 +192,22 @@ class HomeContent extends StatelessWidget {
   Widget _buildCategoryItem(BuildContext context, String title, IconData icon) {
     return GestureDetector(
       onTap: () {
-        // Navigasi atau Filter logic di sini
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Membuka kategori: $title"),
-            duration: const Duration(seconds: 1),
-          ),
-        );
+        // Navigasi khusus untuk kategori Tari Dewasa sesuai permintaan
+        if (title == 'Tari Dewasa') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CategoryDetailPage(categoryTitle: title),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Kategori $title segera hadir!"),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
       },
       child: Column(
         children: [
