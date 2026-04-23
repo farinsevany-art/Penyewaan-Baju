@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../widgets/auth_background.dart';
-import '../../customer/screens/home_page.dart'; // Pastikan import ini ada
+import '../../customer/screens/home_page.dart';
+import '../../admin/screens/admin_dashboard_page.dart';
 
 class LoginFormPage extends StatelessWidget {
   const LoginFormPage({super.key});
@@ -80,7 +81,12 @@ class LoginFormPage extends StatelessWidget {
 
                     // Tombol Login Admin
                     _buildLoginButton('Login Admin', AppColors.primaryGold, () {
-                      // Nanti diarahkan ke Dashboard Admin
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AdminDashboardPage(),
+                        ), // Kata const dihapus
+                      );
                     }),
 
                     const SizedBox(height: 20),
