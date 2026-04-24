@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../widgets/costume_card.dart';
-import 'category_detail_page.dart'; // Import halaman detail kategori
+import 'category_detail_page.dart'; 
+import 'wishlist_page.dart';// Import halaman detail kategori
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key});
@@ -16,7 +17,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   // Daftar halaman untuk BottomNav
   final List<Widget> _pages = [
     const HomeContent(),
-    const Center(child: Text("Halaman Wishlist")),
+    const WishlistPage(),
     const Center(child: Text("Halaman Pesanan")),
     const Center(child: Text("Halaman Cari")),
     const Center(child: Text("Halaman Profil")),
@@ -176,7 +177,7 @@ class HomeContent extends StatelessWidget {
               itemBuilder: (context, index) {
                 return const CostumeCard(
                   name: 'Tari Dewasa Gandrung',
-                  image: 'assets/images/kostum1.png',
+                  image: 'assets/images/taridewas.png',
                   price: '80.000',
                   size: 'M - XL',
                 );
