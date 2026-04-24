@@ -18,6 +18,7 @@ class ManajemenPesananScreen extends StatefulWidget {
 class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+
   @override
   void initState() {
     super.initState();
@@ -69,7 +70,6 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -177,21 +177,6 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           // Navigator.push(context, MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()));
         },
       ),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.black,
-      unselectedItemColor: Colors.grey,
-      currentIndex: 1,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Dashboard'),
-        BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Penyewaan'),
-        BottomNavigationBarItem(icon: Icon(Icons.inventory_2_outlined), label: 'Stok'),
-        BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'REPORTS'),
-      ],
     );
   }
 }
