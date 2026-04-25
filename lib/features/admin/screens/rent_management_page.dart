@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'rent_details_page.dart'; // Sesuaikan dengan lokasi file detail Anda
+import 'rent_details_page.dart'; 
 
 void main() {
   runApp(const MaterialApp(

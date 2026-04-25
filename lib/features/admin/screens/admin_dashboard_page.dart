@@ -3,6 +3,7 @@ import '../../../core/constants/colors.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/income_chart.dart';
 import 'stock_management_page.dart';
+import 'rent_management_page.dart'; 
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -17,7 +18,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   // Daftar halaman yang akan ditampilkan berdasarkan index navigasi
   final List<Widget> _pages = [
     const DashboardContent(), // Index 0: Konten Utama Dashboard
-    const Center(child: Text("Halaman Penyewaan")), // Index 1: Placeholder
+    const ManajemenPesananScreen(), // Index 1: Placeholder
     const StockManagementPage(), // Index 2: Halaman Manajemen Stok
     const Center(child: Text("Halaman Reports")), // Index 3: Placeholder
   ];

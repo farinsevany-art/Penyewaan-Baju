@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/status_update_sheet.dart';
 
 void main() {
   runApp(const RentalApp());
@@ -11,14 +12,42 @@ class RentalApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true, fontFamily: 'Serif'), // Menggunakan font bergaya klasik jika ada
       home: const DetailPenyewaanScreen(),
     );
   }
 }
 
-class DetailPenyewaanScreen extends StatelessWidget {
+class DetailPenyewaanScreen extends StatefulWidget {
   const DetailPenyewaanScreen({super.key});
+
+  @override
+  State<DetailPenyewaanScreen> createState() => _DetailPenyewaanScreenState();
+}
+
+class _DetailPenyewaanScreenState extends State<DetailPenyewaanScreen> {
+  // Variabel untuk menyimpan status saat ini secara dinamis
+  String currentStatus = "Aktif/Disewa"; 
+
+  void _showStatusPopup() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      builder: (context) {
+        return StatusUpdateSheet(
+          currentStatus: currentStatus,
+          onSave: (newStatus) {
+            setState(() {
+              currentStatus = newStatus;
+            });
+            // Opsional: Panggil API update status di sini
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,26 +90,37 @@ class DetailPenyewaanScreen extends StatelessWidget {
   }
 
   // Bagian Judul Pesanan & Status
-  Widget _buildOrderHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("PESANAN #R-94021", style: TextStyle(fontSize: 11, color: Colors.grey)),
-            Text("TARI GANDRUNG L\nSRIKANDI VER 2 L", 
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, height: 1.2)),
-          ],
+Widget _buildOrderHeader() {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("PESANAN #R-94021", style: TextStyle(fontSize: 11, color: Colors.grey)),
+          Text("TARI GANDRUNG L\nSRIKANDI VER 2 L", 
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, height: 1.2)),
+        ],
+      ),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          // Warna hijau jika aktif, abu-abu jika lainnya (bisa disesuaikan)
+          color: currentStatus == "Aktif/Disewa" ? Colors.green.shade100 : Colors.blue.shade100, 
+          borderRadius: BorderRadius.circular(15)
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(color: Colors.green.shade100, borderRadius: BorderRadius.circular(15)),
-          child: const Text("Aktif", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
-        )
-      ],
-    );
-  }
+        child: Text(
+          currentStatus, 
+          style: TextStyle(
+            color: currentStatus == "Aktif/Disewa" ? Colors.green : Colors.blue, 
+            fontWeight: FontWeight.bold, 
+            fontSize: 12
+          )
+        ),
+      )
+    ],
+  );
+}
 
   // Kartu Tanggal Pinjam & Kembali
   Widget _buildDateCard() {
@@ -237,7 +277,7 @@ class DetailPenyewaanScreen extends StatelessWidget {
     return Column(
       children: [
         ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: _showStatusPopup,
           icon: const Icon(Icons.swap_horiz, color: Colors.white),
           label: const Text("Ubah Status", style: TextStyle(color: Colors.white)),
           style: ElevatedButton.styleFrom(
