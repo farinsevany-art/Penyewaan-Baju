@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../widgets/costume_card.dart';
 import 'category_detail_page.dart'; 
+import 'category2_detail_page.dart';
+import 'category3_detail_page.dart';
+import 'category4_detail_page.dart';
 import 'wishlist_page.dart';// Import halaman detail kategori
 
 class CustomerHomePage extends StatefulWidget {
@@ -18,7 +21,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   final List<Widget> _pages = [
     const HomeContent(),
     const WishlistPage(),
-    const Center(child: Text("Halaman Pesanan")),
+    const Center(child: Text("Halaman Keranjang")),
     const Center(child: Text("Halaman Cari")),
     const Center(child: Text("Halaman Profil")),
   ];
@@ -46,7 +49,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
-            label: 'Pesanan',
+            label: 'Keranjang',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Cari'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
@@ -118,22 +121,34 @@ class HomeContent extends StatelessWidget {
           ),
 
           // Barisan Kategori
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildCategoryItem(
-                  context,
-                  'Tari Dewasa',
-                  Icons.accessibility_new,
-                ),
-                _buildCategoryItem(context, 'Tari Anak', Icons.child_care),
-                _buildCategoryItem(context, 'Raja & Ratu', Icons.auto_awesome),
-                _buildCategoryItem(context, 'Pewayangan', Icons.theater_comedy),
-              ],
-            ),
-          ),
+         Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 10),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      _buildCategoryItem(
+        context,
+        'Tari Dewasa',
+        Icons.accessibility_new,
+      ),
+      _buildCategoryItem(
+        context, 
+        'Tari Anak',
+        Icons.child_care, // <--- Ikon diganti agar lebih sesuai untuk anak-anak
+      ),
+      _buildCategoryItem(
+        context, 
+        'Raja & Ratu', 
+        Icons.auto_awesome,
+      ),
+      _buildCategoryItem(
+        context, 
+        'Pewayangan', 
+        Icons.theater_comedy,
+      ),
+    ],
+  ),
+),
 
           const SizedBox(height: 20),
 
@@ -190,25 +205,30 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryItem(BuildContext context, String title, IconData icon) {
+Widget _buildCategoryItem(BuildContext context, String title, IconData icon) {
     return GestureDetector(
       onTap: () {
-        // Navigasi khusus untuk kategori Tari Dewasa sesuai permintaan
-        if (title == 'Tari Dewasa') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CategoryDetailPage(categoryTitle: title),
-            ),
-          );
+        // BARIS INI WAJIB ADA: Mengenalkan destinationPage sebagai sebuah Widget
+        Widget destinationPage;
+
+        if (title == 'Tari Anak') {
+          destinationPage = Category2DetailPage(categoryTitle: title);
+        } else if (title == 'Tari Dewasa') {
+          destinationPage = CategoryDetailPage(categoryTitle: title);
+        } else if (title == 'Raja & Ratu') {
+          destinationPage = Category3DetailPage(categoryTitle: title);
+        } else if (title == 'Pewayangan') {
+          destinationPage = Category4DetailPage(categoryTitle: title);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Kategori $title segera hadir!"),
-              duration: const Duration(seconds: 1),
-            ),
-          );
+          // Jaga-jaga kalau ada kategori lain
+          destinationPage = CategoryDetailPage(categoryTitle: title);
         }
+
+        // Navigator harus di luar blok if-else agar bisa memanggil destinationPage
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => destinationPage),
+        );
       },
       child: Column(
         children: [
