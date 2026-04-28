@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'category2_detail_page.dart'; // Import file anak agar bisa pindah ke sana
 import 'category3_detail_page.dart'; // Import file anak agar bisa pindah ke sana
 import 'category4_detail_page.dart'; // Import file anak agar bisa pindah ke sana
+import 'product_detail_page.dart'; // Import file anak agar bisa pindah ke sana
 
 class CategoryDetailPage extends StatefulWidget {
   final String categoryTitle;
@@ -126,18 +127,20 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
   }
 
   Widget _buildProductCard(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+    onTap: () {
+      // Fungsi pindah ke halaman detail
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProductDetailPage(
+            title: 'Kostum Tari Gandrung',
+            price: 'Rp 80.000/set',
+            imagePath: 'assets/images/taridewasa.jpg', // Samakan dengan asset di bawah
           ),
-        ],
-      ),
+        ),
+      );
+    },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

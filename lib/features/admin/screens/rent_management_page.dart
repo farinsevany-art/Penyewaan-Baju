@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'rent_details_page.dart'; // Pastikan file ini ada
+import 'rent_details_page.dart';
+import '../../auth/widgets/auth_background.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: ManajemenPesananScreen(),
-  ));
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ManajemenPesananScreen(),
+    ),
+  );
 }
 
 class ManajemenPesananScreen extends StatefulWidget {
@@ -15,13 +19,20 @@ class ManajemenPesananScreen extends StatefulWidget {
   State<ManajemenPesananScreen> createState() => _ManajemenPesananScreenState();
 }
 
-class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with SingleTickerProviderStateMixin {
+class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose(); // Praktik baik: hapus controller saat tidak dipakai
+    super.dispose();
   }
 
   @override
@@ -37,17 +48,24 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         ),
         title: const Text(
           'Manajemen Pesanan',
-          style: TextStyle(color: Color(0xFFEEE4D1), fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Color(0xFFEEE4D1),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search, color: Colors.white)),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.search, color: Colors.white),
+          ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.black,
+          indicatorColor: Colors.white, // Ganti putih agar kontras dengan AppBar biru
           indicatorWeight: 3,
-          labelColor: Colors.brown,
-          unselectedLabelColor: Colors.grey,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
           tabs: const [
             Tab(text: "Baru"),
             Tab(text: "Aktif"),
@@ -55,10 +73,11 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           ],
         ),
       ),
+      // PERBAIKAN: Hapus duplikasi properti 'body'
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildPesananBaruList(), // Memanggil fungsi daftar pesanan
+          _buildPesananBaruList(), 
           const Center(child: Text("Tab Aktif")),
           const Center(child: Text("Tab Selesai")),
         ],
@@ -72,12 +91,13 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
     );
   }
 
-  // FUNGSI 1: Membangun list utama (Pastikan ini ada!)
   Widget _buildPesananBaruList() {
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage('https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png'),
+          image: NetworkImage(
+            'https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png',
+          ),
           opacity: 0.1,
           repeat: ImageRepeat.repeat,
         ),
@@ -88,47 +108,53 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Pesanan Terbaru", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              const Text(
+                "Pesanan Terbaru",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: Colors.blue.shade100, borderRadius: BorderRadius.circular(20)),
-                child: const Text("4 Menunggu", style: TextStyle(fontSize: 12, color: Colors.blue)),
-              )
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  "4 Menunggu",
+                  style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.bold),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
           _buildOrderItem(
+            context, // Tambahkan context untuk navigasi
             name: "Sarah Jenkins",
             category: "Clara 1",
             status: "Menunggu Disetujui",
             isUrgent: true,
-            imageUrl: "", // Akan menampilkan ikon default
+            imageUrl: "",
           ),
           _buildOrderItem(
+            context,
             name: "Michael Chen",
             category: "Rama",
             status: "Memproses Pembayaran",
             imageUrl: "https://i.pravatar.cc/150?u=michael",
           ),
           _buildOrderItem(
+            context,
             name: "Elena Rodriguez",
             category: "Shinta",
             status: "Menunggu Pelunasan",
             imageUrl: "https://i.pravatar.cc/150?u=elena",
-          ),
-          _buildOrderItem(
-            name: "David Wilson",
-            category: "Raja",
-            status: "Menunggu Verifikasi",
-            imageUrl: "https://i.pravatar.cc/150?u=david",
           ),
         ],
       ),
     );
   }
 
-  // FUNGSI 2: Membangun item satuan (Gunakan versi yang ada errorBuilder)
-  Widget _buildOrderItem({
+  Widget _buildOrderItem(
+    BuildContext context, {
     required String name,
     required String category,
     required String status,
@@ -138,7 +164,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
-      color: Colors.grey.shade200.withOpacity(0.8),
+      color: Colors.white.withOpacity(0.9), // Lebih cerah agar teks terbaca
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -152,25 +178,29 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
                 ? const Icon(Icons.person, color: Colors.grey)
                 : Image.network(
                     imageUrl,
-                    width: 50,
-                    height: 50,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.broken_image, color: Colors.grey);
-                    },
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.broken_image, color: Colors.grey),
                   ),
           ),
         ),
         title: Row(
           children: [
             Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-            if (isUrgent) const SizedBox(width: 8),
-            if (isUrgent)
+            if (isUrgent) ...[
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: Colors.orange.shade100, borderRadius: BorderRadius.circular(4)),
-                child: const Text("PENTING", style: TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.bold)),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade100,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  "PENTING",
+                  style: TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.bold),
+                ),
               ),
+            ],
           ],
         ),
         subtitle: Column(
@@ -182,8 +212,10 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          // Ganti sesuai nama class di file rent_details_page.dart
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()),
+          );
         },
       ),
     );
