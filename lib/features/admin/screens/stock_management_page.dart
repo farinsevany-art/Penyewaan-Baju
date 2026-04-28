@@ -69,8 +69,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
           ),
 
           // Tab bar kecil (Kostum | Aksesoris)
-          if (!isShowingCategory) _buildSubCategoryTab(),
-
+          // if (!isShowingCategory) _buildSubCategoryTab(),
           Expanded(
             child: isShowingCategory
                 ? _buildCategoryList()
