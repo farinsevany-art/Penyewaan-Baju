@@ -73,9 +73,9 @@ class EditStockPage extends StatelessWidget {
             _buildFieldLabel("Nama"),
             _buildTextField("Shinta"),
             const SizedBox(height: 15),
-            _buildFieldLabel("Kategori"),
-            _buildDropdownField(),
-            const SizedBox(height: 20),
+            // _buildFieldLabel("Kategori"),
+            // _buildDropdownField(),
+            // const SizedBox(height: 20),
 
             // Grid Input Ukuran & Stok
             const Row(

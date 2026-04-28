@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'category2_detail_page.dart'; // Import file anak agar bisa pindah ke sana
-import 'category3_detail_page.dart'; // Import file anak agar bisa pindah ke sana
+import 'category_detail_page.dart'; // Import file utama agar bisa pindah balik
+import 'category3_detail_page.dart';
 import 'category4_detail_page.dart'; // Import file anak agar bisa pindah ke sana
 
-class CategoryDetailPage extends StatefulWidget {
+class Category2DetailPage extends StatefulWidget {
   final String categoryTitle;
 
-  const CategoryDetailPage({super.key, required this.categoryTitle});
+  const Category2DetailPage({super.key, required this.categoryTitle});
 
   @override
-  State<CategoryDetailPage> createState() => _CategoryDetailPageState();
+  State<Category2DetailPage> createState() => _Category2DetailPageState();
 }
 
-class _CategoryDetailPageState extends State<CategoryDetailPage> {
-  // Variabel untuk menyimpan tab mana yang sedang aktif
+// PERBAIKAN: Nama class state harus konsisten dengan di atas
+class _Category2DetailPageState extends State<Category2DetailPage> {
   late String _currentSelected;
 
   @override
   void initState() {
     super.initState();
-    // Ambil judul dari halaman sebelumnya (Home) sebagai pilihan awal
     _currentSelected = widget.categoryTitle;
   }
 
@@ -55,7 +54,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
       body: Column(
         children: [
           const SizedBox(height: 10),
-          _buildFilterTabs(), // Memanggil tab kategori
+          _buildFilterTabs(),
           const SizedBox(height: 15),
           Expanded(
             child: GridView.builder(
@@ -82,7 +81,6 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: categories.map((cat) {
-          // Sekarang isSelected dinamis sesuai yang diklik
           bool isSelected = cat == _currentSelected;
           return Container(
             margin: const EdgeInsets.only(right: 10),
@@ -90,19 +88,20 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
               label: Text(cat),
               selected: isSelected,
               onSelected: (selected) {
-                if (cat == _currentSelected) return; // Jika klik tab yang sama, abaikan
+                if (cat == _currentSelected) return;
 
-                // LOGIKA PINDAH HALAMAN
-                if (cat == 'Tari Anak') {
-                  // Jika user klik Tari Anak, pindah ke file Category2DetailPage
+                // LOGIKA PINDAH HALAMAN YANG BENAR
+                if (cat != 'Tari Anak') {
+                  // Jika user pilih selain Anak (Dewasa, Raja, Wayang), 
+                  // pindah ke CategoryDetailPage (file umum)
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Category2DetailPage(categoryTitle: cat),
+                      builder: (context) => CategoryDetailPage(categoryTitle: cat),
                     ),
                   );
                 } else {
-                  // Jika tetap di kategori umum, cukup ganti state di sini
+                  // Jika tetap di Tari Anak, cuma ganti warna tab
                   setState(() {
                     _currentSelected = cat;
                   });
@@ -154,7 +153,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                     child: Image.asset(
-                      'assets/images/tarikreasibaru.png',
+                      'assets/images/taridewasa.jpg',
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.image, color: Colors.grey, size: 40),
@@ -181,7 +180,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _currentSelected.toUpperCase(), // Judul kecil otomatis berubah
+                    _currentSelected.toUpperCase(),
                     style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.grey),
                   ),
                   const SizedBox(height: 2),
