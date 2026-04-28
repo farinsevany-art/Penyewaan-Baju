@@ -3,7 +3,8 @@ import '../../../core/constants/colors.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/income_chart.dart';
 import 'stock_management_page.dart';
-import 'rent_management_page.dart'; 
+import 'rent_management_page.dart';
+import '../../auth/widgets/auth_background.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -33,8 +34,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      body:
-          _pages[_selectedIndex], // Menampilkan halaman sesuai index yang dipilih
+      body: AuthBackground(
+        // bg
+        child: _pages[_selectedIndex], // bg
+      ), // Menampilkan halaman sesuai index yang dipilih
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,

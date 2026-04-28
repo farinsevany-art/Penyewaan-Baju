@@ -7,6 +7,7 @@ import 'category3_detail_page.dart';
 import 'category4_detail_page.dart';
 import 'wishlist_page.dart';// Import halaman detail kategori
 
+
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key});
 
@@ -192,7 +193,7 @@ class HomeContent extends StatelessWidget {
               itemBuilder: (context, index) {
                 return const CostumeCard(
                   name: 'Tari Dewasa Gandrung',
-                  image: 'assets/images/taridewas.png',
+                  image: 'assets/images/taridewasa.jpg',
                   price: '80.000',
                   size: 'M - XL',
                 );
