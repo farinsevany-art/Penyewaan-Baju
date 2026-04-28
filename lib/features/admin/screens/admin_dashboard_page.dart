@@ -4,6 +4,7 @@ import '../widgets/stat_card.dart';
 import '../widgets/income_chart.dart';
 import 'stock_management_page.dart';
 import 'rent_management_page.dart';
+import 'reports.dart';
 import '../../auth/widgets/auth_background.dart';
 
 class AdminDashboardPage extends StatefulWidget {
@@ -20,7 +21,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   final List<Widget> _pages = [
     const DashboardContent(), // Index 0: Konten Utama Dashboard
     const ManajemenPesananScreen(), // Index 1: Placeholder
-    const StockManagementPage(), // Index 2: Halaman Manajemen Stok
+    const StockManagementPage(),
+    const ReportScreen(), // Index 2: Halaman Manajemen Stok
     const Center(child: Text("Halaman Reports")), // Index 3: Placeholder
   ];
 

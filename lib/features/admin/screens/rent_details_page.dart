@@ -56,7 +56,13 @@ class _DetailPenyewaanScreenState extends State<DetailPenyewaanScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A237E),
         elevation: 0,
-        leading: const Icon(Icons.arrow_back, color: Colors.yellow),
+        // UBAH BAGIAN INI:
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.yellow),
+          onPressed: () {
+            Navigator.pop(context); // Fungsi untuk kembali ke halaman sebelumnya
+          },
+        ),
         title: const Text('Detail Penyewaan', style: TextStyle(color: Colors.white, fontSize: 18)),
         actions: const [Icon(Icons.more_vert, color: Colors.yellow), SizedBox(width: 10)],
       ),

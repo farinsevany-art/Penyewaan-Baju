@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'rent_details_page.dart'; // Pastikan file ini ada
 import 'rent_details_page.dart';
 import '../../auth/widgets/auth_background.dart';
 
@@ -29,19 +30,21 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
   }
 
   @override
+  void dispose() {
+    _tabController.dispose(); // Praktik baik: hapus controller saat tidak dipakai
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7E9), // Background krem motif bunga
+      backgroundColor: const Color(0xFFFDF7E9),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A237E),
         elevation: 0,
         leading: const Padding(
           padding: EdgeInsets.all(12.0),
-          child: Icon(
-            Icons.shield,
-            color: Colors.yellow,
-            size: 28,
-          ), // Logo perisai/kuning
+          child: Icon(Icons.shield, color: Colors.yellow, size: 28),
         ),
         title: const Text(
           'Manajemen Pesanan',
@@ -59,10 +62,10 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.black,
+          indicatorColor: Colors.white, // Ganti putih agar kontras dengan AppBar biru
           indicatorWeight: 3,
-          labelColor: Colors.brown,
-          unselectedLabelColor: Colors.grey,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
           tabs: const [
             Tab(text: "Baru"),
             Tab(text: "Aktif"),
@@ -70,15 +73,14 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
           ],
         ),
       ),
-      body: AuthBackground(
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildPesananBaruList(), // Konten untuk tab 'Baru'
-            const Center(child: Text("Tab Aktif")),
-            const Center(child: Text("Tab Selesai")),
-          ],
-        ),
+      // PERBAIKAN: Hapus duplikasi properti 'body'
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildPesananBaruList(), 
+          const Center(child: Text("Tab Aktif")),
+          const Center(child: Text("Tab Selesai")),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
@@ -92,7 +94,6 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
   Widget _buildPesananBaruList() {
     return Container(
       decoration: const BoxDecoration(
-        // Catatan: Jika ingin menambahkan motif bunga, bisa menggunakan DecorationImage
         image: DecorationImage(
           image: NetworkImage(
             'https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png',
@@ -112,53 +113,48 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.blue.shade100,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
                   "4 Menunggu",
-                  style: TextStyle(fontSize: 12, color: Colors.blue),
+                  style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           _buildOrderItem(
+            context, // Tambahkan context untuk navigasi
             name: "Sarah Jenkins",
             category: "Clara 1",
             status: "Menunggu Disetujui",
             isUrgent: true,
-            imageUrl: "https://i.pravatar.cc/150?u=sarah",
+            imageUrl: "",
           ),
           _buildOrderItem(
+            context,
             name: "Michael Chen",
             category: "Rama",
             status: "Memproses Pembayaran",
             imageUrl: "https://i.pravatar.cc/150?u=michael",
           ),
           _buildOrderItem(
+            context,
             name: "Elena Rodriguez",
             category: "Shinta",
             status: "Menunggu Pelunasan",
             imageUrl: "https://i.pravatar.cc/150?u=elena",
-          ),
-          _buildOrderItem(
-            name: "David Wilson",
-            category: "Raja",
-            status: "Menunggu Verifikasi",
-            imageUrl: "https://i.pravatar.cc/150?u=david",
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOrderItem({
+  Widget _buildOrderItem(
+    BuildContext context, {
     required String name,
     required String category,
     required String status,
@@ -168,24 +164,31 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
-      color: Colors.grey.shade200.withOpacity(0.8),
+      color: Colors.white.withOpacity(0.9), // Lebih cerah agar teks terbaca
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            imageUrl,
+          child: Container(
             width: 50,
             height: 50,
-            fit: BoxFit.cover,
+            color: Colors.grey.shade300,
+            child: imageUrl.isEmpty
+                ? const Icon(Icons.person, color: Colors.grey)
+                : Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.broken_image, color: Colors.grey),
+                  ),
           ),
         ),
         title: Row(
           children: [
             Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-            if (isUrgent) const SizedBox(width: 8),
-            if (isUrgent)
+            if (isUrgent) ...[
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
@@ -194,42 +197,25 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                 ),
                 child: const Text(
                   "PENTING",
-                  style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.bold),
                 ),
               ),
+            ],
           ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              category,
-              style: const TextStyle(color: Colors.blueGrey, fontSize: 13),
-            ),
-            Text(
-              status,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-                color: Colors.black,
-              ),
-            ),
+            Text(category, style: const TextStyle(color: Colors.blueGrey, fontSize: 13)),
+            Text(status, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black)),
           ],
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const DetailPenyewaanScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()),
           );
-          // Navigasi ke halaman detail yang kita buat sebelumnya
-          // Navigator.push(context, MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()));
         },
       ),
     );
