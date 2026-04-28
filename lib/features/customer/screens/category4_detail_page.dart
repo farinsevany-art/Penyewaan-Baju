@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'category_detail_page.dart';
 import 'category2_detail_page.dart';
 import 'category3_detail_page.dart';
+import 'product_detail_page.dart';
 
 class Category4DetailPage extends StatefulWidget {
   final String categoryTitle;
@@ -93,7 +94,101 @@ class _Category4DetailPageState extends State<Category4DetailPage> {
     );
   }
 
-  Widget _buildProductCard(BuildContext context) {
-    return Container(/* ... sama seperti sebelumnya, ganti gambarnya di sini ... */);
+ Widget _buildProductCard(BuildContext context) {
+    return GestureDetector(
+    onTap: () {
+      // Fungsi pindah ke halaman detail
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProductDetailPage(
+            title: 'Kostum Tari Gandrung',
+            price: 'Rp 80.000/set',
+            imagePath: 'assets/images/taridewasa.jpg', // Samakan dengan asset di bawah
+          ),
+        ),
+      );
+    },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 13,
+            child: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                    color: Color(0xFFF0F0F0),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: Image.asset(
+                      'assets/images/tarikreasibaru.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.image, color: Colors.grey, size: 40),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    child: const Icon(Icons.favorite_border, size: 16, color: Colors.black87),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 11,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _currentSelected.toUpperCase(), // Judul kecil otomatis berubah
+                    style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'Clara 1',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  const Text('Ukuran M - XL', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  const Spacer(),
+                  const Text('Rp. 75.000 /day', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 32,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D1B3E),
+                        padding: EdgeInsets.zero,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text(
+                        'Sewa',
+                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
