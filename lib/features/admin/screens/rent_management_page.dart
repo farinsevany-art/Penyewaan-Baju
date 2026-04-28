@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'rent_details_page.dart'; 
+import 'rent_details_page.dart'; // Pastikan file ini ada
 
 void main() {
   runApp(const MaterialApp(
@@ -18,7 +18,6 @@ class ManajemenPesananScreen extends StatefulWidget {
 class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-
   @override
   void initState() {
     super.initState();
@@ -28,13 +27,13 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7E9), // Background krem motif bunga
+      backgroundColor: const Color(0xFFFDF7E9),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A237E),
         elevation: 0,
         leading: const Padding(
           padding: EdgeInsets.all(12.0),
-          child: Icon(Icons.shield, color: Colors.yellow, size: 28), // Logo perisai/kuning
+          child: Icon(Icons.shield, color: Colors.yellow, size: 28),
         ),
         title: const Text(
           'Manajemen Pesanan',
@@ -59,7 +58,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildPesananBaruList(), // Konten untuk tab 'Baru'
+          _buildPesananBaruList(), // Memanggil fungsi daftar pesanan
           const Center(child: Text("Tab Aktif")),
           const Center(child: Text("Tab Selesai")),
         ],
@@ -73,10 +72,10 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
     );
   }
 
+  // FUNGSI 1: Membangun list utama (Pastikan ini ada!)
   Widget _buildPesananBaruList() {
     return Container(
       decoration: const BoxDecoration(
-        // Catatan: Jika ingin menambahkan motif bunga, bisa menggunakan DecorationImage
         image: DecorationImage(
           image: NetworkImage('https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png'),
           opacity: 0.1,
@@ -103,7 +102,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
             category: "Clara 1",
             status: "Menunggu Disetujui",
             isUrgent: true,
-            imageUrl: "https://i.pravatar.cc/150?u=sarah",
+            imageUrl: "", // Akan menampilkan ikon default
           ),
           _buildOrderItem(
             name: "Michael Chen",
@@ -128,6 +127,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
     );
   }
 
+  // FUNGSI 2: Membangun item satuan (Gunakan versi yang ada errorBuilder)
   Widget _buildOrderItem({
     required String name,
     required String category,
@@ -144,7 +144,22 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover),
+          child: Container(
+            width: 50,
+            height: 50,
+            color: Colors.grey.shade300,
+            child: imageUrl.isEmpty
+                ? const Icon(Icons.person, color: Colors.grey)
+                : Image.network(
+                    imageUrl,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.broken_image, color: Colors.grey);
+                    },
+                  ),
+          ),
         ),
         title: Row(
           children: [
@@ -167,14 +182,8 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          Navigator.push(
-            context, 
-            MaterialPageRoute(
-              builder: (context) => const DetailPenyewaanScreen(),
-            ),
-          );
-          // Navigasi ke halaman detail yang kita buat sebelumnya
-          // Navigator.push(context, MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()));
+          // Ganti sesuai nama class di file rent_details_page.dart
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()));
         },
       ),
     );
