@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'rent_details_page.dart'; 
+import 'rent_details_page.dart';
+import '../../auth/widgets/auth_background.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: ManajemenPesananScreen(),
-  ));
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ManajemenPesananScreen(),
+    ),
+  );
 }
 
 class ManajemenPesananScreen extends StatefulWidget {
@@ -15,9 +18,9 @@ class ManajemenPesananScreen extends StatefulWidget {
   State<ManajemenPesananScreen> createState() => _ManajemenPesananScreenState();
 }
 
-class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with SingleTickerProviderStateMixin {
+class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
 
   @override
   void initState() {
@@ -34,14 +37,25 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         elevation: 0,
         leading: const Padding(
           padding: EdgeInsets.all(12.0),
-          child: Icon(Icons.shield, color: Colors.yellow, size: 28), // Logo perisai/kuning
+          child: Icon(
+            Icons.shield,
+            color: Colors.yellow,
+            size: 28,
+          ), // Logo perisai/kuning
         ),
         title: const Text(
           'Manajemen Pesanan',
-          style: TextStyle(color: Color(0xFFEEE4D1), fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Color(0xFFEEE4D1),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search, color: Colors.white)),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.search, color: Colors.white),
+          ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -56,13 +70,15 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildPesananBaruList(), // Konten untuk tab 'Baru'
-          const Center(child: Text("Tab Aktif")),
-          const Center(child: Text("Tab Selesai")),
-        ],
+      body: AuthBackground(
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildPesananBaruList(), // Konten untuk tab 'Baru'
+            const Center(child: Text("Tab Aktif")),
+            const Center(child: Text("Tab Selesai")),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
@@ -78,7 +94,9 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
       decoration: const BoxDecoration(
         // Catatan: Jika ingin menambahkan motif bunga, bisa menggunakan DecorationImage
         image: DecorationImage(
-          image: NetworkImage('https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png'),
+          image: NetworkImage(
+            'https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png',
+          ),
           opacity: 0.1,
           repeat: ImageRepeat.repeat,
         ),
@@ -89,12 +107,24 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Pesanan Terbaru", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              const Text(
+                "Pesanan Terbaru",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: Colors.blue.shade100, borderRadius: BorderRadius.circular(20)),
-                child: const Text("4 Menunggu", style: TextStyle(fontSize: 12, color: Colors.blue)),
-              )
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  "4 Menunggu",
+                  style: TextStyle(fontSize: 12, color: Colors.blue),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -144,7 +174,12 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover),
+          child: Image.network(
+            imageUrl,
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover,
+          ),
         ),
         title: Row(
           children: [
@@ -153,22 +188,42 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
             if (isUrgent)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: Colors.orange.shade100, borderRadius: BorderRadius.circular(4)),
-                child: const Text("PENTING", style: TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.bold)),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade100,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  "PENTING",
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
           ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(category, style: const TextStyle(color: Colors.blueGrey, fontSize: 13)),
-            Text(status, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black)),
+            Text(
+              category,
+              style: const TextStyle(color: Colors.blueGrey, fontSize: 13),
+            ),
+            Text(
+              status,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           Navigator.push(
-            context, 
+            context,
             MaterialPageRoute(
               builder: (context) => const DetailPenyewaanScreen(),
             ),

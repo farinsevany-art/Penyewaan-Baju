@@ -48,35 +48,37 @@ class _StockManagementPageState extends State<StockManagementPage> {
           const SizedBox(width: 10),
         ],
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: isShowingCategory
-                    ? 'Cari Kategori Kostum'
-                    : 'Cari Kostum',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+      body: AuthBackground(
+        child: Column(
+          children: [
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: isShowingCategory
+                      ? 'Cari Kategori Kostum'
+                      : 'Cari Kostum',
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // Tab bar kecil (Kostum | Aksesoris)
-          // if (!isShowingCategory) _buildSubCategoryTab(),
-          Expanded(
-            child: isShowingCategory
-                ? _buildCategoryList()
-                : _buildProductList(),
-          ),
-        ],
+            // Tab bar kecil (Kostum | Aksesoris)
+            // if (!isShowingCategory) _buildSubCategoryTab(),
+            Expanded(
+              child: isShowingCategory
+                  ? _buildCategoryList()
+                  : _buildProductList(),
+            ),
+          ],
+        ),
       ),
     );
   }
