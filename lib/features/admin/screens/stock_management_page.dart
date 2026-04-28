@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import 'edit_stock_page.dart';
+import '../../auth/widgets/auth_background.dart';
 
 class StockManagementPage extends StatefulWidget {
   const StockManagementPage({super.key});

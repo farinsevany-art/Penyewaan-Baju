@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
+import '../../auth/widgets/auth_background.dart';
 
 class EditStockPage extends StatelessWidget {
   const EditStockPage({super.key});
