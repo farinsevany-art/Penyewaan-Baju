@@ -3,10 +3,7 @@ import '../../../core/constants/colors.dart';
 import '../../../data/models/costume_model.dart';
 
 class CostumeCard extends StatefulWidget {
-
   final Costume? costume;
-
-  
   final String? name;
   final String? image;
   final String? price;
@@ -14,6 +11,8 @@ class CostumeCard extends StatefulWidget {
 
   final VoidCallback? onTap;
   final VoidCallback? onAddToCart;
+  // --- TAMBAHKAN INI ---
+  final VoidCallback? onWishlistToggle; 
 
   const CostumeCard({
     super.key,
@@ -24,6 +23,7 @@ class CostumeCard extends StatefulWidget {
     this.size,
     this.onTap,
     this.onAddToCart,
+    this.onWishlistToggle, // --- DAN INI ---
   });
 
   @override
@@ -38,25 +38,27 @@ class _CostumeCardState extends State<CostumeCard> {
   String get _size => widget.costume?.size ?? widget.size ?? '';
   bool get _isWishlisted => widget.costume?.isWishlisted ?? false;
 
-  void _toggleWishlist() {
-    if (widget.costume == null) return;
-    setState(() {
-      widget.costume!.isWishlisted = !widget.costume!.isWishlisted;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-        widget.costume!.isWishlisted
-            ? '$_name ditambahkan ke wishlist'
-            : '$_name dihapus dari wishlist',
-      ),
-      duration: const Duration(seconds: 2),
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: widget.costume!.isWishlisted
-          ? AppColors.primaryNavy
-          : Colors.red.shade700,
-    ));
+  void _handleWishlistClick() {
+    // Jika onWishlistToggle diisi dari luar (seperti di search_page), jalankan itu.
+    if (widget.onWishlistToggle != null) {
+      widget.onWishlistToggle!();
+    } else {
+      // Jika tidak ada parameter dari luar, jalankan logika internal biasa
+      if (widget.costume == null) return;
+      setState(() {
+        widget.costume!.isWishlisted = !widget.costume!.isWishlisted;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          widget.costume!.isWishlisted
+              ? '$_name ditambahkan ke wishlist'
+              : '$_name dihapus dari wishlist',
+        ),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
   }
 
   void _handleAddToCart() {
@@ -66,11 +68,8 @@ class _CostumeCardState extends State<CostumeCard> {
     }
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('$_name ditambahkan ke keranjang'),
-      duration: const Duration(seconds: 2),
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       backgroundColor: AppColors.primaryNavy,
+      behavior: SnackBarBehavior.floating,
     ));
   }
 
@@ -82,21 +81,16 @@ class _CostumeCardState extends State<CostumeCard> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
-          boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 5),
-          ],
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Gambar + tombol wishlist ──
             Expanded(
               child: Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(15),
-                    ),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
                     child: Image.asset(
                       _image,
                       fit: BoxFit.cover,
@@ -104,10 +98,7 @@ class _CostumeCardState extends State<CostumeCard> {
                       height: double.infinity,
                       errorBuilder: (_, __, ___) => Container(
                         color: const Color(0xFFE8DDD0),
-                        child: const Center(
-                          child: Icon(Icons.image_not_supported_outlined,
-                              size: 36, color: Color(0xFFB0A090)),
-                        ),
+                        child: const Center(child: Icon(Icons.image_not_supported_outlined)),
                       ),
                     ),
                   ),
@@ -115,28 +106,17 @@ class _CostumeCardState extends State<CostumeCard> {
                     top: 8,
                     right: 8,
                     child: GestureDetector(
-                      onTap: _toggleWishlist,
+                      onTap: _handleWishlistClick, // Panggil fungsi baru di sini
                       child: Container(
                         width: 30,
                         height: 30,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
                         ),
                         child: Icon(
-                          _isWishlisted
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: _isWishlisted
-                              ? Colors.red.shade600
-                              : AppColors.mediumGrey,
+                          _isWishlisted ? Icons.favorite : Icons.favorite_border,
+                          color: _isWishlisted ? Colors.red.shade600 : Colors.grey,
                           size: 16,
                         ),
                       ),
@@ -145,72 +125,24 @@ class _CostumeCardState extends State<CostumeCard> {
                 ],
               ),
             ),
-
-            // ── Info + tombol ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _name,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                      color: Colors.black87,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    'Ukuran: $_size',
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      color: AppColors.mediumGrey,
-                      fontSize: 10,
-                    ),
-                  ),
+                  Text(_name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), overflow: TextOverflow.ellipsis),
+                  Text('Ukuran: $_size', style: const TextStyle(color: Colors.grey, fontSize: 10)),
                   const SizedBox(height: 2),
-                  Text(
-                    _price,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                      fontSize: 11,
-                    ),
-                  ),
+                  Text(_price, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                   const SizedBox(height: 6),
-
-                  // Tombol Tambah Keranjang
                   SizedBox(
                     width: double.infinity,
                     height: 32,
                     child: ElevatedButton.icon(
                       onPressed: _handleAddToCart,
-                      icon: const Icon(
-                        Icons.shopping_cart_outlined,
-                        size: 13,
-                        color: Colors.white,
-                      ),
-                      label: const Text(
-                        'Tambah Keranjang',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1565C0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: EdgeInsets.zero,
-                        elevation: 0,
-                      ),
+                      icon: const Icon(Icons.shopping_cart_outlined, size: 13, color: Colors.white),
+                      label: const Text('Tambah Keranjang', style: TextStyle(fontSize: 10, color: Colors.white)),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1565C0)),
                     ),
                   ),
                 ],

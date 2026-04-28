@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import '../../../core/constants/colors.dart';
+import '../../../data/models/costume_model.dart';
 import '../widgets/costume_card.dart';
-import 'category_detail_page.dart'; 
+import '../../auth/widgets/auth_background.dart';
+import 'wishlist_page.dart';
+import 'search_page.dart';
+import 'category_detail_page.dart';
 import 'category2_detail_page.dart';
 import 'category3_detail_page.dart';
 import 'category4_detail_page.dart';
-import 'wishlist_page.dart';// Import halaman detail kategori
-
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key});
@@ -18,240 +21,300 @@ class CustomerHomePage extends StatefulWidget {
 class _CustomerHomePageState extends State<CustomerHomePage> {
   int _selectedIndex = 0;
 
-  // Daftar halaman untuk BottomNav
-  final List<Widget> _pages = [
-    const HomeContent(),
-    const WishlistPage(),
-    const Center(child: Text("Halaman Keranjang")),
-    const Center(child: Text("Halaman Cari")),
-    const Center(child: Text("Halaman Profil")),
+  final List<Costume> dummyCostumes = [
+    Costume(
+      id: '1',
+      name: 'Gandrung',
+      category: 'TARI DEWASA',
+      price: 80000,
+      stock: 10,
+      imageUrl: 'assets/images/taridewasa.jpg',
+      description: 'Kostum tari Gandrung tradisional.',
+      size: 'M - XL',
+    ),
+    Costume(
+      id: '2',
+      name: 'TPW Ver 2',
+      category: 'TARI DEWASA',
+      price: 85000,
+      stock: 5,
+      imageUrl: 'assets/images/tarikreasibaru.png',
+      description: 'Kostum tari kreasi baru versi 2.',
+      size: 'M - L',
+    ),
+    Costume(
+      id: '3',
+      name: 'Ratu',
+      category: 'RAJA & RATU',
+      price: 175000,
+      stock: 3,
+      imageUrl: 'assets/images/rajaratu.jpg',
+      description: 'Kostum Ratu dengan jubah mewah.',
+      size: 'M - XL',
+    ),
+    Costume(
+      id: '4',
+      name: 'Ratu Tradisional',
+      category: 'RAJA & RATU',
+      price: 150000,
+      stock: 4,
+      imageUrl: 'assets/images/raja.png',
+      description: 'Kostum Ratu nuansa klasik.',
+      size: 'M - XL',
+    ),
   ];
+
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomeContent(costumes: dummyCostumes),
+      const WishlistPage(),
+      const Center(child: Text("Halaman Keranjang")),
+      const SearchPage(),
+      const Center(child: Text("Halaman Profil")),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.offWhite,
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        selectedItemColor: AppColors.primaryGold,
+        selectedItemColor: AppColors.primaryNavy,
         unselectedItemColor: AppColors.mediumGrey,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+        onTap: (index) => setState(() => _selectedIndex = index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Wishlist',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Keranjang',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Cari'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Wishlist'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_outlined), label: 'Cart'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profil'),
         ],
       ),
     );
   }
 }
 
-class HomeContent extends StatelessWidget {
-  const HomeContent({super.key});
+class HomeContent extends StatefulWidget {
+  final List<Costume> costumes;
+  const HomeContent({super.key, required this.costumes});
 
   @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Header Navy dengan Lengkungan (Clipper)
-          Stack(
+    return AuthBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SingleChildScrollView(
+          child: Column(
             children: [
-              Container(height: 280, color: AppColors.offWhite),
-              ClipPath(
-                clipper: MyHeaderClipper(),
-                child: Container(
-                  height: 250,
-                  color: AppColors.primaryNavy,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 40,
+              // ─── HEADER BANNER DENGAN 4 BUNGA ───
+              Stack(
+                children: [
+                  ClipPath(
+                    clipper: MyHeaderClipper(),
+                    child: Container(height: 380, color: AppColors.primaryNavy),
                   ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Image.asset(
-                            'assets/images/Logotransparan.png',
-                            width: 40,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                                  Icons.auto_awesome,
-                                  color: AppColors.primaryGold,
-                                ),
-                          ),
-                          const Icon(
-                            Icons.notifications_none,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Cari kostum...',
-                          prefixIcon: const Icon(Icons.search),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide.none,
-                          ),
+                  
+                  // Dekorasi Bunga di 4 Sisi
+                  _buildFlower(top: 10, left: -30, rotation: 0),
+                  _buildFlower(top: 10, right: -30, rotation: 90),
+                  _buildFlower(bottom: 100, left: -30, rotation: 270),
+                  _buildFlower(bottom: 100, right: -30, rotation: 180),
+
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(25, 60, 25, 0),
+                    child: Column(
+                      children: [
+                        _buildSearchBar(context),
+                        const SizedBox(height: 30),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _buildHeaderText(),
+                            const Spacer(),
+                            Image.asset('assets/images/Home.png', height: 230, fit: BoxFit.contain),
+                          ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                ],
+              ),
+
+              // ─── KATEGORI ───
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildCategoryCircle(context, 'Tari Dewasa', 'assets/images/taridewasa.jpg'),
+                    _buildCategoryCircle(context, 'Tari Anak', 'assets/images/kostumtarianak.jpg'),
+                    _buildCategoryCircle(context, 'Raja & Ratu', 'assets/images/rajaratu.jpg'),
+                    _buildCategoryCircle(context, 'Pewayangan', 'assets/images/wayang.jpg'),
+                  ],
                 ),
               ),
+
+              // ─── LABEL POPULER ───
+              _buildSectionHeader("POPULER"),
+
+              // ─── GRID KOSTUM ───
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.63, // Rasio agar tombol Sewa proporsional
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                  ),
+                  itemCount: widget.costumes.length,
+                  itemBuilder: (context, index) {
+                    final data = widget.costumes[index];
+                    return CostumeCard(
+                      costume: data,
+                      onWishlistToggle: () => setState(() => data.isWishlisted = !data.isWishlisted),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 30),
             ],
           ),
+        ),
+      ),
+    );
+  }
 
-          // Barisan Kategori
-         Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 10),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: [
-      _buildCategoryItem(
-        context,
-        'Tari Dewasa',
-        Icons.accessibility_new,
+  // Widget Bunga dengan rotasi otomatis
+  Widget _buildFlower({double? top, double? bottom, double? left, double? right, double rotation = 0}) {
+    return Positioned(
+      top: top, bottom: bottom, left: left, right: right,
+      child: Opacity(
+        opacity: 0.25,
+        child: Transform.rotate(
+          angle: rotation * math.pi / 180,
+          child: Image.asset('assets/images/bunga.png', width: 160),
+        ),
       ),
-      _buildCategoryItem(
-        context, 
-        'Tari Anak',
-        Icons.child_care, // <--- Ikon diganti agar lebih sesuai untuk anak-anak
-      ),
-      _buildCategoryItem(
-        context, 
-        'Raja & Ratu', 
-        Icons.auto_awesome,
-      ),
-      _buildCategoryItem(
-        context, 
-        'Pewayangan', 
-        Icons.theater_comedy,
-      ),
-    ],
-  ),
-),
+    );
+  }
 
-          const SizedBox(height: 20),
-
-          // Label Populer
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'POPULER',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Lihat Semua >',
-                    style: TextStyle(color: AppColors.primaryGold),
-                  ),
-                ),
-              ],
-            ),
+  Widget _buildHeaderText() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "KUSUMA",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2.5,
           ),
-
-          // Grid Kostum (Home)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.65,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-              ),
-              itemCount: 4,
-              itemBuilder: (context, index) {
-                return const CostumeCard(
-                  name: 'Tari Dewasa Gandrung',
-                  image: 'assets/images/taridewasa.jpg',
-                  price: '80.000',
-                  size: 'M - XL',
-                );
-              },
-            ),
+        ),
+        const Text(
+          "CANTIKA",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2.5,
+            height: 0.9,
           ),
-          const SizedBox(height: 20),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE4B04B),
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          ),
+          child: const Text(
+            "SEWA SEKARANG",
+            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+          ),
+        ),
+        const SizedBox(height: 40),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SearchPage())),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.search, color: Colors.grey, size: 20),
+            SizedBox(width: 10),
+            Text('Cari kostum...', style: TextStyle(color: Colors.grey, fontSize: 14)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+          const Row(
+            children: [
+              Text('Tersedia ', style: TextStyle(color: Color(0xFFE4B04B), fontSize: 12, fontWeight: FontWeight.bold)),
+              Icon(Icons.arrow_forward_ios, size: 10, color: Color(0xFFE4B04B)),
+            ],
+          ),
         ],
       ),
     );
   }
 
-Widget _buildCategoryItem(BuildContext context, String title, IconData icon) {
+  Widget _buildCategoryCircle(BuildContext context, String title, String imagePath) {
     return GestureDetector(
       onTap: () {
-        // BARIS INI WAJIB ADA: Mengenalkan destinationPage sebagai sebuah Widget
-        Widget destinationPage;
-
-        if (title == 'Tari Anak') {
-          destinationPage = Category2DetailPage(categoryTitle: title);
-        } else if (title == 'Tari Dewasa') {
-          destinationPage = CategoryDetailPage(categoryTitle: title);
-        } else if (title == 'Raja & Ratu') {
-          destinationPage = Category3DetailPage(categoryTitle: title);
-        } else if (title == 'Pewayangan') {
-          destinationPage = Category4DetailPage(categoryTitle: title);
-        } else {
-          // Jaga-jaga kalau ada kategori lain
-          destinationPage = CategoryDetailPage(categoryTitle: title);
-        }
-
-        // Navigator harus di luar blok if-else agar bisa memanggil destinationPage
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => destinationPage),
-        );
+        Widget page;
+        if (title == 'Tari Anak') page = const Category2DetailPage(categoryTitle: 'Tari Anak');
+        else if (title == 'Raja & Ratu') page = const Category3DetailPage(categoryTitle: 'Raja & Ratu');
+        else if (title == 'Pewayangan') page = const Category4DetailPage(categoryTitle: 'Pewayangan');
+        else page = const CategoryDetailPage(categoryTitle: 'Tari Dewasa');
+        Navigator.push(context, MaterialPageRoute(builder: (context) => page));
       },
       child: Column(
         children: [
-          Material(
-            elevation: 3,
-            shadowColor: Colors.black26,
-            shape: const CircleBorder(),
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
             child: CircleAvatar(
               radius: 30,
-              backgroundColor: Colors.white,
-              child: Icon(icon, color: AppColors.primaryNavy),
+              backgroundImage: AssetImage(imagePath),
             ),
           ),
           const SizedBox(height: 8),
-          SizedBox(
-            width: 70,
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-            ),
-          ),
+          Text(title, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -262,18 +325,12 @@ class MyHeaderClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     Path path = Path();
-    path.lineTo(0, size.height - 50);
-    path.quadraticBezierTo(
-      size.width / 2,
-      size.height,
-      size.width,
-      size.height - 50,
-    );
+    path.lineTo(0, size.height - 70);
+    path.quadraticBezierTo(size.width / 2, size.height, size.width, size.height - 70);
     path.lineTo(size.width, 0);
     path.close();
     return path;
   }
-
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

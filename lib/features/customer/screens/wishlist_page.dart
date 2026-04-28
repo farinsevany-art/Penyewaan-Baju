@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
-import '../widgets/costume_card.dart'; // Pastikan path import benar
+import '../widgets/costume_card.dart'; 
+import '../../auth/widgets/auth_background.dart';
+
+// 1. Nanti kalau sudah di-push, buka komen import di bawah ini:
+// import 'path/ke/file/keranjang_page.dart'; 
 
 class WishlistPage extends StatefulWidget {
   const WishlistPage({super.key});
@@ -14,58 +18,60 @@ class WishlistPage extends StatefulWidget {
 class _WishlistPageState extends State<WishlistPage> {
   bool _isExploring = false;
 
-  // Mengambil data berdasarkan mode (Wishlist atau Jelajah)
   List<Costume> get _itemsToShow => _isExploring
       ? allCostumes
       : allCostumes.where((c) => c.isWishlisted).toList();
 
   @override
   Widget build(BuildContext context) {
-    final items = _itemsToShow;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFFDFCF7),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () {
-            if (_isExploring) {
-              setState(() => _isExploring = false);
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
-        ),
-        title: Text(
-          _isExploring ? 'Jelajahi Kostum' : 'Wishlist',
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
+    return AuthBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent, // Agar background muncul
+        appBar: AppBar(
+          backgroundColor: Colors.white.withOpacity(0.9),
+          elevation: 0.5,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black87),
+            onPressed: () {
+              if (_isExploring) {
+                setState(() => _isExploring = false);
+              } else {
+                // Balik ke Homepage agar tidak ke Login
+                Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+              }
+            },
           ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black87),
-            onPressed: () {},
+          title: Text(
+            _isExploring ? 'Jelajahi Kostum' : 'Wishlist',
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ],
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black87),
+              onPressed: () {
+                // 2. Nanti buka komen navigasi ini:
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => const KeranjangPage()));
+              },
+            ),
+          ],
+        ),
+        body: (_itemsToShow.isEmpty && !_isExploring) ? _buildEmpty() : _buildGrid(_itemsToShow),
       ),
-      body: (items.isEmpty && !_isExploring) ? _buildEmpty() : _buildGrid(items),
     );
   }
 
-  // Menggunakan GridView agar tampilan Card lebih proporsional sesuai desain CostumeCard
   Widget _buildGrid(List<Costume> items) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: items.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // Menampilkan 2 card per baris
-        childAspectRatio: 0.65, // Menyesuaikan tinggi card
+        crossAxisCount: 2,
+        childAspectRatio: 0.65,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
@@ -74,13 +80,24 @@ class _WishlistPageState extends State<WishlistPage> {
         return CostumeCard(
           costume: item,
           onTap: () {
-            // Logika navigasi ke detail jika diperlukan
+            // Navigasi detail kalau perlu
           },
           onAddToCart: () {
-            // Callback ini akan dipanggil saat tombol di card ditekan
-            setState(() {
-              // Logika tambah keranjang global bisa di sini
-            });
+            // Feedback ke user
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${item.name} ditambah ke keranjang'),
+                behavior: SnackBarBehavior.floating,
+                action: SnackBarAction(
+                  label: 'CEK',
+                  onPressed: () {
+                    // 3. Nanti buka komen navigasi ini:
+                    // Navigator.push(context, MaterialPageRoute(builder: (context) => const KeranjangPage()));
+                  },
+                ),
+              ),
+            );
           },
         );
       },
@@ -92,11 +109,11 @@ class _WishlistPageState extends State<WishlistPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.favorite_border, size: 70, color: Colors.grey.shade300),
+          Icon(Icons.favorite_border, size: 70, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           const Text(
             'Wishlist Kamu Kosong',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryNavy),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
@@ -104,10 +121,8 @@ class _WishlistPageState extends State<WishlistPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryNavy,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
             ),
             child: const Text('Jelajahi Kostum'),
           ),
