@@ -193,7 +193,7 @@ class HomeContent extends StatelessWidget {
               itemBuilder: (context, index) {
                 return const CostumeCard(
                   name: 'Tari Dewasa Gandrung',
-                  image: 'assets/images/taridewas.png',
+                  image: 'assets/images/taridewasa.jpg',
                   price: '80.000',
                   size: 'M - XL',
                 );
