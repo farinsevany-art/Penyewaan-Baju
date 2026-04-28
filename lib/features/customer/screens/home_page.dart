@@ -7,6 +7,7 @@ import 'category3_detail_page.dart';
 import 'category4_detail_page.dart';
 import 'wishlist_page.dart';// Import halaman detail kategori
 
+
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key});
 
