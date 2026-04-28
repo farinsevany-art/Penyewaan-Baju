@@ -117,7 +117,7 @@ final List<Costume> allCostumes = [
     category: 'Tari Anak',
     price: 60000,
     stock: 8,
-    imageUrl: 'assets/images/minangkabau.jpg',
+    imageUrl: 'assets/images/minangkabau.png',
     description: 'Kostum tari anak warna-warni untuk pertunjukan sekolah.',
     size: 'S - M',
   ),
