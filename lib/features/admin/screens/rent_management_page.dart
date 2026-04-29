@@ -67,8 +67,8 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
 
   @override
   void dispose() {
-    _tabController.dispose();
-    _searchController.dispose();
+    _tabController
+        .dispose(); // Praktik baik: hapus controller saat tidak dipakai
     super.dispose();
   }
 
@@ -124,7 +124,12 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         ],
         bottom: TabBar(
           controller: _tabController,
+<<<<<<< HEAD
           indicatorColor: AppColors.primaryGold,
+=======
+          indicatorColor:
+              Colors.white, // Ganti putih agar kontras dengan AppBar biru
+>>>>>>> b5f48871285e0410d87d99e1d4323a5037b74850
           indicatorWeight: 3,
           labelColor: AppColors.lightGold,
           unselectedLabelColor: AppColors.lightGrey,
@@ -135,6 +140,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           ],
         ),
       ),
+<<<<<<< HEAD
       body: TabBarView(
         controller: _tabController,
         children: [
@@ -142,6 +148,18 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           _buildFilteredPesananList("Aktif"),
           _buildFilteredPesananList("Selesai"),
         ],
+=======
+      // PERBAIKAN: Hapus duplikasi properti 'body'
+      body: AuthBackground(
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildPesananBaruList(),
+            const Center(child: Text("Tab Aktif")),
+            const Center(child: Text("Tab Selesai")),
+          ],
+        ),
+>>>>>>> b5f48871285e0410d87d99e1d4323a5037b74850
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
@@ -194,9 +212,38 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+<<<<<<< HEAD
           Text(
             "Hasil Pesanan", 
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)
+=======
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Pesanan Terbaru",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  "4 Menunggu",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+>>>>>>> b5f48871285e0410d87d99e1d4323a5037b74850
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -242,19 +289,53 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
             Text(name, style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkGrey)), // Hapus const
             if (isUrgent) ...[
               const SizedBox(width: 8),
+<<<<<<< HEAD
               _urgentBadge(),
+=======
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade100,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  "PENTING",
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+>>>>>>> b5f48871285e0410d87d99e1d4323a5037b74850
             ],
           ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+<<<<<<< HEAD
             Text(category, style: TextStyle(color: AppColors.mediumGrey, fontSize: 13)), // Hapus const
             Text(status, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.secondaryNavy)), // Hapus const
+=======
+            Text(
+              category,
+              style: const TextStyle(color: Colors.blueGrey, fontSize: 13),
+            ),
+            Text(
+              status,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: Colors.black,
+              ),
+            ),
+>>>>>>> b5f48871285e0410d87d99e1d4323a5037b74850
           ],
         ),
         trailing: Icon(Icons.chevron_right, color: AppColors.primaryGold), // Hapus const
         onTap: () {
+<<<<<<< HEAD
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -275,3 +356,16 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
     );
   }
 }
+=======
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const DetailPenyewaanScreen(),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+>>>>>>> b5f48871285e0410d87d99e1d4323a5037b74850

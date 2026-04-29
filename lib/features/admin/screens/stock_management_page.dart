@@ -22,12 +22,16 @@ class _StockManagementPageState extends State<StockManagementPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primaryNavy,
         elevation: 0,
-        leading: isShowingCategory
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => setState(() => isShowingCategory = true),
-              ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            if (!isShowingCategory) {
+              setState(() => isShowingCategory = true);
+            } else {
+              Navigator.pop(context);
+            }
+          },
+        ),
         title: Text(
           isShowingCategory ? 'Manajemen Stok' : selectedCategory,
           style: const TextStyle(

@@ -10,6 +10,12 @@ class EditStockPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primaryNavy,
+
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+
         title: const Text(
           "Edit Item",
           style: TextStyle(color: AppColors.primaryGold),
