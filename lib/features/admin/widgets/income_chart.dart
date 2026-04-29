@@ -11,7 +11,7 @@ class IncomeChart extends StatelessWidget {
       height: 250,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3E9D2), // Krem sesuai desain
+        color: const Color(0xFFF3E9D2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.primaryGold.withOpacity(0.3)),
       ),

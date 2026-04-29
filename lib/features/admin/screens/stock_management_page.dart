@@ -22,12 +22,16 @@ class _StockManagementPageState extends State<StockManagementPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primaryNavy,
         elevation: 0,
-        leading: isShowingCategory
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => setState(() => isShowingCategory = true),
-              ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            if (!isShowingCategory) {
+              setState(() => isShowingCategory = true);
+            } else {
+              Navigator.pop(context);
+            }
+          },
+        ),
         title: Text(
           isShowingCategory ? 'Manajemen Stok' : selectedCategory,
           style: const TextStyle(
@@ -79,6 +83,12 @@ class _StockManagementPageState extends State<StockManagementPage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: Colors.black,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),
     );
   }

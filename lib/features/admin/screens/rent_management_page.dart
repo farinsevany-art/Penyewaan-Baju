@@ -1,17 +1,38 @@
 import 'package:flutter/material.dart';
-import 'rent_details_page.dart'; // Pastikan file ini ada
 import 'rent_details_page.dart';
 import '../../auth/widgets/auth_background.dart';
+import '../../../core/constants/colors.dart';
+import '../../../core/theme/app_theme.dart';
+
 
 void main() {
   runApp(
-    const MaterialApp(
+    MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ManajemenPesananScreen(),
+      theme: AppTheme.lightTheme, 
+      home: const ManajemenPesananScreen(),
     ),
   );
 }
 
+// --- MODEL DATA ---
+class PesananData {
+  final String name;
+  final String category;
+  final String status;
+  final String imageUrl;
+  final bool isUrgent;
+
+  PesananData({
+    required this.name,
+    required this.category,
+    required this.status,
+    required this.imageUrl,
+    this.isUrgent = false,
+  });
+}
+
+// --- SCREEN UTAMA ---
 class ManajemenPesananScreen extends StatefulWidget {
   const ManajemenPesananScreen({super.key});
 
@@ -19,53 +40,94 @@ class ManajemenPesananScreen extends StatefulWidget {
   State<ManajemenPesananScreen> createState() => _ManajemenPesananScreenState();
 }
 
-class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
-    with SingleTickerProviderStateMixin {
+class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchText = "";
+  bool _isSearching = false;
+
+  final List<PesananData> _allOrders = [
+    PesananData(name: "Sarah Jenkins", category: "Clara 1", status: "Baru", imageUrl: "", isUrgent: true),
+    PesananData(name: "Michael Chen", category: "Rama", status: "Baru", imageUrl: "https://i.pravatar.cc/150?u=michael"),
+    PesananData(name: "Elena Rodriguez", category: "Shinta", status: "Baru", imageUrl: "https://i.pravatar.cc/150?u=elena"),
+    PesananData(name: "Andi Wijaya", category: "Laksamana", status: "Aktif", imageUrl: ""),
+  ];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _searchController.addListener(() {
+      setState(() {
+        _searchText = _searchController.text;
+      });
+    });
   }
 
   @override
   void dispose() {
-    _tabController.dispose(); // Praktik baik: hapus controller saat tidak dipakai
+    _tabController
+        .dispose(); // Praktik baik: hapus controller saat tidak dipakai
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7E9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A237E),
+        backgroundColor: Theme.of(context).primaryColor, 
         elevation: 0,
-        leading: const Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Icon(Icons.shield, color: Colors.yellow, size: 28),
-        ),
-        title: const Text(
-          'Manajemen Pesanan',
-          style: TextStyle(
-            color: Color(0xFFEEE4D1),
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        leading: _isSearching 
+          ? IconButton(
+              // Hapus const karena AppColors.pureWhite nilainya dinamis dari luar
+              icon: Icon(Icons.arrow_back, color: AppColors.pureWhite),
+              onPressed: () {
+                setState(() {
+                  _isSearching = false;
+                  _searchController.clear();
+                });
+              },
+            )
+          : Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Image.asset('assets/images/Logotransparan.png', fit: BoxFit.contain),
+            ),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: TextStyle(color: AppColors.pureWhite), // Hapus const
+                decoration: const InputDecoration(
+                  hintText: "Cari pelanggan...",
+                  hintStyle: TextStyle(color: AppColors.lightGrey),
+                  border: InputBorder.none,
+                ),
+              )
+            : Text(
+                'Manajemen Pesanan',
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  color: AppColors.pureWhite, // Hapus const
+                  fontSize: 18,
+                ),
+              ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search, color: Colors.white),
+            icon: Icon(_isSearching ? Icons.close : Icons.search, color: AppColors.pureWhite), // Hapus const
+            onPressed: () {
+              setState(() {
+                if (_isSearching) _searchController.clear();
+                _isSearching = !_isSearching;
+              });
+            },
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white, // Ganti putih agar kontras dengan AppBar biru
+          indicatorColor:
+              Colors.white, // Ganti putih agar kontras dengan AppBar biru
           indicatorWeight: 3,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
+          labelColor: AppColors.lightGold,
+          unselectedLabelColor: AppColors.lightGrey,
           tabs: const [
             Tab(text: "Baru"),
             Tab(text: "Aktif"),
@@ -73,37 +135,62 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
           ],
         ),
       ),
-      // PERBAIKAN: Hapus duplikasi properti 'body'
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildPesananBaruList(), 
-          const Center(child: Text("Tab Aktif")),
-          const Center(child: Text("Tab Selesai")),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: Colors.black,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
+
+ body: AuthBackground(
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            // Gunakan fungsi filter yang sudah ada dan masukkan status yang sesuai
+            _buildFilteredPesananList("Baru"), 
+            _buildFilteredPesananList("Aktif"),
+            _buildFilteredPesananList("Selesai"),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPesananBaruList() {
+  Widget _buildFilteredPesananList(String statusTab) {
+    final filteredList = _allOrders.where((p) {
+      final matchStatus = p.status == statusTab;
+      final matchSearch = p.name.toLowerCase().contains(_searchText.toLowerCase()) ||
+                          p.category.toLowerCase().contains(_searchText.toLowerCase());
+      return matchStatus && matchSearch;
+    }).toList();
+
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage(
-            'https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png',
-          ),
-          opacity: 0.1,
+          image: NetworkImage('https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png'),
+          opacity: 0.05,
           repeat: ImageRepeat.repeat,
         ),
       ),
-      child: ListView(
+      child: ListView.builder(
         padding: const EdgeInsets.all(16),
+        itemCount: filteredList.length + 1,
+        itemBuilder: (context, index) {
+          if (index == 0) return _buildHeader(filteredList.length);
+          
+          final item = filteredList[index - 1];
+          return _buildOrderItem(
+            context,
+            name: item.name,
+            category: item.category,
+            status: item.status == "Baru" ? "Menunggu Disetujui" : item.status,
+            imageUrl: item.imageUrl,
+            isUrgent: item.isUrgent,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHeader(int count) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,80 +200,67 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.blue.shade100,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
                   "4 Menunggu",
-                  style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          _buildOrderItem(
-            context, // Tambahkan context untuk navigasi
-            name: "Sarah Jenkins",
-            category: "Clara 1",
-            status: "Menunggu Disetujui",
-            isUrgent: true,
-            imageUrl: "",
-          ),
-          _buildOrderItem(
-            context,
-            name: "Michael Chen",
-            category: "Rama",
-            status: "Memproses Pembayaran",
-            imageUrl: "https://i.pravatar.cc/150?u=michael",
-          ),
-          _buildOrderItem(
-            context,
-            name: "Elena Rodriguez",
-            category: "Shinta",
-            status: "Menunggu Pelunasan",
-            imageUrl: "https://i.pravatar.cc/150?u=elena",
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.lightGold.withOpacity(0.3), 
+              borderRadius: BorderRadius.circular(20)
+            ),
+            child: Text(
+              "$count Total", 
+              style: const TextStyle(fontSize: 12, color: AppColors.primaryGold, fontWeight: FontWeight.bold)
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOrderItem(
-    BuildContext context, {
-    required String name,
-    required String category,
-    required String status,
-    required String imageUrl,
-    bool isUrgent = false,
+  Widget _buildOrderItem(BuildContext context, {
+    required String name, 
+    required String category, 
+    required String status, 
+    required String imageUrl, 
+    bool isUrgent = false
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      color: Colors.white.withOpacity(0.9), // Lebih cerah agar teks terbaca
+      elevation: 2,
+      color: AppColors.pureWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            width: 50,
-            height: 50,
-            color: Colors.grey.shade300,
+            width: 50, height: 50, color: AppColors.lightGrey,
             child: imageUrl.isEmpty
-                ? const Icon(Icons.person, color: Colors.grey)
-                : Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image, color: Colors.grey),
-                  ),
+                ? const Icon(Icons.person, color: AppColors.mediumGrey)
+                : Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
           ),
         ),
         title: Row(
           children: [
-            Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(name, style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkGrey)), // Hapus const
             if (isUrgent) ...[
               const SizedBox(width: 8),
               Container(
@@ -197,7 +271,11 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                 ),
                 child: const Text(
                   "PENTING",
-                  style: TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -206,15 +284,27 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(category, style: const TextStyle(color: Colors.blueGrey, fontSize: 13)),
-            Text(status, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black)),
+            Text(
+              category,
+              style: const TextStyle(color: Colors.blueGrey, fontSize: 13),
+            ),
+            Text(
+              status,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: Icon(Icons.chevron_right, color: AppColors.primaryGold), // Hapus const
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()),
+            MaterialPageRoute(
+              builder: (context) => const DetailPenyewaanScreen(),
+            ),
           );
         },
       ),
