@@ -68,10 +68,10 @@ class _DetailPenyewaanScreenState extends State<DetailPenyewaanScreen> {
           'Detail Penyewaan',
           style: TextStyle(color: Colors.white, fontSize: 18),
         ),
-        actions: const [
-          Icon(Icons.more_vert, color: Colors.yellow),
-          SizedBox(width: 10),
-        ],
+        // actions: const [
+        //   Icon(Icons.more_vert, color: Colors.yellow),
+        //   SizedBox(width: 10),
+        // ],
       ),
       body: AuthBackground(
         child: SingleChildScrollView(
@@ -363,45 +363,45 @@ class _DetailPenyewaanScreenState extends State<DetailPenyewaanScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.description, color: Colors.black),
-                label: const Text(
-                  "Nota",
-                  style: TextStyle(color: Colors.black),
-                ),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 50),
-                  side: const BorderSide(color: Colors.orange),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.edit, color: Colors.black),
-                label: const Text(
-                  "Edit",
-                  style: TextStyle(color: Colors.black),
-                ),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 50),
-                  side: const BorderSide(color: Colors.orange),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   children: [
+        //     Expanded(
+        //       child: OutlinedButton.icon(
+        //         onPressed: () {},
+        //         icon: const Icon(Icons.description, color: Colors.black),
+        //         label: const Text(
+        //           "Nota",
+        //           style: TextStyle(color: Colors.black),
+        //         ),
+        //         style: OutlinedButton.styleFrom(
+        //           minimumSize: const Size(0, 50),
+        //           side: const BorderSide(color: Colors.orange),
+        //           shape: RoundedRectangleBorder(
+        //             borderRadius: BorderRadius.circular(10),
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //     const SizedBox(width: 10),
+        //     Expanded(
+        //       child: OutlinedButton.icon(
+        //         onPressed: () {},
+        //         icon: const Icon(Icons.edit, color: Colors.black),
+        //         label: const Text(
+        //           "Edit",
+        //           style: TextStyle(color: Colors.black),
+        //         ),
+        //         style: OutlinedButton.styleFrom(
+        //           minimumSize: const Size(0, 50),
+        //           side: const BorderSide(color: Colors.orange),
+        //           shape: RoundedRectangleBorder(
+        //             borderRadius: BorderRadius.circular(10),
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
     );
   }
