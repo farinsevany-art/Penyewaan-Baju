@@ -142,7 +142,7 @@ class _CostumeCardState extends State<CostumeCard> {
                       onPressed: _handleAddToCart,
                       icon: const Icon(Icons.shopping_cart_outlined, size: 13, color: Colors.white),
                       label: const Text('Tambah Keranjang', style: TextStyle(fontSize: 10, color: Colors.white)),
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1565C0)),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 7, 32, 60)),
                     ),
                   ),
                 ],

@@ -28,7 +28,7 @@ class _WishlistPageState extends State<WishlistPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent, // Agar background muncul
         appBar: AppBar(
-          backgroundColor: Colors.white.withOpacity(0.9),
+          backgroundColor: const Color.fromARGB(243, 239, 239, 239).withOpacity(0.9),
           elevation: 0.5,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black87),
