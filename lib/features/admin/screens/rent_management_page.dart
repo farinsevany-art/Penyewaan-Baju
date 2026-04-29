@@ -86,12 +86,6 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: Colors.black,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
-      ),
     );
   }
 
