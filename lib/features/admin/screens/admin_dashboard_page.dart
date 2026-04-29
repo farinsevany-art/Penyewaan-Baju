@@ -77,10 +77,10 @@ class DashboardContent extends StatelessWidget {
         // Header Navy
         Container(
           padding: const EdgeInsets.only(
-            top: 50,
+            top: 32,
             left: 20,
             right: 20,
-            bottom: 20,
+            bottom: 32,
           ),
           color: AppColors.primaryNavy,
           child: Row(

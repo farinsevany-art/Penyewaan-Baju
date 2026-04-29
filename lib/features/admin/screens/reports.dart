@@ -63,7 +63,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
 Widget _buildHeader() {
   return Container(
-    padding: const EdgeInsets.only(top: 60, bottom: 40, left: 24, right: 24),
+    padding: const EdgeInsets.only(top: 32, bottom: 32, left: 24, right: 24),
     width: double.infinity,
     decoration: const BoxDecoration(
       color: AppColors.primaryNavy,
