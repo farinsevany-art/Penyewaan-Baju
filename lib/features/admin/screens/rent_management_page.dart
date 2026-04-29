@@ -31,7 +31,8 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
 
   @override
   void dispose() {
-    _tabController.dispose(); // Praktik baik: hapus controller saat tidak dipakai
+    _tabController
+        .dispose(); // Praktik baik: hapus controller saat tidak dipakai
     super.dispose();
   }
 
@@ -62,7 +63,8 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white, // Ganti putih agar kontras dengan AppBar biru
+          indicatorColor:
+              Colors.white, // Ganti putih agar kontras dengan AppBar biru
           indicatorWeight: 3,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
@@ -74,13 +76,15 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
         ),
       ),
       // PERBAIKAN: Hapus duplikasi properti 'body'
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildPesananBaruList(), 
-          const Center(child: Text("Tab Aktif")),
-          const Center(child: Text("Tab Selesai")),
-        ],
+      body: AuthBackground(
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildPesananBaruList(),
+            const Center(child: Text("Tab Aktif")),
+            const Center(child: Text("Tab Selesai")),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
@@ -113,14 +117,21 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.blue.shade100,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
                   "4 Menunggu",
-                  style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -197,7 +208,11 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                 ),
                 child: const Text(
                   "PENTING",
-                  style: TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -206,15 +221,27 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(category, style: const TextStyle(color: Colors.blueGrey, fontSize: 13)),
-            Text(status, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black)),
+            Text(
+              category,
+              style: const TextStyle(color: Colors.blueGrey, fontSize: 13),
+            ),
+            Text(
+              status,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()),
+            MaterialPageRoute(
+              builder: (context) => const DetailPenyewaanScreen(),
+            ),
           );
         },
       ),
