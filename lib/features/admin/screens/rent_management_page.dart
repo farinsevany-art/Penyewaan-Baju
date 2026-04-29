@@ -147,12 +147,6 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: AppColors.primaryGold, 
-        shape: const CircleBorder(),
-        child: Icon(Icons.add, color: AppColors.primaryNavy, size: 30), // Hapus const
-      ),
     );
   }
 
