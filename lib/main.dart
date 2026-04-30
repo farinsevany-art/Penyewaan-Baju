@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'core/theme/app_theme.dart'; // Import tema yang kita buat
-import 'features/auth/screens/splash_page.dart'; // Import halaman splash
+import 'core/theme/app_theme.dart';
+import 'features/auth/screens/splash_page.dart';
 
 void main() {
   runApp(const MyApp());
