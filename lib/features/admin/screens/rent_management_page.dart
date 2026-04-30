@@ -28,17 +28,39 @@ class ManajemenPesananScreen extends StatefulWidget {
   State<ManajemenPesananScreen> createState() => _ManajemenPesananScreenState();
 }
 
-class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with SingleTickerProviderStateMixin {
+class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
   bool _isSearching = false;
 
   final List<PesananData> _allOrders = [
-    PesananData(name: "Sarah Jenkins", category: "Clara 1", status: "Baru", imageUrl: "", isUrgent: true),
-    PesananData(name: "Michael Chen", category: "Rama", status: "Baru", imageUrl: "https://i.pravatar.cc/150?u=michael"),
-    PesananData(name: "Elena Rodriguez", category: "Shinta", status: "Baru", imageUrl: "https://i.pravatar.cc/150?u=elena"),
-    PesananData(name: "Andi Wijaya", category: "Laksamana", status: "Aktif", imageUrl: ""),
+    PesananData(
+      name: "Sarah Jenkins",
+      category: "Clara 1",
+      status: "Baru",
+      imageUrl: "",
+      isUrgent: true,
+    ),
+    PesananData(
+      name: "Michael Chen",
+      category: "Rama",
+      status: "Baru",
+      imageUrl: "https://i.pravatar.cc/150?u=michael",
+    ),
+    PesananData(
+      name: "Elena Rodriguez",
+      category: "Shinta",
+      status: "Baru",
+      imageUrl: "https://i.pravatar.cc/150?u=elena",
+    ),
+    PesananData(
+      name: "Andi Wijaya",
+      category: "Laksamana",
+      status: "Aktif",
+      imageUrl: "",
+    ),
   ];
 
   @override
@@ -78,7 +100,10 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
               )
             : Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Image.asset('assets/images/Logotransparan.png', fit: BoxFit.contain),
+                child: Image.asset(
+                  'assets/images/Logotransparan.png',
+                  fit: BoxFit.contain,
+                ),
               ),
         title: _isSearching
             ? TextField(
@@ -93,11 +118,18 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
               )
             : const Text(
                 'Manajemen Pesanan',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.primaryGold,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search, color: Colors.white),
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              color: Colors.white,
+            ),
             onPressed: () {
               setState(() {
                 if (_isSearching) _searchController.clear();
@@ -146,7 +178,8 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
   Widget _buildFilteredPesananList(String statusTab) {
     final filteredList = _allOrders.where((p) {
       final matchStatus = p.status == statusTab;
-      final matchSearch = p.name.toLowerCase().contains(_searchText.toLowerCase()) ||
+      final matchSearch =
+          p.name.toLowerCase().contains(_searchText.toLowerCase()) ||
           p.category.toLowerCase().contains(_searchText.toLowerCase());
       return matchStatus && matchSearch;
     }).toList();
@@ -154,7 +187,9 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage('https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png'),
+          image: NetworkImage(
+            'https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png',
+          ),
           opacity: 0.05,
           repeat: ImageRepeat.repeat,
         ),
@@ -193,14 +228,21 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.blue.shade100,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
                   "4 Menunggu",
-                  style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -208,11 +250,16 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-                color: AppColors.lightGold.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(20)),
+              color: AppColors.lightGold.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Text(
               "$count Total",
-              style: const TextStyle(fontSize: 12, color: AppColors.primaryGold, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.primaryGold,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -220,12 +267,14 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
     );
   }
 
-  Widget _buildOrderItem(BuildContext context,
-      {required String name,
-      required String category,
-      required String status,
-      required String imageUrl,
-      bool isUrgent = false}) {
+  Widget _buildOrderItem(
+    BuildContext context, {
+    required String name,
+    required String category,
+    required String status,
+    required String imageUrl,
+    bool isUrgent = false,
+  }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -241,12 +290,22 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
             color: Colors.grey.shade200,
             child: imageUrl.isEmpty
                 ? const Icon(Icons.person, color: Colors.grey)
-                : Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+                : Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (c, e, s) => const Icon(Icons.broken_image),
+                  ),
           ),
         ),
         title: Row(
           children: [
-            Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+            Text(
+              name,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
             if (isUrgent) ...[
               const SizedBox(width: 8),
               Container(
@@ -257,7 +316,11 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
                 ),
                 child: const Text(
                   "PENTING",
-                  style: TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -266,8 +329,18 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(category, style: const TextStyle(color: Colors.blueGrey, fontSize: 13)),
-            Text(status, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black)),
+            Text(
+              category,
+              style: const TextStyle(color: Colors.blueGrey, fontSize: 13),
+            ),
+            Text(
+              status,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
         trailing: const Icon(Icons.chevron_right, color: Colors.orange),
