@@ -19,7 +19,6 @@ class CustomerHomePage extends StatefulWidget {
 class _CustomerHomePageState extends State<CustomerHomePage> {
   int _selectedIndex = 0;
 
-  // Data Dummy Lengkap (4 Items)
   final List<Costume> dummyCostumes = [
     Costume(id: '1', name: 'Gandrung', category: 'TARI DEWASA', price: 80000, stock: 10, imageUrl: 'assets/images/taridewasa.jpg', description: 'Kostum Gandrung.', size: 'M - XL'),
     Costume(id: '2', name: 'TPW Ver 2', category: 'TARI DEWASA', price: 85000, stock: 5, imageUrl: 'assets/images/tarikreasibaru.png', description: 'Kostum kreasi.', size: 'M - L'),
@@ -66,82 +65,113 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
+  final PageController _pageController = PageController();
+  final ScrollController _scrollController = ScrollController();
+  int _activePage = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToContent() {
+    _scrollController.animateTo(
+      540, 
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.easeOutQuart,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7F0),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // --- HEADER (HOME.PNG) ---
-            Stack(
-              children: [
-                ClipPath(
-                  clipper: MyHeaderClipper(),
-                  child: Container(
-                    height: 398, // Diperpendek agar kategori naik
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/Home.png'),
-                        fit: BoxFit.cover,
-                        alignment: Alignment.topCenter,
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/bg.png'),
+            fit: BoxFit.cover,
+            opacity: 0.4, 
+          ),
+        ),
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            children: [
+              // --- HEADER ---
+              Stack(
+                children: [
+                  ClipPath(
+                    clipper: MyHeaderClipper(),
+                    child: Container(
+                      height: 350, 
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/home.png'),
+                          fit: BoxFit.cover,
+                        ),
                       ),
+                      child: Container(color: Colors.black.withOpacity(0.35)),
                     ),
-                    child: Container(color: Colors.black.withOpacity(0.35)),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(25, 55, 25, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSearchBar(context),
-                      const SizedBox(height: 55),
-                      _buildHeaderText(),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSearchBar(context),
+                        const SizedBox(height: 35),
+                        _buildHeaderText(),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-
-            // --- INDICATORS ---
-            const SizedBox(height: 5),
-            _buildIndicators(),
-            const SizedBox(height: 15),
-
-            // --- KATEGORI MELENGKUNG (BISA DIPENCET) ---
-            _buildCurvedCategories(context, screenWidth),
-
-            // --- POPULER SECTION ---
-            _buildSectionHeader("POPULER"),
-
-            // --- GRID 4 CARD ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.costumes.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.62, // Ratio disesuaikan agar tidak hilang satu
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15,
-                ),
-                itemBuilder: (context, index) {
-                  final data = widget.costumes[index];
-                  return CostumeCard(
-                    costume: data,
-                    onWishlistToggle: () => setState(() => data.isWishlisted = !data.isWishlisted),
-                  );
-                },
+                ],
               ),
-            ),
-            const SizedBox(height: 30),
-          ],
+
+              // --- INDICATORS ---
+              Transform.translate(
+                offset: const Offset(0, -25),
+                child: _buildIndicators(),
+              ),
+              SizedBox(
+                height: 155, // Tinggi disesuaikan dengan ukuran ikon baru
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (page) => setState(() => _activePage = page),
+                  children: [
+                    _buildCurvedCategories(context, screenWidth),
+                    const Center(child: Text("Halaman 2")),
+                  ],
+                ),
+              ),
+
+              _buildSectionHeader("POPULER"),
+
+              // --- GRID PRODUK ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: widget.costumes.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.68,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemBuilder: (context, index) {
+                    return CostumeCard(costume: widget.costumes[index]);
+                  },
+                ),
+              ),
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
@@ -150,39 +180,29 @@ class _HomeContentState extends State<HomeContent> {
   Widget _buildIndicators() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _dot(isActive: true),
-        const SizedBox(width: 5),
-        _dot(isActive: false),
-        const SizedBox(width: 5),
-        _dot(isActive: false),
-      ],
+      children: List.generate(3, (index) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          width: 8, height: 8,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _activePage == index ? const Color(0xFF5D4037) : Colors.grey.withOpacity(0.4),
+          ),
+        );
+      }),
     );
   }
 
-  Widget _dot({required bool isActive}) {
-    return Container(
-      width: 8, height: 8,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isActive ? const Color(0xFF5D4037) : Colors.grey.withOpacity(0.4),
-      ),
-    );
-  }
-
+  // --- KATEGORI LEBIH BESAR & PADAT ---
   Widget _buildCurvedCategories(BuildContext context, double width) {
-    return SizedBox(
-      height: 140, // Height cukup agar area sentuh tidak terpotong
-      width: double.infinity,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(left: 15, top: 0, child: _catItem(context, 'Tari Dewasa', 'assets/images/taridewasa.jpg', 1)),
-          Positioned(left: width * 0.28, top: 25, child: _catItem(context, 'Tari Anak', 'assets/images/kostumtarianak.jpg', 2)),
-          Positioned(right: width * 0.28, top: 25, child: _catItem(context, 'Raja & Ratu', 'assets/images/rajaratu.jpg', 3)),
-          Positioned(right: 15, top: 0, child: _catItem(context, 'Pewayangan', 'assets/images/wayang.jpg', 4)),
-        ],
-      ),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned(left: 15, top: 0, child: _catItem(context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg', 1)),
+        Positioned(left: width * 0.28, top: 15, child: _catItem(context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg', 2)),
+        Positioned(right: width * 0.28, top: 15, child: _catItem(context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg', 3)),
+        Positioned(right: 15, top: 0, child: _catItem(context, 'Wayang', 'assets/images/wayang.jpg', 4)),
+      ],
     );
   }
 
@@ -195,19 +215,32 @@ class _HomeContentState extends State<HomeContent> {
         if (type == 4) page = const Category4DetailPage(categoryTitle: 'Pewayangan');
         Navigator.push(context, MaterialPageRoute(builder: (context) => page));
       },
-      child: SizedBox(
-        width: 85,
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 31, backgroundColor: Colors.white,
-              child: CircleAvatar(radius: 29, backgroundImage: AssetImage(path)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2.5),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4))],
             ),
-            const SizedBox(height: 8),
-            Text(title, textAlign: TextAlign.center, 
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black)),
-          ],
-        ),
+            child: CircleAvatar(
+              radius: 35, // UKURAN IKON DIPERBESAR
+              backgroundImage: AssetImage(path),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title, 
+            textAlign: TextAlign.center, 
+            style: const TextStyle(
+              fontSize: 12, // UKURAN FONT DIPERBESAR
+              fontWeight: FontWeight.bold, // DIBUAT BOLD AGAR TEGAS
+              height: 1.1,
+              color: Colors.black87
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -218,9 +251,9 @@ class _HomeContentState extends State<HomeContent> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white, 
+          color: Colors.white,
           borderRadius: BorderRadius.circular(30),
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
         ),
         child: const Row(
           children: [
@@ -234,23 +267,35 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Widget _buildHeaderText() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("KUSUMA", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 3.0)),
-        Text("CANTIKA", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 3.0, height: 0.9)),
+        const Text("KUSUMA", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 3.0)),
+        const Text("CANTIKA", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 3.0, height: 0.9)),
+        const SizedBox(height: 15),
+        ElevatedButton(
+          onPressed: _scrollToContent,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE4B04B),
+            foregroundColor: Colors.white,
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+          ),
+          child: const Text("SEWA SEKARANG", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        ),
       ],
     );
   }
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 15),
+      padding: const EdgeInsets.fromLTRB(20, 25, 20, 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          const Text('Tersedia >', style: TextStyle(color: Color(0xFFE4B04B), fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          const Text('Tersedia >', style: TextStyle(color: Color(0xFFE4B04B), fontSize: 14, fontWeight: FontWeight.bold)),
         ],
       ),
     );
