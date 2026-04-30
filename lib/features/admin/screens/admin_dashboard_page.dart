@@ -6,6 +6,9 @@ import 'stock_management_page.dart';
 import 'rent_management_page.dart';
 import 'reports.dart';
 import '../../auth/widgets/auth_background.dart';
+import 'notification_page.dart'; 
+
+// ... (Bagian import tetap sama)
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -17,13 +20,11 @@ class AdminDashboardPage extends StatefulWidget {
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   int _selectedIndex = 0;
 
-  // Daftar halaman yang akan ditampilkan berdasarkan index navigasi
   final List<Widget> _pages = [
-    const DashboardContent(), // Index 0: Konten Utama Dashboard
-    const ManajemenPesananScreen(), // Index 1: Placeholder
+    const DashboardContent(), 
+    const ManajemenPesananScreen(), 
     const StockManagementPage(),
-    const ReportScreen(), // Index 2: Halaman Manajemen Stok
-    const Center(child: Text("Halaman Reports")), // Index 3: Placeholder
+    const ReportScreen(), 
   ];
 
   void _onItemTapped(int index) {
@@ -37,9 +38,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     return Scaffold(
       backgroundColor: AppColors.offWhite,
       body: AuthBackground(
-        // bg
-        child: _pages[_selectedIndex], // bg
-      ), // Menampilkan halaman sesuai index yang dipilih
+        child: _pages[_selectedIndex],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -47,26 +47,16 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment),
-            label: 'Penyewaan',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Penyewaan'),
           BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Stok'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Reports',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Reports'),
         ],
       ),
     );
   }
 }
 
-// Widget terpisah untuk isi konten Dashboard agar kode tidak menumpuk
 class DashboardContent extends StatelessWidget {
   const DashboardContent({super.key});
 
@@ -74,18 +64,14 @@ class DashboardContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Header Navy
+        // Header Navy - Perbaikan Struktur Row
         Container(
-          padding: const EdgeInsets.only(
-            top: 32,
-            left: 20,
-            right: 20,
-            bottom: 32,
-          ),
+          padding: const EdgeInsets.only(top: 32, left: 20, right: 20, bottom: 32),
           color: AppColors.primaryNavy,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Bagian Logo dan Judul
               Row(
                 children: [
                   Image.asset('assets/images/Logotransparan.png', width: 40),
@@ -100,9 +86,20 @@ class DashboardContent extends StatelessWidget {
                   ),
                 ],
               ),
-              const Icon(
-                Icons.notifications_active,
-                color: AppColors.primaryGold,
+              // Tombol Notifikasi - Sekarang berada di dalam Row utama
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.notifications_active,
+                  color: AppColors.primaryGold,
+                ),
               ),
             ],
           ),
@@ -114,7 +111,6 @@ class DashboardContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Row Statistik Atas
                 const Row(
                   children: [
                     Expanded(
@@ -125,7 +121,7 @@ class DashboardContent extends StatelessWidget {
                         isIncrease: true,
                       ),
                     ),
-                    const SizedBox(width: 15),
+                    SizedBox(width: 15),
                     Expanded(
                       child: StatCard(
                         title: 'Pendapatan Bulanan',
@@ -137,31 +133,21 @@ class DashboardContent extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 15),
-
-                // Card Jumlah Kostum
                 const StatCard(
                   title: 'Jumlah Kostum Disewa',
                   value: '84',
                   percentage: '-2%',
                   isIncrease: false,
                 ),
-
                 const SizedBox(height: 20),
                 const IncomeChart(),
-
                 const SizedBox(height: 30),
                 const Text(
                   'Kostum Dengan Penyewaan Terbanyak',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 15),
-
-                _buildPopularItem(
-                  'Tari Kreasi Baru',
-                  'Tari Anak',
-                  '24 Disewa',
-                  true,
-                ),
+                _buildPopularItem('Tari Kreasi Baru', 'Tari Anak', '24 Disewa', true),
                 _buildPopularItem('Clara 1', 'Tari Dewasa', '18 Disewa', false),
                 _buildPopularItem('Anoman', 'Wayang', '15 Disewa', true),
               ],
@@ -172,12 +158,7 @@ class DashboardContent extends StatelessWidget {
     );
   }
 
-  Widget _buildPopularItem(
-    String name,
-    String cat,
-    String count,
-    bool isPopuler,
-  ) {
+  Widget _buildPopularItem(String name, String cat, String count, bool isPopuler) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(10),
@@ -189,8 +170,7 @@ class DashboardContent extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 50, height: 50,
             decoration: BoxDecoration(
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(8),
@@ -202,10 +182,7 @@ class DashboardContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(
-                  cat,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                ),
+                Text(cat, style: const TextStyle(color: Colors.grey, fontSize: 12)),
               ],
             ),
           ),
@@ -213,20 +190,14 @@ class DashboardContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(count, style: const TextStyle(fontWeight: FontWeight.bold)),
-              if (isPopuler)
-                const Text(
-                  '↑ Populer',
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              else
-                const Text(
-                  'Stabil',
-                  style: TextStyle(color: Colors.blue, fontSize: 10),
+              Text(
+                isPopuler ? '↑ Populer' : 'Stabil',
+                style: TextStyle(
+                  color: isPopuler ? Colors.green : Colors.blue,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
             ],
           ),
         ],
