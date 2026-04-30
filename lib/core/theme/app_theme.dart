@@ -8,51 +8,88 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.offWhite,
       primaryColor: AppColors.primaryNavy,
 
-      //default font
+      // default font untuk seluruh aplikasi
       fontFamily: 'Poppins',
 
       textTheme: const TextTheme(
-        // displayLarge (H1)
         displayLarge: TextStyle(
           color: AppColors.darkGrey,
           fontSize: 32,
           fontWeight: FontWeight.bold,
           fontFamily: 'PlayfairDisplay',
         ),
-
-        // displayMedium (H2) menggunakan Playfair Display
         displayMedium: TextStyle(
           color: AppColors.darkGrey,
           fontSize: 24,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           fontFamily: 'PlayfairDisplay',
         ),
-
-        // titleLarge (Judul Kecil/AppBar) menggunakan Playfair Display
+        displaySmall: TextStyle(
+          color: AppColors.darkGrey,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'PlayfairDisplay',
+        ),
         titleLarge: TextStyle(
           color: AppColors.darkGrey,
           fontSize: 20,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           fontFamily: 'PlayfairDisplay',
         ),
-
-        // bodyLarge & bodySmall otomatis menggunakan Poppins dari root fontFamily
+        titleMedium: TextStyle(
+          color: AppColors.darkGrey,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+        titleSmall: TextStyle(
+          color: AppColors.darkGrey,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
         bodyLarge: TextStyle(
           color: AppColors.darkGrey,
           fontSize: 16,
           fontWeight: FontWeight.normal,
         ),
-        bodySmall: TextStyle(color: AppColors.mediumGrey, fontSize: 12),
+        bodyMedium: TextStyle(
+          color: AppColors.darkGrey,
+          fontSize: 14,
+          fontWeight: FontWeight.normal,
+        ),
+        bodySmall: TextStyle(
+          color: AppColors.mediumGrey,
+          fontSize: 12,
+          fontWeight: FontWeight.normal,
+        ),
+        labelLarge: TextStyle(
+          color: AppColors.primaryNavy,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+        labelSmall: TextStyle(
+          color: AppColors.mediumGrey,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
       ),
 
-      // 2. Mengatur Tema Tombol agar konsisten pakai Poppins
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          textStyle: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGold,
           foregroundColor: AppColors.primaryNavy,
           textStyle: const TextStyle(
-            fontFamily: 'Poppins', // Memastikan tombol pakai Poppins
-            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -69,7 +106,7 @@ class AppTheme {
           fontFamily: 'PlayfairDisplay',
           color: AppColors.primaryGold,
           fontSize: 20,
-          fontWeight: FontWeight.bold,
+          // fontWeight: FontWeight.bold,
         ),
         iconTheme: IconThemeData(color: Colors.white),
       ),

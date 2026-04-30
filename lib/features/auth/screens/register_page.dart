@@ -131,7 +131,6 @@ class RegisterPage extends StatelessWidget {
                             style: TextStyle(
                               color: AppColors.mediumGrey,
                               fontSize: 12,
-                              fontFamily: 'Poppins',
                             ),
                             children: [
                               TextSpan(text: 'Sudah punya akun? '),
