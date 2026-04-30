@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/colors.dart';
 import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
 import '../../auth/widgets/auth_background.dart';
-// import 'keranjang_page.dart'; 
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  // 1. Tambahkan parameter ini agar bisa menerima kiriman teks dari Home
+  final String? initialQuery; 
+
+  const SearchPage({super.key, this.initialQuery});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
+  late TextEditingController _searchController;
   List<Costume> _filteredCostumes = allCostumes;
+
+  @override
+  void initState() {
+    super.initState();
+    // 2. Inisialisasi controller dengan teks kiriman (jika ada)
+    _searchController = TextEditingController(text: widget.initialQuery ?? "");
+    
+    // 3. Jika ada kiriman teks dari Home, langsung jalankan filter di awal
+    if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+      _runFilter(widget.initialQuery!);
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _runFilter(String enteredKeyword) {
     setState(() {
@@ -74,8 +93,6 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
 
-            // Bagian "List Kostum" sudah dihapus agar lebih bersih
-
             // Grid Kostum
             Expanded(
               child: _filteredCostumes.isEmpty
@@ -96,10 +113,9 @@ class _SearchPageState extends State<SearchPage> {
                           onTap: () {
                             // Detail produk
                           },
-                          // LOGIKA WISHLIST (Icon Love)
                           onWishlistToggle: () {
                             setState(() {
-                              item.isWishlisted = !item.isWishlisted; // Mengubah status wishlist
+                              item.isWishlisted = !item.isWishlisted;
                             });
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -111,7 +127,6 @@ class _SearchPageState extends State<SearchPage> {
                               ),
                             );
                           },
-                          // LOGIKA KERANJANG (Tombol Tambah)
                           onAddToCart: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(

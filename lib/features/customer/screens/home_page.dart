@@ -31,9 +31,9 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     final List<Widget> pages = [
       HomeContent(costumes: dummyCostumes),
       const WishlistPage(),
-      const Center(child: Text("Halaman Keranjang")),
+      const Center(child: Text("Halaman Keranjang", style: TextStyle(fontFamily: 'Poppins', fontSize: 14))),
       const SearchPage(),
-      const Center(child: Text("Halaman Profil")),
+      const Center(child: Text("Halaman Profil", style: TextStyle(fontFamily: 'Poppins', fontSize: 14))),
     ];
 
     return Scaffold(
@@ -43,6 +43,8 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         currentIndex: _selectedIndex,
         selectedItemColor: const Color(0xFF0D1B3E),
         unselectedItemColor: Colors.grey,
+        selectedLabelStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
+        unselectedLabelStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
         onTap: (index) => setState(() => _selectedIndex = index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -66,16 +68,21 @@ class HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<HomeContent> {
   final ScrollController _scrollController = ScrollController();
-  int _activePage = 0; // Index untuk 4 titik indikator
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  void _scrollToContent() {
-    _scrollController.animateTo(540, duration: const Duration(milliseconds: 700), curve: Curves.easeOutQuart);
+  void _scrollToCategories() {
+    _scrollController.animateTo(
+      320, 
+      duration: const Duration(milliseconds: 700), 
+      curve: Curves.easeOutQuart
+    );
   }
 
   @override
@@ -100,7 +107,7 @@ class _HomeContentState extends State<HomeContent> {
                 children: [
                   ClipPath(
                     clipper: MyHeaderClipper(),
-                    child: Container(
+                    child: SizedBox(
                       height: 350,
                       width: double.infinity,
                       child: Stack(
@@ -131,28 +138,8 @@ class _HomeContentState extends State<HomeContent> {
                 ],
               ),
 
-              // --- 4 TITIK INDIKATOR ---
-              Transform.translate(
-                offset: const Offset(0, -25),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(4, (index) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _activePage == index 
-                            ? const Color(0xFFE4B04B) 
-                            : Colors.grey.withOpacity(0.4),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-
               // --- KATEGORI ---
+              const SizedBox(height: 10),
               SizedBox(
                 height: 155,
                 child: _buildCurvedCategories(context, screenWidth),
@@ -186,25 +173,100 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  Widget _buildCurvedCategories(BuildContext context, double width) {
-    return Stack(
-      alignment: Alignment.center,
+  Widget _buildSearchBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      decoration: BoxDecoration(
+        color: Colors.white, 
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
+        textInputAction: TextInputAction.search,
+        onSubmitted: (value) {
+          if (value.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SearchPage(initialQuery: value)),
+            );
+          }
+        },
+        decoration: const InputDecoration(
+          hintText: 'Cari kostum...',
+          hintStyle: TextStyle(fontFamily: 'Poppins', color: Colors.grey, fontSize: 14),
+          prefixIcon: Icon(Icons.search, color: Colors.grey, size: 20),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderText() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Positioned(left: 15, top: 0, child: _catItem(context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg', 1, 0)),
-        Positioned(left: width * 0.28, top: 15, child: _catItem(context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg', 2, 1)),
-        Positioned(right: width * 0.28, top: 15, child: _catItem(context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg', 3, 2)),
-        Positioned(right: 15, top: 0, child: _catItem(context, 'Wayang', 'assets/images/wayang.jpg', 4, 3)),
+        const Text(
+          "KUSUMA", 
+          style: TextStyle(
+            fontFamily: 'PlayfairDisplay', 
+            color: Colors.white, 
+            fontSize: 18, 
+            fontWeight: FontWeight.w600, // SemiBold
+            letterSpacing: 3.0
+          )
+        ),
+        const Text(
+          "CANTIKA", 
+          style: TextStyle(
+            fontFamily: 'PlayfairDisplay', 
+            color: Colors.white, 
+            fontSize: 18, 
+            fontWeight: FontWeight.w600, // SemiBold
+            letterSpacing: 3.0, 
+            height: 0.9
+          )
+        ),
+        const SizedBox(height: 15),
+        ElevatedButton(
+          onPressed: _scrollToCategories,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE4B04B),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+          child: const Text(
+            "SEWA SEKARANG", 
+            style: TextStyle(
+              fontFamily: 'Poppins', 
+              color: Colors.white, 
+              fontSize: 14,
+              fontWeight: FontWeight.bold
+            )
+          ),
+        ),
       ],
     );
   }
 
-  Widget _catItem(BuildContext context, String title, String path, int type, int index) {
+  Widget _buildCurvedCategories(BuildContext context, double width) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned(left: 15, top: 0, child: _catItem(context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg', 1)),
+        Positioned(left: width * 0.28, top: 15, child: _catItem(context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg', 2)),
+        Positioned(right: width * 0.28, top: 15, child: _catItem(context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg', 3)),
+        Positioned(right: 15, top: 0, child: _catItem(context, 'Wayang', 'assets/images/wayang.jpg', 4)),
+      ],
+    );
+  }
+
+  Widget _catItem(BuildContext context, String title, String path, int type) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _activePage = index; // Titik menyala sesuai urutan ikon
-        });
-        
         Widget page = const CategoryDetailPage(categoryTitle: 'Tari Dewasa');
         if (type == 2) page = const Category2DetailPage(categoryTitle: 'Tari Anak');
         if (type == 3) page = const Category3DetailPage(categoryTitle: 'Raja & Ratu');
@@ -216,10 +278,7 @@ class _HomeContentState extends State<HomeContent> {
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: _activePage == index ? const Color(0xFFE4B04B) : Colors.white, 
-                width: 2.5
-              ),
+              border: Border.all(color: Colors.white, width: 2.5),
             ),
             child: CircleAvatar(radius: 35, backgroundImage: AssetImage(path)),
           ),
@@ -227,50 +286,15 @@ class _HomeContentState extends State<HomeContent> {
           Text(
             title, 
             textAlign: TextAlign.center, 
-            style: TextStyle(
+            style: const TextStyle(
+              fontFamily: 'Poppins',
               fontSize: 12, 
               fontWeight: FontWeight.bold, 
-              color: _activePage == index ? const Color(0xFFE4B04B) : Colors.black87
+              color: Colors.black87
             )
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSearchBar(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SearchPage())),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
-        child: const Row(
-          children: [
-            Icon(Icons.search, color: Colors.grey, size: 20),
-            SizedBox(width: 10),
-            Text('Cari kostum...', style: TextStyle(color: Colors.grey, fontSize: 14)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderText() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("KUSUMA", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 3.0)),
-        const Text("CANTIKA", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 3.0, height: 0.9)),
-        const SizedBox(height: 15),
-        ElevatedButton(
-          onPressed: _scrollToContent,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFE4B04B),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          ),
-          child: const Text("SEWA SEKARANG", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        ),
-      ],
     );
   }
 
@@ -280,8 +304,31 @@ class _HomeContentState extends State<HomeContent> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          const Text('Tersedia >', style: TextStyle(color: Color(0xFFE4B04B), fontWeight: FontWeight.bold)),
+          Text(
+            title, 
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.bold, 
+              fontSize: 14
+            )
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const CategoryDetailPage(categoryTitle: 'Tari Dewasa'))
+              );
+            },
+            child: const Text(
+              'Tersedia >', 
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: Color(0xFFE4B04B), 
+                fontWeight: FontWeight.bold,
+                fontSize: 14
+              )
+            ),
+          ),
         ],
       ),
     );
