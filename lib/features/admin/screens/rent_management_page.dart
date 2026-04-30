@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../auth/widgets/auth_background.dart';
 import '../../../core/constants/colors.dart';
+// Pastikan file ini ada di folder yang sama dan tidak ada error di dalamnya
+import 'rent_details_page.dart';
 
 // --- MODEL DATA ---
 class PesananData {
@@ -144,7 +146,6 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
       padding: const EdgeInsets.all(20),
       itemCount: filteredList.length + 1,
       itemBuilder: (context, index) {
-        // Mengirim statusTab ke header untuk logika pengkondisian badge
         if (index == 0) return _buildHeader(filteredList.length, statusTab);
         final item = filteredList[index - 1];
         return _buildOrderItem(item);
@@ -167,45 +168,26 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
             ),
           ),
           const SizedBox(width: 12),
-          
-          // Logika Badge: Menunggu (Biru) untuk Tab Baru, Total (Emas) untuk Tab lainnya
           if (statusTab == "Baru")
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Text(
-                "$count Menunggu",
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 11,
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
+            _badge(Colors.blue, "$count Menunggu")
           else
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.primaryGold.withOpacity(0.5)),
-              ),
-              child: Text(
-                "$count Total",
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 11,
-                  color: AppColors.primaryGold,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            _badge(AppColors.primaryGold, "$count Total"),
         ],
+      ),
+    );
+  }
+
+  Widget _badge(Color color, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: color, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -227,41 +209,24 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           ),
           child: const Icon(Icons.person_outline, color: AppColors.primaryNavy),
         ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                item.name,
-                style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: AppColors.primaryNavy),
-              ),
-            ),
-            if (item.isUrgent)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: const Text(
-                  "PENTING",
-                  style: TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.bold),
-                ),
-              ),
-          ],
+        title: Text(
+          item.name,
+          style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: AppColors.primaryNavy),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(item.category, style: const TextStyle(fontFamily: 'Poppins', color: Colors.grey, fontSize: 13)),
-            Text(
-              item.status == "Baru" ? "Menunggu Disetujui" : item.status,
-              style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 13, color: Colors.black87),
-            ),
-          ],
+        subtitle: Text(
+          item.status == "Baru" ? "Menunggu Disetujui" : item.status,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.black87),
         ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.primaryGold),
-        onTap: () {},
+onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const DetailPenyewaanScreen(),
+            ),
+          );
+        },
       ),
     );
   }
-}
+}// Penutup class _ManajemenPesananScreenState yang tadinya hilang
