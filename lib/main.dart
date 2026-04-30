@@ -17,13 +17,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       
-      // Halaman awal tetap SplashPage
+      // Halaman awal aplikasi
       home: const SplashPage(),
 
-      // TAMBAHKAN INI: Daftar alamat halaman
+      // Daftar rute navigasi
       routes: {
         '/home': (context) => const CustomerHomePage(),
-        
       },
     );
   }

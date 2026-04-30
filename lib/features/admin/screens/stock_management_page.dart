@@ -21,6 +21,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
       backgroundColor: AppColors.offWhite,
       appBar: AppBar(
         backgroundColor: AppColors.primaryNavy,
+        toolbarHeight: 95,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),

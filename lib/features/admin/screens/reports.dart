@@ -1,5 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../../core/constants/colors.dart';
+
+// 1. PINDAHKAN MODEL DATA KE TOP-LEVEL
+class RevenueData {
+  final double x;
+  final double y;
+
+  RevenueData(this.x, this.y);
+}
+
+// 2. PINDAHKAN WIDGET GRAFIK KE TOP-LEVEL
+class RevenueChart extends StatelessWidget {
+  final List<RevenueData> chartData;
+  const RevenueChart({super.key, required this.chartData});
+
+  @override
+  Widget build(BuildContext context) {
+    return LineChart(
+      LineChartData(
+        gridData: const FlGridData(show: false),
+        titlesData: const FlTitlesData(show: false),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: chartData.map((e) => FlSpot(e.x, e.y)).toList(),
+            isCurved: true,
+            color: AppColors.primaryNavy,
+            barWidth: 3,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              color: AppColors.primaryNavy.withOpacity(0.1),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -9,7 +49,6 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  // State untuk menyimpan tab mana yang aktif
   String _selectedTab = "Bulan";
 
   BoxDecoration _cardDecoration() {
@@ -29,73 +68,65 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-  return SingleChildScrollView(
-    child: Column(
-      children: [
-        // Header Biru
-        _buildHeader(),
-        
-        // BERI JARAK DI SINI
-        const SizedBox(height: 20), 
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              // Tab Switcher sekarang berdiri sendiri dengan jarak
-              _buildTabSwitcher(),
-              
-              const SizedBox(height: 24), // Jarak antara Tab dan Card pertama
-              
-              _buildPerformanceCard(),
-              const SizedBox(height: 16),
-              _buildRevenueChartCard(),
-              const SizedBox(height: 16),
-              _buildPopularSection(),
-              const SizedBox(height: 100), 
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-Widget _buildHeader() {
-  return Container(
-    padding: const EdgeInsets.only(top: 60, bottom: 40, left: 24, right: 24),
-    width: double.infinity,
-    decoration: const BoxDecoration(
-      color: AppColors.primaryNavy,
-      // HAPUS ATAU KOMENTAR BAGIAN INI:
-      // borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)), 
-    ),
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        Positioned(
-          left: 0,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primaryGold,
-              borderRadius: BorderRadius.circular(8),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  _buildTabSwitcher(),
+                  const SizedBox(height: 24),
+                  _buildPerformanceCard(),
+                  const SizedBox(height: 16),
+                  _buildRevenueChartCard(), // Fungsi ini sekarang sudah benar
+                  const SizedBox(height: 16),
+                  _buildPopularSection(),
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
-            child: const Icon(Icons.person, color: AppColors.primaryNavy, size: 20),
-          ),
+          ],
         ),
-        const Text(
-          'Laporan',
-          style: TextStyle(
-            color: AppColors.primaryGold,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.only(top: 32, bottom: 32, left: 24, right: 24),
+      width: double.infinity,
+      decoration: const BoxDecoration(color: AppColors.primaryNavy),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            left: 0,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryGold,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.person, color: AppColors.primaryNavy, size: 20),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+          const Text(
+            'Laporan',
+            style: TextStyle(
+              color: AppColors.primaryGold,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTabSwitcher() {
     return Container(
@@ -126,11 +157,7 @@ Widget _buildHeader() {
     bool isActive = _selectedTab == title;
     return Expanded(
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedTab = title;
-          });
-        },
+        onTap: () => setState(() => _selectedTab = title),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
@@ -150,9 +177,6 @@ Widget _buildHeader() {
     );
   }
 
-  // --- Widget Card lainnya (Performance, Chart, Popular) tetap sama ---
-  // Pastikan memanggil AppColors.pureWhite dengan 'W' besar.
-  
   Widget _buildPerformanceCard() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -205,6 +229,11 @@ Widget _buildHeader() {
   }
 
   Widget _buildRevenueChartCard() {
+    // Simulasi data grafik
+    List<RevenueData> currentData = _selectedTab == "Hari"
+        ? [RevenueData(0, 10), RevenueData(1, 45), RevenueData(2, 30)]
+        : [RevenueData(0, 20), RevenueData(1, 50), RevenueData(2, 40), RevenueData(3, 84)];
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: _cardDecoration(),
@@ -213,16 +242,22 @@ Widget _buildHeader() {
         children: [
           Text("Pendapatan ($_selectedTab)",
               style: const TextStyle(color: AppColors.mediumGrey, fontSize: 13)),
-          const Row(
+          Row(
             children: [
-              Text("Rp84.000.000",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primaryNavy)),
-              SizedBox(width: 8),
-              Icon(Icons.trending_up, color: Colors.green, size: 18),
+              Text(
+                _selectedTab == "Hari" ? "Rp450.000" : "Rp84.000.000",
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primaryNavy),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.trending_up, color: Colors.green, size: 18),
             ],
           ),
           const SizedBox(height: 24),
-          SizedBox(height: 140, width: double.infinity, child: CustomPaint(painter: ChartPainter())),
+          SizedBox(
+            height: 140,
+            width: double.infinity,
+            child: RevenueChart(chartData: currentData),
+          ),
         ],
       ),
     );
@@ -260,24 +295,4 @@ Widget _buildHeader() {
       trailing: Text("+$price", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
     );
   }
-}
-
-// Painter tetap sama, pastikan gunakan AppColors.pureWhite
-class ChartPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = AppColors.primaryNavy..style = PaintingStyle.stroke..strokeWidth = 2.5;
-    final fillPaint = Paint()..shader = LinearGradient(
-      begin: Alignment.topCenter, end: Alignment.bottomCenter,
-      colors: [AppColors.primaryNavy.withOpacity(0.2), AppColors.pureWhite.withOpacity(0.1)],
-    ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    final path = Path();
-    path.moveTo(0, size.height * 0.85);
-    path.quadraticBezierTo(size.width * 0.25, size.height * 0.7, size.width * 0.5, size.height * 0.75);
-    path.quadraticBezierTo(size.width * 0.75, size.height * 0.8, size.width, size.height * 0.4);
-    final fillPath = Path.from(path)..lineTo(size.width, size.height)..lineTo(0, size.height)..close();
-    canvas.drawPath(fillPath, fillPaint);
-    canvas.drawPath(path, paint);
-  }
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

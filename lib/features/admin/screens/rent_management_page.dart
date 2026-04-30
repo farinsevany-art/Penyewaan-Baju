@@ -4,17 +4,6 @@ import '../../auth/widgets/auth_background.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/theme/app_theme.dart';
 
-
-void main() {
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme, 
-      home: const ManajemenPesananScreen(),
-    ),
-  );
-}
-
 // --- MODEL DATA ---
 class PesananData {
   final String name;
@@ -32,7 +21,6 @@ class PesananData {
   });
 }
 
-// --- SCREEN UTAMA ---
 class ManajemenPesananScreen extends StatefulWidget {
   const ManajemenPesananScreen({super.key});
 
@@ -40,17 +28,39 @@ class ManajemenPesananScreen extends StatefulWidget {
   State<ManajemenPesananScreen> createState() => _ManajemenPesananScreenState();
 }
 
-class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with SingleTickerProviderStateMixin {
+class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
   bool _isSearching = false;
 
   final List<PesananData> _allOrders = [
-    PesananData(name: "Sarah Jenkins", category: "Clara 1", status: "Baru", imageUrl: "", isUrgent: true),
-    PesananData(name: "Michael Chen", category: "Rama", status: "Baru", imageUrl: "https://i.pravatar.cc/150?u=michael"),
-    PesananData(name: "Elena Rodriguez", category: "Shinta", status: "Baru", imageUrl: "https://i.pravatar.cc/150?u=elena"),
-    PesananData(name: "Andi Wijaya", category: "Laksamana", status: "Aktif", imageUrl: ""),
+    PesananData(
+      name: "Sarah Jenkins",
+      category: "Clara 1",
+      status: "Baru",
+      imageUrl: "",
+      isUrgent: true,
+    ),
+    PesananData(
+      name: "Michael Chen",
+      category: "Rama",
+      status: "Baru",
+      imageUrl: "https://i.pravatar.cc/150?u=michael",
+    ),
+    PesananData(
+      name: "Elena Rodriguez",
+      category: "Shinta",
+      status: "Baru",
+      imageUrl: "https://i.pravatar.cc/150?u=elena",
+    ),
+    PesananData(
+      name: "Andi Wijaya",
+      category: "Laksamana",
+      status: "Aktif",
+      imageUrl: "",
+    ),
   ];
 
   @override
@@ -66,53 +76,60 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
 
   @override
   void dispose() {
-    _tabController
-        .dispose(); // Praktik baik: hapus controller saat tidak dipakai
+    _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // AppBar sekarang bersih, tanpa TabBar di dalamnya
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor, 
+        backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
-        leading: _isSearching 
-          ? IconButton(
-              // Hapus const karena AppColors.pureWhite nilainya dinamis dari luar
-              icon: Icon(Icons.arrow_back, color: AppColors.pureWhite),
-              onPressed: () {
-                setState(() {
-                  _isSearching = false;
-                  _searchController.clear();
-                });
-              },
-            )
-          : Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Image.asset('assets/images/Logotransparan.png', fit: BoxFit.contain),
-            ),
+        leading: _isSearching
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                  });
+                },
+              )
+            : Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Image.asset(
+                  'assets/images/Logotransparan.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
         title: _isSearching
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: TextStyle(color: AppColors.pureWhite), // Hapus const
+                style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   hintText: "Cari pelanggan...",
-                  hintStyle: TextStyle(color: AppColors.lightGrey),
+                  hintStyle: TextStyle(color: Colors.white70),
                   border: InputBorder.none,
                 ),
               )
-            : Text(
+            : const Text(
                 'Manajemen Pesanan',
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  color: AppColors.pureWhite, // Hapus const
+                style: TextStyle(
+                  color: AppColors.primaryGold,
                   fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search, color: AppColors.pureWhite), // Hapus const
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              color: Colors.white,
+            ),
             onPressed: () {
               setState(() {
                 if (_isSearching) _searchController.clear();
@@ -121,29 +138,37 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
             },
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor:
-              Colors.white, // Ganti putih agar kontras dengan AppBar biru
-          indicatorWeight: 3,
-          labelColor: AppColors.lightGold,
-          unselectedLabelColor: AppColors.lightGrey,
-          tabs: const [
-            Tab(text: "Baru"),
-            Tab(text: "Aktif"),
-            Tab(text: "Selesai"),
-          ],
-        ),
       ),
-
- body: AuthBackground(
-        child: TabBarView(
-          controller: _tabController,
+      body: AuthBackground(
+        child: Column(
           children: [
-            // Gunakan fungsi filter yang sudah ada dan masukkan status yang sesuai
-            _buildFilteredPesananList("Baru"), 
-            _buildFilteredPesananList("Aktif"),
-            _buildFilteredPesananList("Selesai"),
+            // TabBar diletakkan di dalam Column agar terpisah dari Header Biru AppBar
+            Container(
+              color: Theme.of(context).primaryColor,
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: Colors.white,
+                indicatorWeight: 3,
+                labelColor: AppColors.lightGold,
+                unselectedLabelColor: Colors.white60,
+                tabs: const [
+                  Tab(text: "Baru"),
+                  Tab(text: "Aktif"),
+                  Tab(text: "Selesai"),
+                ],
+              ),
+            ),
+            // Isi konten berdasarkan Tab
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildFilteredPesananList("Baru"),
+                  _buildFilteredPesananList("Aktif"),
+                  _buildFilteredPesananList("Selesai"),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -153,15 +178,18 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
   Widget _buildFilteredPesananList(String statusTab) {
     final filteredList = _allOrders.where((p) {
       final matchStatus = p.status == statusTab;
-      final matchSearch = p.name.toLowerCase().contains(_searchText.toLowerCase()) ||
-                          p.category.toLowerCase().contains(_searchText.toLowerCase());
+      final matchSearch =
+          p.name.toLowerCase().contains(_searchText.toLowerCase()) ||
+          p.category.toLowerCase().contains(_searchText.toLowerCase());
       return matchStatus && matchSearch;
     }).toList();
 
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage('https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png'),
+          image: NetworkImage(
+            'https://www.toptal.com/designers/subtlepatterns/patterns/floral-felt.png',
+          ),
           opacity: 0.05,
           repeat: ImageRepeat.repeat,
         ),
@@ -171,7 +199,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         itemCount: filteredList.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) return _buildHeader(filteredList.length);
-          
+
           final item = filteredList[index - 1];
           return _buildOrderItem(
             context,
@@ -193,12 +221,12 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 "Pesanan Terbaru",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -222,12 +250,16 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.lightGold.withOpacity(0.3), 
-              borderRadius: BorderRadius.circular(20)
+              color: AppColors.lightGold.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              "$count Total", 
-              style: const TextStyle(fontSize: 12, color: AppColors.primaryGold, fontWeight: FontWeight.bold)
+              "$count Total",
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.primaryGold,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -235,32 +267,45 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
     );
   }
 
-  Widget _buildOrderItem(BuildContext context, {
-    required String name, 
-    required String category, 
-    required String status, 
-    required String imageUrl, 
-    bool isUrgent = false
+  Widget _buildOrderItem(
+    BuildContext context, {
+    required String name,
+    required String category,
+    required String status,
+    required String imageUrl,
+    bool isUrgent = false,
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      color: AppColors.pureWhite,
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            width: 50, height: 50, color: AppColors.lightGrey,
+            width: 50,
+            height: 50,
+            color: Colors.grey.shade200,
             child: imageUrl.isEmpty
-                ? const Icon(Icons.person, color: AppColors.mediumGrey)
-                : Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+                ? const Icon(Icons.person, color: Colors.grey)
+                : Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (c, e, s) => const Icon(Icons.broken_image),
+                  ),
           ),
         ),
         title: Row(
           children: [
-            Text(name, style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkGrey)), // Hapus const
+            Text(
+              name,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
             if (isUrgent) ...[
               const SizedBox(width: 8),
               Container(
@@ -298,14 +343,10 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
             ),
           ],
         ),
-        trailing: Icon(Icons.chevron_right, color: AppColors.primaryGold), // Hapus const
+        trailing: const Icon(Icons.chevron_right, color: Colors.orange),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const DetailPenyewaanScreen(),
-            ),
-          );
+          // Pastikan nama class di rent_details_page.dart sesuai
+          // Navigator.push(context, MaterialPageRoute(builder: (context) => const DetailPenyewaanScreen()));
         },
       ),
     );
