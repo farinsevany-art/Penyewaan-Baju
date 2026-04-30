@@ -32,10 +32,7 @@ class AuthSelectionPage extends StatelessWidget {
               const Text(
                 'Create your fashion\nin your own way',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  color: AppColors.darkGrey,
-                ),
+                style: TextStyle(color: AppColors.darkGrey),
               ),
               const SizedBox(height: 40),
 
