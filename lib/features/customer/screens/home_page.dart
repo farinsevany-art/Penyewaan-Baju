@@ -8,6 +8,7 @@ import 'category_detail_page.dart';
 import 'category2_detail_page.dart';
 import 'category3_detail_page.dart';
 import 'category4_detail_page.dart';
+import 'profile_page.dart';
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key});
@@ -33,7 +34,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       const WishlistPage(),
       const Center(child: Text("Halaman Keranjang", style: TextStyle(fontFamily: 'Poppins', fontSize: 14))),
       const SearchPage(),
-      const Center(child: Text("Halaman Profil", style: TextStyle(fontFamily: 'Poppins', fontSize: 14))),
+      const ProfilePage(),
     ];
 
     return Scaffold(
