@@ -4,9 +4,7 @@ import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart'; 
 import '../../auth/widgets/auth_background.dart';
-
-// 1. Nanti kalau sudah di-push, buka komen import di bawah ini:
-// import 'path/ke/file/keranjang_page.dart'; 
+import 'home_page.dart'; 
 
 class WishlistPage extends StatefulWidget {
   const WishlistPage({super.key});
@@ -26,7 +24,7 @@ class _WishlistPageState extends State<WishlistPage> {
   Widget build(BuildContext context) {
     return AuthBackground(
       child: Scaffold(
-        backgroundColor: Colors.transparent, // Agar background muncul
+        backgroundColor: Colors.transparent, // Agar background bunga muncul
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(243, 239, 239, 239).withOpacity(0.9),
           elevation: 0.5,
@@ -36,8 +34,7 @@ class _WishlistPageState extends State<WishlistPage> {
               if (_isExploring) {
                 setState(() => _isExploring = false);
               } else {
-                // Balik ke Homepage agar tidak ke Login
-                Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+                Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
               }
             },
           ),
@@ -54,8 +51,15 @@ class _WishlistPageState extends State<WishlistPage> {
             IconButton(
               icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black87),
               onPressed: () {
-                // 2. Nanti buka komen navigasi ini:
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => const KeranjangPage()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                      appBar: AppBar(title: const Text("Keranjang")),
+                      body: const Center(child: Text("Halaman Keranjang")),
+                    ),
+                  ),
+                );
               },
             ),
           ],
@@ -79,11 +83,7 @@ class _WishlistPageState extends State<WishlistPage> {
         final item = items[index];
         return CostumeCard(
           costume: item,
-          onTap: () {
-            // Navigasi detail kalau perlu
-          },
           onAddToCart: () {
-            // Feedback ke user
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -92,8 +92,16 @@ class _WishlistPageState extends State<WishlistPage> {
                 action: SnackBarAction(
                   label: 'CEK',
                   onPressed: () {
-                    // 3. Nanti buka komen navigasi ini:
-                    // Navigator.push(context, MaterialPageRoute(builder: (context) => const KeranjangPage()));
+                    // Navigasi ke Keranjang dari snackbar jika tombol diklik
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Scaffold(
+                          appBar: AppBar(title: const Text("Keranjang")),
+                          body: const Center(child: Text("Halaman Keranjang")),
+                        ),
+                      ),
+                    );
                   },
                 ),
               ),

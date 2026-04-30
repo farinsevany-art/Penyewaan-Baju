@@ -41,7 +41,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        selectedItemColor: AppColors.primaryNavy,
+        selectedItemColor: const Color(0xFF0D1B3E),
         unselectedItemColor: Colors.grey,
         onTap: (index) => setState(() => _selectedIndex = index),
         items: const [
@@ -65,23 +65,17 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  final PageController _pageController = PageController();
   final ScrollController _scrollController = ScrollController();
-  int _activePage = 0;
+  int _activePage = 0; // Index untuk 4 titik indikator
 
   @override
   void dispose() {
-    _pageController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   void _scrollToContent() {
-    _scrollController.animateTo(
-      540, 
-      duration: const Duration(milliseconds: 700),
-      curve: Curves.easeOutQuart,
-    );
+    _scrollController.animateTo(540, duration: const Duration(milliseconds: 700), curve: Curves.easeOutQuart);
   }
 
   @override
@@ -94,7 +88,7 @@ class _HomeContentState extends State<HomeContent> {
           image: DecorationImage(
             image: AssetImage('assets/images/bg.png'),
             fit: BoxFit.cover,
-            opacity: 0.4, 
+            opacity: 0.4,
           ),
         ),
         child: SingleChildScrollView(
@@ -107,15 +101,20 @@ class _HomeContentState extends State<HomeContent> {
                   ClipPath(
                     clipper: MyHeaderClipper(),
                     child: Container(
-                      height: 350, 
+                      height: 350,
                       width: double.infinity,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('assets/images/home.png'),
-                          fit: BoxFit.cover,
-                        ),
+                      child: Stack(
+                        children: [
+                          Image.asset(
+                            'assets/images/home.png',
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 350,
+                            errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF0D1B3E)),
+                          ),
+                          Container(color: Colors.black.withOpacity(0.35)),
+                        ],
                       ),
-                      child: Container(color: Colors.black.withOpacity(0.35)),
                     ),
                   ),
                   Padding(
@@ -132,21 +131,31 @@ class _HomeContentState extends State<HomeContent> {
                 ],
               ),
 
-              // --- INDICATORS ---
+              // --- 4 TITIK INDIKATOR ---
               Transform.translate(
                 offset: const Offset(0, -25),
-                child: _buildIndicators(),
-              ),
-              SizedBox(
-                height: 155, // Tinggi disesuaikan dengan ukuran ikon baru
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (page) => setState(() => _activePage = page),
-                  children: [
-                    _buildCurvedCategories(context, screenWidth),
-                    const Center(child: Text("Halaman 2")),
-                  ],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(4, (index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _activePage == index 
+                            ? const Color(0xFFE4B04B) 
+                            : Colors.grey.withOpacity(0.4),
+                      ),
+                    );
+                  }),
                 ),
+              ),
+
+              // --- KATEGORI ---
+              SizedBox(
+                height: 155,
+                child: _buildCurvedCategories(context, screenWidth),
               ),
 
               _buildSectionHeader("POPULER"),
@@ -177,38 +186,25 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  Widget _buildIndicators() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(3, (index) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 3),
-          width: 8, height: 8,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _activePage == index ? const Color(0xFF5D4037) : Colors.grey.withOpacity(0.4),
-          ),
-        );
-      }),
-    );
-  }
-
-  // --- KATEGORI LEBIH BESAR & PADAT ---
   Widget _buildCurvedCategories(BuildContext context, double width) {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Positioned(left: 15, top: 0, child: _catItem(context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg', 1)),
-        Positioned(left: width * 0.28, top: 15, child: _catItem(context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg', 2)),
-        Positioned(right: width * 0.28, top: 15, child: _catItem(context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg', 3)),
-        Positioned(right: 15, top: 0, child: _catItem(context, 'Wayang', 'assets/images/wayang.jpg', 4)),
+        Positioned(left: 15, top: 0, child: _catItem(context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg', 1, 0)),
+        Positioned(left: width * 0.28, top: 15, child: _catItem(context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg', 2, 1)),
+        Positioned(right: width * 0.28, top: 15, child: _catItem(context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg', 3, 2)),
+        Positioned(right: 15, top: 0, child: _catItem(context, 'Wayang', 'assets/images/wayang.jpg', 4, 3)),
       ],
     );
   }
 
-  Widget _catItem(BuildContext context, String title, String path, int type) {
+  Widget _catItem(BuildContext context, String title, String path, int type, int index) {
     return GestureDetector(
       onTap: () {
+        setState(() {
+          _activePage = index; // Titik menyala sesuai urutan ikon
+        });
+        
         Widget page = const CategoryDetailPage(categoryTitle: 'Tari Dewasa');
         if (type == 2) page = const Category2DetailPage(categoryTitle: 'Tari Anak');
         if (type == 3) page = const Category3DetailPage(categoryTitle: 'Raja & Ratu');
@@ -216,29 +212,26 @@ class _HomeContentState extends State<HomeContent> {
         Navigator.push(context, MaterialPageRoute(builder: (context) => page));
       },
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2.5),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4))],
+              border: Border.all(
+                color: _activePage == index ? const Color(0xFFE4B04B) : Colors.white, 
+                width: 2.5
+              ),
             ),
-            child: CircleAvatar(
-              radius: 35, // UKURAN IKON DIPERBESAR
-              backgroundImage: AssetImage(path),
-            ),
+            child: CircleAvatar(radius: 35, backgroundImage: AssetImage(path)),
           ),
           const SizedBox(height: 8),
           Text(
             title, 
             textAlign: TextAlign.center, 
-            style: const TextStyle(
-              fontSize: 12, // UKURAN FONT DIPERBESAR
-              fontWeight: FontWeight.bold, // DIBUAT BOLD AGAR TEGAS
-              height: 1.1,
-              color: Colors.black87
-            ),
+            style: TextStyle(
+              fontSize: 12, 
+              fontWeight: FontWeight.bold, 
+              color: _activePage == index ? const Color(0xFFE4B04B) : Colors.black87
+            )
           ),
         ],
       ),
@@ -250,11 +243,7 @@ class _HomeContentState extends State<HomeContent> {
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SearchPage())),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-        ),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
         child: const Row(
           children: [
             Icon(Icons.search, color: Colors.grey, size: 20),
@@ -277,12 +266,9 @@ class _HomeContentState extends State<HomeContent> {
           onPressed: _scrollToContent,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFE4B04B),
-            foregroundColor: Colors.white,
-            elevation: 2,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
           ),
-          child: const Text("SEWA SEKARANG", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          child: const Text("SEWA SEKARANG", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -295,7 +281,7 @@ class _HomeContentState extends State<HomeContent> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          const Text('Tersedia >', style: TextStyle(color: Color(0xFFE4B04B), fontSize: 14, fontWeight: FontWeight.bold)),
+          const Text('Tersedia >', style: TextStyle(color: Color(0xFFE4B04B), fontWeight: FontWeight.bold)),
         ],
       ),
     );
