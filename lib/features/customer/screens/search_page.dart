@@ -118,7 +118,7 @@ class _SearchPageState extends State<SearchPage> {
                         return CostumeCard(
                           costume: item,
 
-                          // ❤️ WISHLIST
+                          // ❤️ WISHLIST (Tetap pakai setState agar UI Search Page update)
                           onWishlistToggle: () {
                             setState(() {
                               item.isWishlisted = !item.isWishlisted;
@@ -136,20 +136,10 @@ class _SearchPageState extends State<SearchPage> {
                             );
                           },
 
-                          // 🛒 ADD TO CART (PERBAIKAN LOGIKA)
+                          // 🛒 ADD TO CART (FIXED: Logika dihapus agar tidak double)
                           onAddToCart: () {
-                            setState(() {
-                              if (!cartItemsGlobal.contains(item)) {
-                                item.quantity = 1; // 👈 Set quantity awal
-                                item.isInCart = true;
-                                cartItemsGlobal.add(
-                                  item,
-                                ); // 👈 Masukkan ke list global
-                              } else {
-                                item.quantity++; // 👈 Jika sudah ada, tambah jumlah
-                              }
-                            });
-
+                            // Cukup tampilkan SnackBar saja.
+                            // Logika "cartItemsGlobal.add" sudah dihandle otomatis oleh CostumeCard internal.
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(

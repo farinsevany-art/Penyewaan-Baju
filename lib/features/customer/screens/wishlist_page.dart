@@ -5,7 +5,6 @@ import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
 import '../../auth/widgets/auth_background.dart';
 import 'cart_page.dart';
-// 🔻 Hapus import home_page atau customer_home_page dari sini
 
 class WishlistPage extends StatefulWidget {
   const WishlistPage({super.key});
@@ -27,7 +26,6 @@ class _WishlistPageState extends State<WishlistPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          // ✅ FIX ERROR: Color argumen sudah benar
           backgroundColor: const Color.fromRGBO(243, 239, 239, 0.9),
           elevation: 0.5,
           leading: IconButton(
@@ -36,7 +34,6 @@ class _WishlistPageState extends State<WishlistPage> {
               if (_isExploring) {
                 setState(() => _isExploring = false);
               } else {
-                // ✅ FIX NAVIGASI: Cukup pop saja, ini paling aman
                 Navigator.pop(context);
               }
             },
@@ -87,17 +84,11 @@ class _WishlistPageState extends State<WishlistPage> {
 
         return CostumeCard(
           costume: item,
-          onAddToCart: () {
-            setState(() {
-              if (!cartItemsGlobal.contains(item)) {
-                item.quantity = 1;
-                item.isInCart = true;
-                cartItemsGlobal.add(item);
-              } else {
-                item.quantity++;
-              }
-            });
 
+          // 🛒 ADD TO CART (FIXED: Logika dihapus agar tidak double 2x)
+          onAddToCart: () {
+            // Kita biarkan logika internal CostumeCard yang bekerja.
+            // Di sini kita cuma menampilkan notifikasi saja.
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -115,6 +106,7 @@ class _WishlistPageState extends State<WishlistPage> {
               ),
             );
           },
+
           onWishlistToggle: () {
             setState(() {
               item.isWishlisted = !item.isWishlisted;
