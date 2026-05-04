@@ -11,6 +11,13 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
+  // 🔻 TAMBAHAN: Fungsi ini akan memaksa UI refresh setiap kali tab Cart dibuka
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    setState(() {});
+  }
+
   String formatRupiah(double number) {
     return "Rp ${number.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
   }
@@ -166,7 +173,6 @@ class _CartPageState extends State<CartPage> {
               ],
             ),
 
-      // 🔥 TAMBAH DI SINI
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
