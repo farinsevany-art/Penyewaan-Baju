@@ -1,10 +1,78 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
+import '../../../data/services/auth_service.dart';
 import '../widgets/auth_background.dart';
-import 'success_page.dart'; // Kita buat setelah ini
+import 'success_page.dart';
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final _namaController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _alamatController = TextEditingController(); // Controller Alamat
+  final _passwordController = TextEditingController();
+  final _verifyPasswordController = TextEditingController();
+  bool _isLoading = false;
+
+  void _handleRegister() async {
+    final nama = _namaController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final alamat = _alamatController.text.trim();
+    final password = _passwordController.text.trim();
+    final verify = _verifyPasswordController.text.trim();
+
+    if (nama.isEmpty ||
+        email.isEmpty ||
+        phone.isEmpty ||
+        alamat.isEmpty ||
+        password.isEmpty) {
+      _showSnackBar("Semua kolom harus diisi", Colors.orange);
+      return;
+    }
+
+    if (password != verify) {
+      _showSnackBar("Password tidak cocok", Colors.red);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await AuthService.register(
+        nama,
+        email,
+        password,
+        phone,
+        alamat,
+      );
+
+      if (response['status'] == 'success') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SuccessPage()),
+        );
+      } else {
+        _showSnackBar(response['message'] ?? "Pendaftaran Gagal", Colors.red);
+      }
+    } catch (e) {
+      _showSnackBar("Gagal terhubung ke server", Colors.red);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +81,7 @@ class RegisterPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            // Logo Header
+            // Header Logo
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -24,13 +92,12 @@ class RegisterPage extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'PlayfairDisplay',
                     fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 30),
-
-            // Card Register
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Container(
@@ -58,69 +125,53 @@ class RegisterPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 25),
-
-                    // Input Fields dengan Icon sesuai desainmu
-                    _buildRegisterField('Nama Lengkap', Icons.person_outline),
+                    _buildRegisterField(
+                      'Nama Lengkap',
+                      Icons.person_outline,
+                      _namaController,
+                    ),
                     const SizedBox(height: 15),
-                    _buildRegisterField('Username', Icons.badge_outlined),
+                    _buildRegisterField(
+                      'Email',
+                      Icons.email_outlined,
+                      _emailController,
+                    ),
                     const SizedBox(height: 15),
                     _buildRegisterField(
                       'No. Handphone',
                       Icons.phone_android_outlined,
+                      _phoneController,
                     ),
+                    const SizedBox(height: 15),
+                    _buildRegisterField(
+                      'Alamat',
+                      Icons.location_on_outlined,
+                      _alamatController,
+                    ), // Input Alamat
                     const SizedBox(height: 15),
                     _buildRegisterField(
                       'Password',
                       Icons.lock_outline,
+                      _passwordController,
                       isObscure: true,
                     ),
                     const SizedBox(height: 15),
                     _buildRegisterField(
                       'Verifikasi Password',
                       Icons.verified_user_outlined,
+                      _verifyPasswordController,
                       isObscure: true,
                     ),
-
                     const SizedBox(height: 30),
 
-                    // Tombol Daftar
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              AppColors.primaryGold,
-                              AppColors.lightGold,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(15),
+                    if (_isLoading)
+                      const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryGold,
                         ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Navigasi ke halaman sukses
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SuccessPage(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                          ),
-                          child: const Text(
-                            'Daftar',
-                            style: TextStyle(
-                              color: AppColors.primaryNavy,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                      )
+                    else
+                      _buildSubmitButton(),
 
                     const SizedBox(height: 20),
                     Center(
@@ -131,6 +182,7 @@ class RegisterPage extends StatelessWidget {
                             style: TextStyle(
                               color: AppColors.mediumGrey,
                               fontSize: 12,
+                              fontFamily: 'Poppins',
                             ),
                             children: [
                               TextSpan(text: 'Sudah punya akun? '),
@@ -159,7 +211,8 @@ class RegisterPage extends StatelessWidget {
 
   Widget _buildRegisterField(
     String label,
-    IconData icon, {
+    IconData icon,
+    TextEditingController controller, {
     bool isObscure = false,
   }) {
     return Column(
@@ -171,12 +224,16 @@ class RegisterPage extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppColors.darkGrey,
+            fontFamily: 'Poppins',
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
+          controller: controller,
           obscureText: isObscure,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
           decoration: InputDecoration(
+            hintText: label,
             prefixIcon: Icon(icon, size: 20, color: AppColors.mediumGrey),
             filled: true,
             fillColor: AppColors.offWhite,
@@ -191,6 +248,36 @@ class RegisterPage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.primaryGold, AppColors.lightGold],
+          ),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: ElevatedButton(
+          onPressed: _handleRegister,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+          ),
+          child: const Text(
+            'Daftar',
+            style: TextStyle(
+              color: AppColors.primaryNavy,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

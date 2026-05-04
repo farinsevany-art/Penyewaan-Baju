@@ -1,11 +1,73 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
+import '../../../data/services/auth_service.dart';
 import '../widgets/auth_background.dart';
 import '../../customer/screens/home_page.dart';
 import '../../admin/screens/admin_dashboard_page.dart';
 
-class LoginFormPage extends StatelessWidget {
+class LoginFormPage extends StatefulWidget {
   const LoginFormPage({super.key});
+
+  @override
+  State<LoginFormPage> createState() => _LoginFormPageState();
+}
+
+class _LoginFormPageState extends State<LoginFormPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  void _handleLogin(String roleType) async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar("Harap isi semua kolom", Colors.orange);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await AuthService.login(email, password);
+
+      if (response['status'] == 'success') {
+        final userRole = response['role'];
+
+        // Validasi apakah role yang login sesuai dengan tombol yang ditekan
+        if (userRole == roleType.toLowerCase()) {
+          if (userRole == 'admin') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminDashboardPage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const CustomerHomePage()),
+            );
+          }
+        } else {
+          _showSnackBar(
+            "Akun Anda tidak terdaftar sebagai $roleType",
+            Colors.red,
+          );
+        }
+      } else {
+        _showSnackBar(response['message'] ?? "Login Gagal", Colors.red);
+      }
+    } catch (e) {
+      _showSnackBar("Gagal terhubung ke server", Colors.red);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +76,6 @@ class LoginFormPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            // Header Kecil di Atas
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -25,13 +86,12 @@ class LoginFormPage extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'PlayfairDisplay',
                     fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 50),
-
-            // Kartu Login
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Container(
@@ -59,55 +119,60 @@ class LoginFormPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 30),
-                    _buildTextField('Username'),
+                    _buildTextField('Email', controller: _emailController),
                     const SizedBox(height: 20),
-                    _buildTextField('Password', isObscure: true),
+                    _buildTextField(
+                      'Password',
+                      controller: _passwordController,
+                      isObscure: true,
+                    ),
                     const SizedBox(height: 40),
 
-                    // Tombol Login Pelanggan (Sudah diperbaiki navigasinya)
-                    _buildLoginButton(
-                      'Login Pelanggan',
-                      AppColors.primaryGold,
-                      () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CustomerHomePage(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 15),
-
-                    // Tombol Login Admin
-                    _buildLoginButton('Login Admin', AppColors.primaryGold, () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AdminDashboardPage(),
-                        ), // Kata const dihapus
-                      );
-                    }),
+                    if (_isLoading)
+                      const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryGold,
+                        ),
+                      )
+                    else ...[
+                      _buildLoginButton(
+                        'Login Pelanggan',
+                        AppColors.primaryGold,
+                        () => _handleLogin('Pelanggan'),
+                      ),
+                      const SizedBox(height: 15),
+                      _buildLoginButton(
+                        'Login Admin',
+                        AppColors.primaryGold,
+                        () => _handleLogin('Admin'),
+                      ),
+                    ],
 
                     const SizedBox(height: 20),
                     Center(
-                      child: RichText(
-                        text: const TextSpan(
-                          style: TextStyle(
-                            color: AppColors.mediumGrey,
-                            fontSize: 12,
-                            fontFamily: 'Poppins',
-                          ),
-                          children: [
-                            TextSpan(text: 'Belum punya akun? '),
-                            TextSpan(
-                              text: 'Daftar di sini',
-                              style: TextStyle(
-                                color: Colors.deepOrange,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      child: GestureDetector(
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          '/register',
+                        ), // Sesuaikan route
+                        child: RichText(
+                          text: const TextSpan(
+                            style: TextStyle(
+                              color: AppColors.mediumGrey,
+                              fontSize: 12,
+                              fontFamily: 'Poppins',
                             ),
-                          ],
+                            children: [
+                              TextSpan(text: 'Belum punya akun? '),
+                              TextSpan(
+                                text: 'Daftar di sini',
+                                style: TextStyle(
+                                  color: Colors.deepOrange,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -121,10 +186,15 @@ class LoginFormPage extends StatelessWidget {
     );
   }
 
-  // Method Helper untuk Input Field
-  Widget _buildTextField(String hint, {bool isObscure = false}) {
+  Widget _buildTextField(
+    String hint, {
+    required TextEditingController controller,
+    bool isObscure = false,
+  }) {
     return TextField(
+      controller: controller,
       obscureText: isObscure,
+      style: const TextStyle(fontFamily: 'Poppins'),
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
@@ -141,7 +211,6 @@ class LoginFormPage extends StatelessWidget {
     );
   }
 
-  // Method Helper untuk Membuat Tombol (Definisi Fungsi)
   Widget _buildLoginButton(String text, Color color, VoidCallback onPressed) {
     return SizedBox(
       width: double.infinity,
@@ -159,10 +228,10 @@ class LoginFormPage extends StatelessWidget {
           style: const TextStyle(
             color: AppColors.primaryNavy,
             fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
           ),
         ),
       ),
     );
   }
 }
-  

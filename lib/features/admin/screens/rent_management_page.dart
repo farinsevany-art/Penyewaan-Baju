@@ -222,7 +222,7 @@ onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const DetailPenyewaanScreen(),
+              builder: (context) => const RentDetailsPage(orderId: "123"),
             ),
           );
         },
