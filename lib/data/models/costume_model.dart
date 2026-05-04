@@ -1,4 +1,4 @@
-  class Costume {
+class Costume {
   final String id;
   final String name;
   final String category;
@@ -8,6 +8,8 @@
   final String description;
   final String size;
   bool isWishlisted;
+  int quantity = 1;
+  bool isInCart = false;
 
   Costume({
     required this.id,

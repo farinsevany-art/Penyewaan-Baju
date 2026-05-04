@@ -8,7 +8,8 @@ final List<Costume> allCostumes = [
     price: 125000,
     stock: 3,
     imageUrl: 'assets/images/sinta.png',
-    description: 'Kostum tokoh Sinta dari Ramayana, cocok untuk pementasan wayang orang.',
+    description:
+        'Kostum tokoh Sinta dari Ramayana, cocok untuk pementasan wayang orang.',
     size: 'S - L',
   ),
   Costume(
@@ -130,3 +131,5 @@ List<Costume> getWishlistedCostumes() {
 List<Costume> getCostumesByCategory(String category) {
   return allCostumes.where((c) => c.category == category).toList();
 }
+
+List<Costume> cartItemsGlobal = [];
