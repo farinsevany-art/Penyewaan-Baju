@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/constants/colors.dart';
+import '../../auth/widgets/auth_background.dart';
 
 // 1. PINDAHKAN MODEL DATA KE TOP-LEVEL
 class RevenueData {
@@ -69,28 +70,30 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  _buildTabSwitcher(),
-                  const SizedBox(height: 24),
-                  _buildPerformanceCard(),
-                  const SizedBox(height: 16),
-                  _buildRevenueChartCard(), // Fungsi ini sekarang sudah benar
-                  const SizedBox(height: 16),
-                  _buildPopularSection(),
-                  const SizedBox(height: 100),
-                ],
+      // backgroundColor: const Color(0xFFF8F9FA),
+      body: AuthBackground(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    _buildTabSwitcher(),
+                    const SizedBox(height: 24),
+                    _buildPerformanceCard(),
+                    const SizedBox(height: 16),
+                    _buildRevenueChartCard(), // Fungsi ini sekarang sudah benar
+                    const SizedBox(height: 16),
+                    _buildPopularSection(),
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -112,7 +115,11 @@ class _ReportScreenState extends State<ReportScreen> {
                 color: AppColors.primaryGold,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.person, color: AppColors.primaryNavy, size: 20),
+              child: const Icon(
+                Icons.person,
+                color: AppColors.primaryNavy,
+                size: 20,
+              ),
             ),
           ),
           const Text(
@@ -140,7 +147,7 @@ class _ReportScreenState extends State<ReportScreen> {
             color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Row(
@@ -161,7 +168,9 @@ class _ReportScreenState extends State<ReportScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.lightGold.withOpacity(0.3) : Colors.transparent,
+            color: isActive
+                ? AppColors.lightGold.withOpacity(0.3)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -186,8 +195,13 @@ class _ReportScreenState extends State<ReportScreen> {
           const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Ringkasan Kinerja",
-                  style: TextStyle(color: AppColors.mediumGrey, fontWeight: FontWeight.w500)),
+              Text(
+                "Ringkasan Kinerja",
+                style: TextStyle(
+                  color: AppColors.mediumGrey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               Icon(Icons.insights, size: 20, color: AppColors.primaryNavy),
             ],
           ),
@@ -195,8 +209,14 @@ class _ReportScreenState extends State<ReportScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem("PENDAPATAN", _selectedTab == "Hari" ? "Rp450.000" : "Rp8.400.000"),
-              _buildStatItem("PELANGGAN", _selectedTab == "Hari" ? "12" : "246"),
+              _buildStatItem(
+                "PENDAPATAN",
+                _selectedTab == "Hari" ? "Rp450.000" : "Rp8.400.000",
+              ),
+              _buildStatItem(
+                "PELANGGAN",
+                _selectedTab == "Hari" ? "12" : "246",
+              ),
               _buildStatItem("PENGEMBALIAN", "94%"),
             ],
           ),
@@ -209,9 +229,11 @@ class _ReportScreenState extends State<ReportScreen> {
               backgroundColor: AppColors.primaryNavy,
               foregroundColor: AppColors.pureWhite,
               minimumSize: const Size(double.infinity, 50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -221,9 +243,19 @@ class _ReportScreenState extends State<ReportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 10, color: AppColors.mediumGrey)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 10, color: AppColors.mediumGrey),
+        ),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryNavy)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryNavy,
+          ),
+        ),
       ],
     );
   }
@@ -232,7 +264,12 @@ class _ReportScreenState extends State<ReportScreen> {
     // Simulasi data grafik
     List<RevenueData> currentData = _selectedTab == "Hari"
         ? [RevenueData(0, 10), RevenueData(1, 45), RevenueData(2, 30)]
-        : [RevenueData(0, 20), RevenueData(1, 50), RevenueData(2, 40), RevenueData(3, 84)];
+        : [
+            RevenueData(0, 20),
+            RevenueData(1, 50),
+            RevenueData(2, 40),
+            RevenueData(3, 84),
+          ];
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -240,13 +277,19 @@ class _ReportScreenState extends State<ReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Pendapatan ($_selectedTab)",
-              style: const TextStyle(color: AppColors.mediumGrey, fontSize: 13)),
+          Text(
+            "Pendapatan ($_selectedTab)",
+            style: const TextStyle(color: AppColors.mediumGrey, fontSize: 13),
+          ),
           Row(
             children: [
               Text(
                 _selectedTab == "Hari" ? "Rp450.000" : "Rp84.000.000",
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primaryNavy),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryNavy,
+                ),
               ),
               const SizedBox(width: 8),
               const Icon(Icons.trending_up, color: Colors.green, size: 18),
@@ -267,15 +310,31 @@ class _ReportScreenState extends State<ReportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Sering Disewa", 
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryNavy)),
+        const Text(
+          "Sering Disewa",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: AppColors.primaryNavy,
+          ),
+        ),
         const SizedBox(height: 12),
         Container(
           decoration: _cardDecoration(),
           child: Column(
             children: [
-              _buildListItem("Srikandi", "12 Disewa", "Rp4.500.000", Icons.theater_comedy),
-              _buildListItem("Shinta", "8 Disewa", "Rp3.700.000", Icons.auto_fix_high),
+              _buildListItem(
+                "Srikandi",
+                "12 Disewa",
+                "Rp4.500.000",
+                Icons.theater_comedy,
+              ),
+              _buildListItem(
+                "Shinta",
+                "8 Disewa",
+                "Rp3.700.000",
+                Icons.auto_fix_high,
+              ),
             ],
           ),
         ),
@@ -283,16 +342,37 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildListItem(String title, String subtitle, String price, IconData icon) {
+  Widget _buildListItem(
+    String title,
+    String subtitle,
+    String price,
+    IconData icon,
+  ) {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: AppColors.lightGold.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(
+          color: AppColors.lightGold.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Icon(icon, color: AppColors.primaryGold),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.primaryNavy)),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+          color: AppColors.primaryNavy,
+        ),
+      ),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-      trailing: Text("+$price", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+      trailing: Text(
+        "+$price",
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.green,
+        ),
+      ),
     );
   }
 }

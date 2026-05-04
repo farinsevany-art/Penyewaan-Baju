@@ -33,13 +33,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.offWhite,
-      body: AuthBackground(
-        child: _pages[_selectedIndex],
-      ),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.primaryNavy, // Set agar status bar/area atas defaultnya navy
+    body: _pages[_selectedIndex], // Hapus AuthBackground dari sini
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -64,14 +62,13 @@ class DashboardContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Header Navy - Perbaikan Struktur Row
+        // 1. Header tetap di luar AuthBackground supaya tidak kena gambar bunga
         Container(
-          padding: const EdgeInsets.only(top: 32, left: 20, right: 20, bottom: 32),
+          padding: const EdgeInsets.only(top: 40, left: 20, right: 20, bottom: 32),
           color: AppColors.primaryNavy,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Bagian Logo dan Judul
               Row(
                 children: [
                   Image.asset('assets/images/Logotransparan.png', width: 40),
@@ -86,31 +83,22 @@ class DashboardContent extends StatelessWidget {
                   ),
                 ],
               ),
-              // Tombol Notifikasi - Sekarang berada di dalam Row utama
               IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationPage(),
-                    ),
-                  );
-                },
-                icon: const Icon(
-                  Icons.notifications_active,
-                  color: AppColors.primaryGold,
-                ),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPage())),
+                icon: const Icon(Icons.notifications_active, color: AppColors.primaryGold),
               ),
             ],
           ),
         ),
 
+        // 2. Gunakan AuthBackground HANYA untuk area konten
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          child: AuthBackground( // Pindahkan ke sini
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 const Row(
                   children: [
                     Expanded(
@@ -151,6 +139,7 @@ class DashboardContent extends StatelessWidget {
                 _buildPopularItem('Clara 1', 'Tari Dewasa', '18 Disewa', false),
                 _buildPopularItem('Anoman', 'Wayang', '15 Disewa', true),
               ],
+            ),
             ),
           ),
         ),

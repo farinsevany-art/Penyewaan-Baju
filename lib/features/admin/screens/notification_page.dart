@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
+import 'rent_details_page.dart'; // Pastikan path import ini benar
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -9,7 +10,6 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
-  // State untuk melacak tab mana yang aktif
   bool _isShowingUnreadOnly = true;
 
   @override
@@ -28,7 +28,6 @@ class _NotificationPageState extends State<NotificationPage> {
       ),
       body: Column(
         children: [
-          // Tab Menu dengan Deteksi Klik
           Container(
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -37,24 +36,23 @@ class _NotificationPageState extends State<NotificationPage> {
             child: Row(
               children: [
                 _buildTabItem(
-                  "Belum Dibaca", 
+                  "Belum Dibaca",
                   isActive: _isShowingUnreadOnly,
                   onTap: () => setState(() => _isShowingUnreadOnly = true),
                 ),
                 _buildTabItem(
-                  "Semua", 
+                  "Semua",
                   isActive: !_isShowingUnreadOnly,
                   onTap: () => setState(() => _isShowingUnreadOnly = false),
                 ),
               ],
             ),
           ),
-          
           Expanded(
             child: ListView(
-              children: _isShowingUnreadOnly 
-                ? _buildUnreadList() // Jika true, tampilkan yang belum dibaca saja
-                : _buildAllList(),   // Jika false, tampilkan semua
+              children: _isShowingUnreadOnly
+                  ? _buildUnreadList()
+                  : _buildAllList(),
             ),
           ),
         ],
@@ -62,7 +60,6 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  // Fungsi untuk membuat Tab yang bisa diklik
   Widget _buildTabItem(String title, {required bool isActive, required VoidCallback onTap}) {
     return Expanded(
       child: GestureDetector(
@@ -90,7 +87,6 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  // List Data: Belum Dibaca
   List<Widget> _buildUnreadList() {
     return [
       _buildSectionHeader("HARI INI"),
@@ -99,17 +95,15 @@ class _NotificationPageState extends State<NotificationPage> {
     ];
   }
 
-  // List Data: Semua (Termasuk yang sudah lama/dibaca)
   List<Widget> _buildAllList() {
     return [
-      ..._buildUnreadList(), // Ambil data unread
+      ..._buildUnreadList(),
       _buildSectionHeader("KEMARIN"),
       _buildNotificationItem("Pesanan Baru", "Menyewa 'Raja dan Ratu'", "1h lalu", "#CR-8642"),
       _buildNotificationItem("Pesanan Baru", "Menyewa 'Shinta'", "1h lalu", "#CR-8511"),
     ];
   }
 
-  // Widget Helper lainnya (Section Header & Item) tetap sama...
   Widget _buildSectionHeader(String title) {
     return Container(
       width: double.infinity,
@@ -120,33 +114,43 @@ class _NotificationPageState extends State<NotificationPage> {
   }
 
   Widget _buildNotificationItem(String title, String sub, String time, String code) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Color(0xFFFDF6E9),
-        border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.shopping_bag_outlined),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(sub),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: AppColors.primaryGold, borderRadius: BorderRadius.circular(4)),
-                  child: Text(code, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
+    return InkWell( // Menggunakan InkWell agar ada efek tekan (ripple)
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RentDetailsPage(orderId: code),
           ),
-          Text(time, style: const TextStyle(color: Colors.grey, fontSize: 11)),
-        ],
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Color(0xFFFDF6E9),
+          border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.shopping_bag_outlined),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(sub),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(color: AppColors.primaryGold, borderRadius: BorderRadius.circular(4)),
+                    child: Text(code, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+            Text(time, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+          ],
+        ),
       ),
     );
   }
