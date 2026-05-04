@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
-import '../widgets/costume_card.dart'; 
+import '../widgets/costume_card.dart';
 import '../../auth/widgets/auth_background.dart';
-import 'home_page.dart'; 
+import 'home_page.dart';
+import 'cart_page.dart';
 
 class WishlistPage extends StatefulWidget {
   const WishlistPage({super.key});
@@ -24,9 +25,14 @@ class _WishlistPageState extends State<WishlistPage> {
   Widget build(BuildContext context) {
     return AuthBackground(
       child: Scaffold(
-        backgroundColor: Colors.transparent, // Agar background bunga muncul
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          backgroundColor: const Color.fromARGB(243, 239, 239, 239).withOpacity(0.9),
+          backgroundColor: const Color.fromARGB(
+            243,
+            239,
+            239,
+            239,
+          ).withOpacity(0.9),
           elevation: 0.5,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black87),
@@ -34,7 +40,11 @@ class _WishlistPageState extends State<WishlistPage> {
               if (_isExploring) {
                 setState(() => _isExploring = false);
               } else {
-                Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/home',
+                  (route) => false,
+                );
               }
             },
           ),
@@ -47,24 +57,27 @@ class _WishlistPageState extends State<WishlistPage> {
             ),
           ),
           centerTitle: true,
+
+          // 🔥 FIX 1: ICON KERANJANG
           actions: [
             IconButton(
-              icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black87),
+              icon: const Icon(
+                Icons.shopping_cart_outlined,
+                color: Colors.black87,
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => Scaffold(
-                      appBar: AppBar(title: const Text("Keranjang")),
-                      body: const Center(child: Text("Halaman Keranjang")),
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => const CartPage()),
                 );
               },
             ),
           ],
         ),
-        body: (_itemsToShow.isEmpty && !_isExploring) ? _buildEmpty() : _buildGrid(_itemsToShow),
+
+        body: (_itemsToShow.isEmpty && !_isExploring)
+            ? _buildEmpty()
+            : _buildGrid(_itemsToShow),
       ),
     );
   }
@@ -81,26 +94,32 @@ class _WishlistPageState extends State<WishlistPage> {
       ),
       itemBuilder: (context, index) {
         final item = items[index];
+
         return CostumeCard(
           costume: item,
+
+          // 🔥 FIX 2: TAMBAH KE CART
           onAddToCart: () {
+            setState(() {
+              if (!cartItemsGlobal.contains(item)) {
+                cartItemsGlobal.add(item);
+                item.isInCart = true;
+              }
+            });
+
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('${item.name} ditambah ke keranjang'),
                 behavior: SnackBarBehavior.floating,
+
+                // 🔥 FIX 3: TOMBOL CEK
                 action: SnackBarAction(
                   label: 'CEK',
                   onPressed: () {
-                    // Navigasi ke Keranjang dari snackbar jika tombol diklik
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => Scaffold(
-                          appBar: AppBar(title: const Text("Keranjang")),
-                          body: const Center(child: Text("Halaman Keranjang")),
-                        ),
-                      ),
+                      MaterialPageRoute(builder: (context) => const CartPage()),
                     );
                   },
                 ),
@@ -121,7 +140,11 @@ class _WishlistPageState extends State<WishlistPage> {
           const SizedBox(height: 16),
           const Text(
             'Wishlist Kamu Kosong',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryNavy),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryNavy,
+            ),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
@@ -130,7 +153,9 @@ class _WishlistPageState extends State<WishlistPage> {
               backgroundColor: AppColors.primaryNavy,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
             ),
             child: const Text('Jelajahi Kostum'),
           ),
