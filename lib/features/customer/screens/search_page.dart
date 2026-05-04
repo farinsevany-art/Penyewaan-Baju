@@ -3,7 +3,7 @@ import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
 import '../../auth/widgets/auth_background.dart';
-import 'cart_page.dart'; // 🔥 TAMBAHAN
+import 'cart_page.dart';
 
 class SearchPage extends StatefulWidget {
   final String? initialQuery;
@@ -136,12 +136,17 @@ class _SearchPageState extends State<SearchPage> {
                             );
                           },
 
-                          // 🛒 ADD TO CART (FIX DI SINI)
+                          // 🛒 ADD TO CART (PERBAIKAN LOGIKA)
                           onAddToCart: () {
                             setState(() {
                               if (!cartItemsGlobal.contains(item)) {
-                                cartItemsGlobal.add(item);
+                                item.quantity = 1; // 👈 Set quantity awal
                                 item.isInCart = true;
+                                cartItemsGlobal.add(
+                                  item,
+                                ); // 👈 Masukkan ke list global
+                              } else {
+                                item.quantity++; // 👈 Jika sudah ada, tambah jumlah
                               }
                             });
 

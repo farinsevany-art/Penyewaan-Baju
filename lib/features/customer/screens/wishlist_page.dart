@@ -4,8 +4,8 @@ import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
 import '../../auth/widgets/auth_background.dart';
-import 'home_page.dart';
 import 'cart_page.dart';
+// 🔻 Hapus import home_page atau customer_home_page dari sini
 
 class WishlistPage extends StatefulWidget {
   const WishlistPage({super.key});
@@ -27,12 +27,8 @@ class _WishlistPageState extends State<WishlistPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          backgroundColor: const Color.fromARGB(
-            243,
-            239,
-            239,
-            239,
-          ).withOpacity(0.9),
+          // ✅ FIX ERROR: Color argumen sudah benar
+          backgroundColor: const Color.fromRGBO(243, 239, 239, 0.9),
           elevation: 0.5,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black87),
@@ -40,11 +36,8 @@ class _WishlistPageState extends State<WishlistPage> {
               if (_isExploring) {
                 setState(() => _isExploring = false);
               } else {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/home',
-                  (route) => false,
-                );
+                // ✅ FIX NAVIGASI: Cukup pop saja, ini paling aman
+                Navigator.pop(context);
               }
             },
           ),
@@ -57,8 +50,6 @@ class _WishlistPageState extends State<WishlistPage> {
             ),
           ),
           centerTitle: true,
-
-          // 🔥 FIX 1: ICON KERANJANG
           actions: [
             IconButton(
               icon: const Icon(
@@ -74,7 +65,6 @@ class _WishlistPageState extends State<WishlistPage> {
             ),
           ],
         ),
-
         body: (_itemsToShow.isEmpty && !_isExploring)
             ? _buildEmpty()
             : _buildGrid(_itemsToShow),
@@ -97,13 +87,14 @@ class _WishlistPageState extends State<WishlistPage> {
 
         return CostumeCard(
           costume: item,
-
-          // 🔥 FIX 2: TAMBAH KE CART
           onAddToCart: () {
             setState(() {
               if (!cartItemsGlobal.contains(item)) {
-                cartItemsGlobal.add(item);
+                item.quantity = 1;
                 item.isInCart = true;
+                cartItemsGlobal.add(item);
+              } else {
+                item.quantity++;
               }
             });
 
@@ -112,8 +103,6 @@ class _WishlistPageState extends State<WishlistPage> {
               SnackBar(
                 content: Text('${item.name} ditambah ke keranjang'),
                 behavior: SnackBarBehavior.floating,
-
-                // 🔥 FIX 3: TOMBOL CEK
                 action: SnackBarAction(
                   label: 'CEK',
                   onPressed: () {
@@ -125,6 +114,11 @@ class _WishlistPageState extends State<WishlistPage> {
                 ),
               ),
             );
+          },
+          onWishlistToggle: () {
+            setState(() {
+              item.isWishlisted = !item.isWishlisted;
+            });
           },
         );
       },

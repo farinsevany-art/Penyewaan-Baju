@@ -9,6 +9,7 @@ import 'category2_detail_page.dart';
 import 'category3_detail_page.dart';
 import 'category4_detail_page.dart';
 import 'profile_page.dart';
+import 'cart_page.dart';
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key});
@@ -32,7 +33,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     final List<Widget> pages = [
       HomeContent(costumes: dummyCostumes),
       const WishlistPage(),
-      const Center(child: Text("Halaman Keranjang", style: TextStyle(fontFamily: 'Poppins', fontSize: 14))),
+      const CartPage(),
       const SearchPage(),
       const ProfilePage(),
     ];
