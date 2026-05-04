@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/colors.dart';
 import '../../../data/models/costume_model.dart';
+import '../../../data/services/mock_data.dart'; // IMPORT PUSAT DATA
 import '../widgets/costume_card.dart';
 import 'wishlist_page.dart';
 import 'search_page.dart';
@@ -20,17 +20,11 @@ class CustomerHomePage extends StatefulWidget {
 class _CustomerHomePageState extends State<CustomerHomePage> {
   int _selectedIndex = 0;
 
-  final List<Costume> dummyCostumes = [
-    Costume(id: '1', name: 'Gandrung', category: 'TARI DEWASA', price: 80000, stock: 10, imageUrl: 'assets/images/taridewasa.jpg', description: 'Kostum Gandrung.', size: 'M - XL'),
-    Costume(id: '2', name: 'TPW Ver 2', category: 'TARI DEWASA', price: 85000, stock: 5, imageUrl: 'assets/images/tarikreasibaru.png', description: 'Kostum kreasi.', size: 'M - L'),
-    Costume(id: '3', name: 'Ratu', category: 'RAJA & RATU', price: 175000, stock: 3, imageUrl: 'assets/images/rajaratu.jpg', description: 'Kostum Ratu.', size: 'M - XL'),
-    Costume(id: '4', name: 'Pewayangan', category: 'PEWAYANGAN', price: 120000, stock: 6, imageUrl: 'assets/images/wayang.jpg', description: 'Kostum Wayang.', size: 'L - XL'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    // Gunakan IndexedStack agar posisi scroll tidak reset saat pindah tab
     final List<Widget> pages = [
-      HomeContent(costumes: dummyCostumes),
+      HomeContent(costumes: allCostumes), // Pakai allCostumes dari mock_data
       const WishlistPage(),
       const Center(child: Text("Halaman Keranjang", style: TextStyle(fontFamily: 'Poppins', fontSize: 14))),
       const SearchPage(),
@@ -38,7 +32,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     ];
 
     return Scaffold(
-      body: pages[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -79,11 +76,8 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _scrollToCategories() {
-    _scrollController.animateTo(
-      320, 
-      duration: const Duration(milliseconds: 700), 
-      curve: Curves.easeOutQuart
-    );
+    _scrollController.animateTo(320,
+        duration: const Duration(milliseconds: 700), curve: Curves.easeOutQuart);
   }
 
   @override
@@ -118,7 +112,8 @@ class _HomeContentState extends State<HomeContent> {
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: 350,
-                            errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF0D1B3E)),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(color: const Color(0xFF0D1B3E)),
                           ),
                           Container(color: Colors.black.withOpacity(0.35)),
                         ],
@@ -162,7 +157,16 @@ class _HomeContentState extends State<HomeContent> {
                     mainAxisSpacing: 12,
                   ),
                   itemBuilder: (context, index) {
-                    return CostumeCard(costume: widget.costumes[index]);
+                    final item = widget.costumes[index];
+                    return CostumeCard(
+                      costume: item,
+                      // Tambahkan callback ini agar ikon hati di home langsung berubah warna
+                      onWishlistToggle: () {
+                        setState(() {
+                          item.isWishlisted = !item.isWishlisted;
+                        });
+                      },
+                    );
                   },
                 ),
               ),
@@ -174,14 +178,19 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
+  // --- Widget Build Helpers (Tetap Sama Seperti Versi Kamu) ---
+
   Widget _buildSearchBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
-        color: Colors.white, 
+        color: Colors.white,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))
+          BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4))
         ],
       ),
       child: TextField(
@@ -192,13 +201,15 @@ class _HomeContentState extends State<HomeContent> {
           if (value.isNotEmpty) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => SearchPage(initialQuery: value)),
+              MaterialPageRoute(
+                  builder: (context) => SearchPage(initialQuery: value)),
             );
           }
         },
         decoration: const InputDecoration(
           hintText: 'Cari kostum...',
-          hintStyle: TextStyle(fontFamily: 'Poppins', color: Colors.grey, fontSize: 14),
+          hintStyle: TextStyle(
+              fontFamily: 'Poppins', color: Colors.grey, fontSize: 14),
           prefixIcon: Icon(Icons.search, color: Colors.grey, size: 20),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 12),
@@ -211,43 +222,35 @@ class _HomeContentState extends State<HomeContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "KUSUMA", 
-          style: TextStyle(
-            fontFamily: 'PlayfairDisplay', 
-            color: Colors.white, 
-            fontSize: 18, 
-            fontWeight: FontWeight.w600, // SemiBold
-            letterSpacing: 3.0
-          )
-        ),
-        const Text(
-          "CANTIKA", 
-          style: TextStyle(
-            fontFamily: 'PlayfairDisplay', 
-            color: Colors.white, 
-            fontSize: 18, 
-            fontWeight: FontWeight.w600, // SemiBold
-            letterSpacing: 3.0, 
-            height: 0.9
-          )
-        ),
+        const Text("KUSUMA",
+            style: TextStyle(
+                fontFamily: 'PlayfairDisplay',
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 3.0)),
+        const Text("CANTIKA",
+            style: TextStyle(
+                fontFamily: 'PlayfairDisplay',
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 3.0,
+                height: 0.9)),
         const SizedBox(height: 15),
         ElevatedButton(
           onPressed: _scrollToCategories,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFE4B04B),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
-          child: const Text(
-            "SEWA SEKARANG", 
-            style: TextStyle(
-              fontFamily: 'Poppins', 
-              color: Colors.white, 
-              fontSize: 14,
-              fontWeight: FontWeight.bold
-            )
-          ),
+          child: const Text("SEWA SEKARANG",
+              style: TextStyle(
+                  fontFamily: 'Poppins',
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -257,10 +260,26 @@ class _HomeContentState extends State<HomeContent> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Positioned(left: 15, top: 0, child: _catItem(context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg', 1)),
-        Positioned(left: width * 0.28, top: 15, child: _catItem(context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg', 2)),
-        Positioned(right: width * 0.28, top: 15, child: _catItem(context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg', 3)),
-        Positioned(right: 15, top: 0, child: _catItem(context, 'Wayang', 'assets/images/wayang.jpg', 4)),
+        Positioned(
+            left: 15,
+            top: 0,
+            child: _catItem(
+                context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg', 1)),
+        Positioned(
+            left: width * 0.28,
+            top: 15,
+            child: _catItem(
+                context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg', 2)),
+        Positioned(
+            right: width * 0.28,
+            top: 15,
+            child: _catItem(
+                context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg', 3)),
+        Positioned(
+            right: 15,
+            top: 0,
+            child: _catItem(
+                context, 'Wayang', 'assets/images/wayang.jpg', 4)),
       ],
     );
   }
@@ -284,16 +303,13 @@ class _HomeContentState extends State<HomeContent> {
             child: CircleAvatar(radius: 35, backgroundImage: AssetImage(path)),
           ),
           const SizedBox(height: 8),
-          Text(
-            title, 
-            textAlign: TextAlign.center, 
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12, 
-              fontWeight: FontWeight.bold, 
-              color: Colors.black87
-            )
-          ),
+          Text(title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87)),
         ],
       ),
     );
@@ -305,30 +321,26 @@ class _HomeContentState extends State<HomeContent> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title, 
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.bold, 
-              fontSize: 14
-            )
-          ),
+          Text(title,
+              style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14)),
           GestureDetector(
             onTap: () {
               Navigator.push(
-                context, 
-                MaterialPageRoute(builder: (context) => const CategoryDetailPage(categoryTitle: 'Tari Dewasa'))
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const CategoryDetailPage(categoryTitle: 'Tari Dewasa')),
               );
             },
-            child: const Text(
-              'Tersedia >', 
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                color: Color(0xFFE4B04B), 
-                fontWeight: FontWeight.bold,
-                fontSize: 14
-              )
-            ),
+            child: const Text('Tersedia >',
+                style: TextStyle(
+                    fontFamily: 'Poppins',
+                    color: Color(0xFFE4B04B),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14)),
           ),
         ],
       ),
@@ -341,11 +353,13 @@ class MyHeaderClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     Path path = Path();
     path.lineTo(0, size.height - 50);
-    path.quadraticBezierTo(size.width / 2, size.height, size.width, size.height - 50);
+    path.quadraticBezierTo(
+        size.width / 2, size.height, size.width, size.height - 50);
     path.lineTo(size.width, 0);
     path.close();
     return path;
   }
+
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
