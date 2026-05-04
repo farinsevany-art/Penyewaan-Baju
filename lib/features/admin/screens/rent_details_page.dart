@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import '../widgets/status_update_sheet.dart';
 import '../../auth/widgets/auth_background.dart';
 
-class DetailPenyewaanScreen extends StatefulWidget {
-  const DetailPenyewaanScreen({super.key});
+class RentDetailsPage extends StatefulWidget {
+  final String orderId; // Variabel penampung ID
+
+  const RentDetailsPage({
+    super.key, 
+    required this.orderId, // Wajib diisi saat navigasi
+  });
 
   @override
-  State<DetailPenyewaanScreen> createState() => _DetailPenyewaanScreenState();
+  State<RentDetailsPage> createState() => _RentDetailsPageState();
 }
 
-class _DetailPenyewaanScreenState extends State<DetailPenyewaanScreen> {
+class _RentDetailsPageState extends State<RentDetailsPage> {
   String currentStatus = "Aktif/Disewa";
 
   void _showStatusPopup() {
@@ -41,15 +46,13 @@ class _DetailPenyewaanScreenState extends State<DetailPenyewaanScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.yellow),
-          onPressed: () {
-            // Ini akan kembali ke ManajemenPesananScreen
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Detail Penyewaan',
           style: TextStyle(color: Colors.white, fontSize: 18),
         ),
+        centerTitle: true,
       ),
       body: AuthBackground(
         child: SingleChildScrollView(
@@ -95,16 +98,17 @@ class _DetailPenyewaanScreenState extends State<DetailPenyewaanScreen> {
     );
   }
 
-  // --- WIDGET HELPER ---
   Widget _buildOrderHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("PESANAN #R-94021", style: TextStyle(fontSize: 11, color: Colors.grey)),
-            Text(
+            // Menggunakan widget.orderId untuk menampilkan ID yang dikirim
+            Text("PESANAN ${widget.orderId}", 
+              style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+            const Text(
               "TARI GANDRUNG L\nSRIKANDI VER 2 L",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, height: 1.2),
             ),
@@ -160,30 +164,36 @@ class _DetailPenyewaanScreenState extends State<DetailPenyewaanScreen> {
 
   Widget _buildCustomerCard() {
     return Card(
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.orange.shade200),
       ),
-      child: const Column(
-        children: [
-          ListTile(
-            leading: CircleAvatar(backgroundColor: Colors.black, child: Icon(Icons.person, color: Colors.white)),
-            title: Text("Alex Johnson", style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text("Pelanggan • Pro"),
-          ),
-        ],
+      child: const ListTile(
+        leading: CircleAvatar(backgroundColor: Colors.black, child: Icon(Icons.person, color: Colors.white)),
+        title: Text("Alex Johnson", style: TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text("Pelanggan • Pro"),
       ),
     );
   }
 
   Widget _itemTile(String name, String size, String price) {
     return Card(
+      elevation: 0,
       margin: const EdgeInsets.only(bottom: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: Container(width: 50, height: 50, color: Colors.grey.shade300),
+        leading: Container(
+          width: 50, 
+          height: 50, 
+          decoration: BoxDecoration(
+            color: Colors.grey.shade300,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
         title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(size),
-        trailing: Text(price, style: const TextStyle(fontWeight: FontWeight.bold)),
+        trailing: Text(price, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
       ),
     );
   }
