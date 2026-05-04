@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../widgets/auth_background.dart';
-import 'success_page.dart'; // Kita buat setelah ini
+import 'success_page.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -13,6 +13,7 @@ class RegisterPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20),
+
             // Logo Header
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -28,6 +29,7 @@ class RegisterPage extends StatelessWidget {
                 ),
               ],
             ),
+
             const SizedBox(height: 30),
 
             // Card Register
@@ -57,24 +59,28 @@ class RegisterPage extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+
                     const SizedBox(height: 25),
 
-                    // Input Fields dengan Icon sesuai desainmu
                     _buildRegisterField('Nama Lengkap', Icons.person_outline),
                     const SizedBox(height: 15),
+
                     _buildRegisterField('Username', Icons.badge_outlined),
                     const SizedBox(height: 15),
+
                     _buildRegisterField(
                       'No. Handphone',
                       Icons.phone_android_outlined,
                     ),
                     const SizedBox(height: 15),
+
                     _buildRegisterField(
                       'Password',
                       Icons.lock_outline,
                       isObscure: true,
                     ),
                     const SizedBox(height: 15),
+
                     _buildRegisterField(
                       'Verifikasi Password',
                       Icons.verified_user_outlined,
@@ -99,7 +105,6 @@ class RegisterPage extends StatelessWidget {
                         ),
                         child: ElevatedButton(
                           onPressed: () {
-                            // Navigasi ke halaman sukses
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -123,6 +128,7 @@ class RegisterPage extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 20),
+
                     Center(
                       child: GestureDetector(
                         onTap: () => Navigator.pop(context),
@@ -150,6 +156,7 @@ class RegisterPage extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 40),
           ],
         ),
@@ -174,9 +181,11 @@ class RegisterPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
           obscureText: isObscure,
           decoration: InputDecoration(
+            hintText: '$label',
+            hintStyle: TextStyle(color: AppColors.mediumGrey.withOpacity(0.7)),
             prefixIcon: Icon(icon, size: 20, color: AppColors.mediumGrey),
             filled: true,
             fillColor: AppColors.offWhite,
