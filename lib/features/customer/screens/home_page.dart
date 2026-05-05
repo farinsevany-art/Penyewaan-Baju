@@ -5,9 +5,7 @@ import '../widgets/costume_card.dart';
 import 'wishlist_page.dart';
 import 'orders_page.dart';
 import 'category_detail_page.dart';
-import 'category2_detail_page.dart';
-import 'category3_detail_page.dart';
-import 'category4_detail_page.dart';
+
 import 'profile_page.dart';
 import 'cart_page.dart';
 
@@ -226,33 +224,53 @@ class _HomeContentState extends State<HomeContent> {
         Positioned(left: 15, top: 0, child: _catItem(context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg', 1)),
         Positioned(left: width * 0.28, top: 15, child: _catItem(context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg', 2)),
         Positioned(right: width * 0.28, top: 15, child: _catItem(context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg', 3)),
-        Positioned(right: 15, top: 0, child: _catItem(context, 'Wayang', 'assets/images/wayang.jpg', 4)),
+        Positioned(right: 15, top: 0, child: _catItem(context, 'Pewayangan', 'assets/images/wayang.jpg', 4)),
       ],
     );
   }
 
-  Widget _catItem(BuildContext context, String title, String path, int type) {
-    return GestureDetector(
-      onTap: () {
-        Widget page = const CategoryDetailPage(categoryTitle: 'Tari Dewasa');
-        if (type == 2) page = const Category2DetailPage(categoryTitle: 'Tari Anak');
-        if (type == 3) page = const Category3DetailPage(categoryTitle: 'Raja & Ratu');
-        if (type == 4) page = const Category4DetailPage(categoryTitle: 'Pewayangan');
-        Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-      },
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2.5)),
-            child: CircleAvatar(radius: 35, backgroundImage: AssetImage(path)),
-          ),
-          const SizedBox(height: 8),
-          Text(title, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
-        ],
-      ),
-    );
-  }
+ Widget _catItem(BuildContext context, String title, String path, int type) {
+  return GestureDetector(
+    onTap: () {
+      // Bersihkan karakter \n menjadi spasi agar sama dengan data kategori
+      String categoryToSend = title.replaceAll('\n', ' ');
 
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CategoryDetailPage(
+            categoryTitle: categoryToSend, // Mengirimkan judul yang sudah dibersihkan
+          ),
+        ),
+      );
+    },
+    child: Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle, 
+            border: Border.all(color: Colors.white, width: 2.5),
+          ),
+          child: CircleAvatar(
+            radius: 35, 
+            backgroundImage: AssetImage(path),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title, 
+          textAlign: TextAlign.center, 
+          style: const TextStyle(
+            fontFamily: 'Poppins', 
+            fontSize: 12, 
+            fontWeight: FontWeight.bold, 
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    ),
+  );
+}
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 25, 20, 15),
