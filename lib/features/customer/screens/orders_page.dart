@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-// Catatan: Jika kamu punya model data pesanan nantinya, import di sini.
-// Contoh: import '../../../data/models/order_model.dart';
-
 class OrdersPage extends StatefulWidget {
-  const OrdersPage({super.key});
+  // 1. Tambahkan variabel untuk menerima kiriman data dari Search Bar
+  final String? orderId; 
+
+  // 2. Masukkan ke dalam constructor
+  const OrdersPage({super.key, this.orderId});
 
   @override
   State<OrdersPage> createState() => _OrdersPageState();
@@ -20,9 +21,10 @@ class _OrdersPageState extends State<OrdersPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text(
-          "My Orders",
-          style: TextStyle(
+        title: Text(
+          // 3. Judul dinamis: Jika sedang mencari, tampilkan ID-nya
+          widget.orderId != null ? "Search: ${widget.orderId}" : "My Orders",
+          style: const TextStyle(
             fontFamily: 'Poppins', 
             fontWeight: FontWeight.bold, 
             fontSize: 18, 
@@ -32,16 +34,16 @@ class _OrdersPageState extends State<OrdersPage> {
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0.5,
-        automaticallyImplyLeading: false, // Menghilangkan tombol back jika ini tab navigator
+        automaticallyImplyLeading: widget.orderId != null, // Tampilkan tombol back hanya jika hasil pencarian
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Status Pesanan",
-              style: TextStyle(
+            Text(
+              widget.orderId != null ? "Hasil Pencarian" : "Status Pesanan",
+              style: const TextStyle(
                 fontFamily: 'PlayfairDisplay', 
                 fontSize: 24, 
                 fontWeight: FontWeight.bold, 
@@ -49,9 +51,11 @@ class _OrdersPageState extends State<OrdersPage> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              "Pantau tahapan penyewaan kostum kamu",
-              style: TextStyle(
+            Text(
+              widget.orderId != null 
+                ? "Menampilkan detail pesanan untuk ID: ${widget.orderId}"
+                : "Pantau tahapan penyewaan kostum kamu",
+              style: const TextStyle(
                 fontFamily: 'Poppins', 
                 fontSize: 14, 
                 color: Color(0xFFE4B04B)
@@ -59,11 +63,11 @@ class _OrdersPageState extends State<OrdersPage> {
             ),
             const SizedBox(height: 25),
             
-            // Kartu Pesanan
+            // Kartu Pesanan (Data ID diambil dari widget.orderId jika tersedia)
             _buildOrderCard(
               context,
               costumeName: "Kostum Tari Legong Bali",
-              orderId: "KC-2024-001",
+              orderId: widget.orderId ?? "KC-2024-001",
               date: "12 Mei 2024",
             ),
           ],
@@ -72,6 +76,7 @@ class _OrdersPageState extends State<OrdersPage> {
     );
   }
 
+  // --- Widget helper tetap sama seperti sebelumnya ---
   Widget _buildOrderCard(
     BuildContext context, {
     required String costumeName,
@@ -94,7 +99,6 @@ class _OrdersPageState extends State<OrdersPage> {
       ),
       child: Column(
         children: [
-          // Header Kartu
           Row(
             children: [
               Container(
@@ -136,7 +140,6 @@ class _OrdersPageState extends State<OrdersPage> {
             child: Divider(thickness: 1, height: 1),
           ),
 
-          // LIST STATUS (Sesuai urutan gambar Admin yang kamu kirim)
           _statusStep("Menunggu Deposit", "Awaiting Deposit", Icons.account_balance_wallet_outlined, 0),
           _statusStep("Diproses", "Processing", Icons.sync, 1),
           _statusStep("Aktif/Disewa", "Active/Rented", Icons.check_circle_outline, 2),
@@ -148,9 +151,7 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Widget _statusStep(String title, String subtitle, IconData icon, int index) {
-    // Logika warna: jika index ini sama dengan currentStatusIndex, maka aktif (kuning)
     bool isActive = currentStatusIndex == index;
-    // Logika warna: jika index sudah lewat (sudah selesai), bisa diberi warna hijau atau tetap abu
     bool isPast = currentStatusIndex > index && currentStatusIndex != 4; 
 
     return Padding(
@@ -167,14 +168,12 @@ class _OrdersPageState extends State<OrdersPage> {
         ),
         child: Row(
           children: [
-            // Icon Radio (Sesuai Gambar)
             Icon(
               isActive ? Icons.radio_button_checked : (isPast ? Icons.check_circle : Icons.radio_button_off),
               color: isActive ? const Color(0xFFE4B04B) : (isPast ? Colors.green : Colors.grey[400]),
               size: 22,
             ),
             const SizedBox(width: 15),
-            // Teks Status
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,7 +198,6 @@ class _OrdersPageState extends State<OrdersPage> {
                 ],
               ),
             ),
-            // Icon Kanan (Sesuai Gambar)
             Icon(
               icon,
               color: isActive ? const Color(0xFFE4B04B) : Colors.grey[300],

@@ -24,17 +24,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // List halaman untuk navigasi bawah
+    // List halaman untuk navigasi bawah - Konflik sudah dibersihkan
     final List<Widget> pages = [
       HomeContent(costumes: allCostumes),
       const WishlistPage(),
-<<<<<<< HEAD
-      const CartPage(),
-      const SearchPage(),
-=======
-      const Center(child: Text("Cart Page", style: TextStyle(fontFamily: 'Poppins'))),
-      const OrdersPage(), // Pengganti SearchPage
->>>>>>> 2592796 (orders)
+      const CartPage(), // Menggunakan CartPage asli
+      const OrdersPage(), // Menggunakan OrdersPage baru sebagai pengganti SearchPage
       const ProfilePage(),
     ];
 
@@ -190,6 +185,7 @@ class _HomeContentState extends State<HomeContent> {
         textInputAction: TextInputAction.search,
         onSubmitted: (value) {
           if (value.isNotEmpty) {
+            // Navigasi ke halaman pencarian/orders dengan parameter
             Navigator.push(context, MaterialPageRoute(builder: (context) => OrdersPage(orderId: value)));
           }
         },
@@ -266,40 +262,6 @@ class _HomeContentState extends State<HomeContent> {
           Text(title, style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 14)),
           const Text('Tersedia >', style: TextStyle(fontFamily: 'Poppins', color: Color(0xFFE4B04B), fontWeight: FontWeight.bold, fontSize: 14)),
         ],
-      ),
-    );
-  }
-}
-
-// --- ORDERS PAGE SECTION ---
-class OrdersPage extends StatelessWidget {
-  final String? orderId;
-
-  const OrdersPage({super.key, this.orderId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("My Orders", style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 18)),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF0D1B3E),
-        elevation: 0.5,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.receipt_long_outlined, size: 100, color: Colors.grey[300]),
-            const SizedBox(height: 20),
-            const Text("No orders yet", style: TextStyle(fontFamily: 'Poppins', fontSize: 16, color: Colors.grey)),
-            const SizedBox(height: 10),
-            const Text("Your costume rental history will appear here.", 
-              textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.grey)),
-          ],
-        ),
       ),
     );
   }
