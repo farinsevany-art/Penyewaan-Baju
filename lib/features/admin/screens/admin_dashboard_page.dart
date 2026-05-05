@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/income_chart.dart';
-import 'stock_management_page.dart';
+// Import CategorySelectionPage untuk memperbaiki error alur stok
+import '../stock_management/category_selection_page.dart';
 import 'rent_management_page.dart';
 import 'reports.dart';
 import '../../auth/widgets/auth_background.dart';
-import 'notification_page.dart'; 
-
-// ... (Bagian import tetap sama)
+import 'notification_page.dart';
+import '../../../data/services/dashboard_service.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -20,11 +20,13 @@ class AdminDashboardPage extends StatefulWidget {
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   int _selectedIndex = 0;
 
+  // DAFTAR HALAMAN UTAMA
   final List<Widget> _pages = [
-    const DashboardContent(), 
-    const ManajemenPesananScreen(), 
-    const StockManagementPage(),
-    const ReportScreen(), 
+    const DashboardContent(),
+    const ManajemenPesananScreen(),
+    // PERBAIKAN: Diarahkan ke CategorySelectionPage agar user memilih kategori dulu
+    const CategorySelectionPage(),
+    const ReportScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -33,11 +35,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     });
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: AppColors.primaryNavy, // Set agar status bar/area atas defaultnya navy
-    body: _pages[_selectedIndex], // Hapus AuthBackground dari sini
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.primaryNavy,
+      body: IndexedStack(
+        // Menggunakan IndexedStack agar state halaman tetap terjaga
+        index: _selectedIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -45,36 +51,88 @@ Widget build(BuildContext context) {
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Penyewaan'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assignment),
+            label: 'Penyewaan',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Stok'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Reports'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Reports',
+          ),
         ],
       ),
     );
   }
 }
 
-class DashboardContent extends StatelessWidget {
+class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
+
+  @override
+  State<DashboardContent> createState() => _DashboardContentState();
+}
+
+class _DashboardContentState extends State<DashboardContent> {
+  Map<String, dynamic>? _stats;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDashboardData();
+  }
+
+  Future<void> _fetchDashboardData() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+    try {
+      final data = await DashboardService.getDashboardStats();
+      if (!mounted) return;
+      setState(() {
+        _stats = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal memperbarui data: $e")));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // 1. Header tetap di luar AuthBackground supaya tidak kena gambar bunga
+        // 1. Header
         Container(
-          padding: const EdgeInsets.only(top: 40, left: 20, right: 20, bottom: 32),
+          padding: const EdgeInsets.only(
+            top: 50, // Disesuaikan untuk notch
+            left: 20,
+            right: 20,
+            bottom: 25,
+          ),
           color: AppColors.primaryNavy,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  Image.asset('assets/images/Logotransparan.png', width: 40),
+                  Image.asset(
+                    'assets/images/Logotransparan.png',
+                    width: 40,
+                    errorBuilder: (c, e, s) =>
+                        const Icon(Icons.store, color: AppColors.primaryGold),
+                  ),
                   const SizedBox(width: 12),
                   const Text(
-                    'Dashboard Penyewaan',
+                    'Dashboard Admin',
                     style: TextStyle(
                       color: AppColors.primaryGold,
                       fontSize: 18,
@@ -84,70 +142,106 @@ class DashboardContent extends StatelessWidget {
                 ],
               ),
               IconButton(
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPage())),
-                icon: const Icon(Icons.notifications_active, color: AppColors.primaryGold),
+                onPressed: _fetchDashboardData,
+                icon: const Icon(Icons.refresh, color: AppColors.primaryGold),
               ),
             ],
           ),
         ),
 
-        // 2. Gunakan AuthBackground HANYA untuk area konten
+        // 2. Konten Utama
         Expanded(
-          child: AuthBackground( // Pindahkan ke sini
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                const Row(
-                  children: [
-                    Expanded(
-                      child: StatCard(
-                        title: 'Total Pendapatan Hari Ini',
-                        value: 'Rp450.000',
-                        percentage: '+12%',
-                        isIncrease: true,
+          child: AuthBackground(
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryNavy,
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _fetchDashboardData,
+                    color: AppColors.primaryNavy,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: StatCard(
+                                  title: 'Pendapatan Hari Ini',
+                                  value:
+                                      'Rp ${_stats?['income_today']?.toInt() ?? 0}',
+                                  percentage: 'Live',
+                                  isIncrease: true,
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: StatCard(
+                                  title: 'Pendapatan Bulanan',
+                                  value:
+                                      'Rp ${_stats?['income_monthly']?.toInt() ?? 0}',
+                                  percentage: '+5%',
+                                  isIncrease: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          StatCard(
+                            title: 'Jumlah Kostum Sedang Disewa',
+                            value: '${_stats?['rented_count'] ?? 0} Unit',
+                            percentage: 'Aktif',
+                            isIncrease: (_stats?['rented_count'] ?? 0) > 0,
+                          ),
+                          const SizedBox(height: 20),
+                          IncomeChart(chartData: _stats?['chart_data'] ?? []),
+                          const SizedBox(height: 30),
+                          const Text(
+                            'Kostum Terpopuler',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          _buildPopularItem(
+                            'Tari Kreasi Baru',
+                            'Tari Anak',
+                            '24 Disewa',
+                            true,
+                          ),
+                          _buildPopularItem(
+                            'Clara 1',
+                            'Tari Dewasa',
+                            '18 Disewa',
+                            false,
+                          ),
+                          _buildPopularItem(
+                            'Anoman',
+                            'Wayang',
+                            '15 Disewa',
+                            true,
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(width: 15),
-                    Expanded(
-                      child: StatCard(
-                        title: 'Pendapatan Bulanan',
-                        value: 'Rp12.400.000',
-                        percentage: '+5%',
-                        isIncrease: true,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 15),
-                const StatCard(
-                  title: 'Jumlah Kostum Disewa',
-                  value: '84',
-                  percentage: '-2%',
-                  isIncrease: false,
-                ),
-                const SizedBox(height: 20),
-                const IncomeChart(),
-                const SizedBox(height: 30),
-                const Text(
-                  'Kostum Dengan Penyewaan Terbanyak',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 15),
-                _buildPopularItem('Tari Kreasi Baru', 'Tari Anak', '24 Disewa', true),
-                _buildPopularItem('Clara 1', 'Tari Dewasa', '18 Disewa', false),
-                _buildPopularItem('Anoman', 'Wayang', '15 Disewa', true),
-              ],
-            ),
-            ),
+                  ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPopularItem(String name, String cat, String count, bool isPopuler) {
+  Widget _buildPopularItem(
+    String name,
+    String cat,
+    String count,
+    bool isPopuler,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(10),
@@ -159,11 +253,13 @@ class DashboardContent extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 50, height: 50,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Colors.grey[200],
               borderRadius: BorderRadius.circular(8),
             ),
+            child: const Icon(Icons.image, color: Colors.grey),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -171,7 +267,10 @@ class DashboardContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(cat, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                Text(
+                  cat,
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
               ],
             ),
           ),

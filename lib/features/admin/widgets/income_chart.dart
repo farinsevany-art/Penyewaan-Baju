@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 
 class IncomeChart extends StatelessWidget {
-  const IncomeChart({super.key});
+  final List<dynamic> chartData;
+  const IncomeChart({super.key, required this.chartData});
 
   @override
   Widget build(BuildContext context) {
+    double totalWeek = 0;
+    for (var item in chartData) {
+      totalWeek += item['total'];
+    }
+
     return Container(
-      height: 250,
+      height: 280,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: const Color(0xFFF3E9D2),
@@ -19,31 +25,16 @@ class IncomeChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Rata - rata total Penyewaan Per - Minggu",
+            "Total Penyewaan 7 Hari Terakhir",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              const Text(
-                "Rp3.500.00",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                "+8.5%",
-                style: TextStyle(
-                  color: Colors.green[700],
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          Text(
+            "Rp ${totalWeek.toInt()}",
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
-          const Text(
-            "Pendapatan dalam 7 Hari Terakhir",
-            style: TextStyle(fontSize: 10, color: Colors.grey),
-          ),
-          const Expanded(child: _LineChart()), // Memanggil grafik
+          const SizedBox(height: 20),
+          Expanded(child: _LineChart(data: chartData)),
         ],
       ),
     );
@@ -51,37 +42,23 @@ class IncomeChart extends StatelessWidget {
 }
 
 class _LineChart extends StatelessWidget {
-  const _LineChart();
+  final List<dynamic> data;
+  const _LineChart({required this.data});
 
   @override
   Widget build(BuildContext context) {
     return LineChart(
       LineChartData(
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          getDrawingHorizontalLine: (value) =>
-              FlLine(color: Colors.white, strokeWidth: 1, dashArray: [5, 5]),
-        ),
+        gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
-          show: true,
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                const days = ['SEN', 'SEL', 'RA', 'KA', 'JU', 'SA', 'MI'];
-                if (value.toInt() >= 0 && value.toInt() < days.length) {
+                int index = value.toInt();
+                if (index >= 0 && index < data.length) {
                   return Text(
-                    days[value.toInt()],
+                    data[index]['day'],
                     style: const TextStyle(fontSize: 10, color: Colors.grey),
                   );
                 }
@@ -89,27 +66,33 @@ class _LineChart extends StatelessWidget {
               },
             ),
           ),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         borderData: FlBorderData(show: false),
         lineBarsData: [
           LineChartBarData(
-            spots: const [
-              FlSpot(0, 1),
-              FlSpot(1, 1.5),
-              FlSpot(2, 1.2),
-              FlSpot(3, 3),
-              FlSpot(4, 1),
-              FlSpot(5, 5),
-              FlSpot(6, 2),
-            ],
-            isCurved: true, // Membuat melengkung
+            spots: data.asMap().entries.map((e) {
+              // Dibagi 10.000 agar skala grafik tetap proporsional (Y-axis)
+              return FlSpot(
+                e.key.toDouble(),
+                (e.value['total'] as num).toDouble() / 10000,
+              );
+            }).toList(),
+            isCurved: true,
             color: AppColors.primaryGold,
             barWidth: 4,
-            isStrokeCapRound: true,
-            dotData: const FlDotData(show: false),
+            dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: AppColors.primaryGold.withOpacity(0.2),
+              color: AppColors.primaryGold.withOpacity(0.1),
             ),
           ),
         ],

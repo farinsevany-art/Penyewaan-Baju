@@ -28,17 +28,39 @@ class ManajemenPesananScreen extends StatefulWidget {
   State<ManajemenPesananScreen> createState() => _ManajemenPesananScreenState();
 }
 
-class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with SingleTickerProviderStateMixin {
+class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
   bool _isSearching = false;
 
   final List<PesananData> _allOrders = [
-    PesananData(name: "Sarah Jenkins", category: "Clara 1", status: "Baru", imageUrl: "", isUrgent: true),
-    PesananData(name: "Michael Chen", category: "Rama", status: "Baru", imageUrl: ""),
-    PesananData(name: "Elena Rodriguez", category: "Shinta", status: "Baru", imageUrl: ""),
-    PesananData(name: "Andi Wijaya", category: "Laksamana", status: "Aktif", imageUrl: ""),
+    PesananData(
+      name: "Sarah Jenkins",
+      category: "Clara 1",
+      status: "Baru",
+      imageUrl: "",
+      isUrgent: true,
+    ),
+    PesananData(
+      name: "Michael Chen",
+      category: "Rama",
+      status: "Baru",
+      imageUrl: "",
+    ),
+    PesananData(
+      name: "Elena Rodriguez",
+      category: "Shinta",
+      status: "Baru",
+      imageUrl: "",
+    ),
+    PesananData(
+      name: "Andi Wijaya",
+      category: "Laksamana",
+      status: "Aktif",
+      imageUrl: "",
+    ),
   ];
 
   @override
@@ -71,7 +93,10 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
               )
             : Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Image.asset('assets/images/Logotransparan.png', fit: BoxFit.contain),
+                child: Image.asset(
+                  'assets/images/Logotransparan.png',
+                  fit: BoxFit.contain,
+                ),
               ),
         title: _isSearching
             ? TextField(
@@ -87,11 +112,16 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
               )
             : Text(
                 'Manajemen Pesanan',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.primaryGold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: AppColors.primaryGold),
               ),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search, color: Colors.white),
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              color: Colors.white,
+            ),
             onPressed: () => setState(() {
               if (_isSearching) {
                 _searchController.clear();
@@ -187,7 +217,12 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
       ),
       child: Text(
         text,
-        style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: color, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 11,
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -211,14 +246,26 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen> with Si
         ),
         title: Text(
           item.name,
-          style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: AppColors.primaryNavy),
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryNavy,
+          ),
         ),
         subtitle: Text(
           item.status == "Baru" ? "Menunggu Disetujui" : item.status,
-          style: const TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.black87),
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 13,
+            color: Colors.black87,
+          ),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.primaryGold),
-onTap: () {
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: AppColors.primaryGold,
+        ),
+        onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
