@@ -9,7 +9,6 @@ import 'category_detail_page.dart';
 import 'profile_page.dart';
 import 'cart_page.dart';
 
-// --- MAIN CUSTOMER HOME PAGE ---
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key});
 
@@ -22,7 +21,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // List halaman navigasi bawah (Tetap 5 Menu)
     final List<Widget> pages = [
       HomeContent(costumes: allCostumes),
       const WishlistPage(),
@@ -32,17 +30,27 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     ];
 
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: pages,
+      // Bungkus body dengan Container Background agar semua halaman dapat BG yang sama
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFBFBFB),
+          image: DecorationImage(
+            image: AssetImage('assets/images/bg.png'),
+            fit: BoxFit.cover,
+            opacity: 0.25, 
+          ),
+        ),
+        child: IndexedStack(
+          index: _selectedIndex,
+          children: pages,
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
+        backgroundColor: Colors.white,
         selectedItemColor: const Color(0xFF0D1B3E),
         unselectedItemColor: Colors.grey,
-        selectedLabelStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
         onTap: (index) => setState(() => _selectedIndex = index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
@@ -56,7 +64,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 }
 
-// --- HOME CONTENT SECTION ---
 class HomeContent extends StatefulWidget {
   final List<Costume> costumes;
   const HomeContent({super.key, required this.costumes});
@@ -85,110 +92,95 @@ class _HomeContentState extends State<HomeContent> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/bg.png'),
-            fit: BoxFit.cover,
-            opacity: 0.15, 
-          ),
-          color: Color(0xFFFBFBFB),
-        ),
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Column(
-            children: [
-              // HEADER AREA
-              Stack(
-                children: [
-                  ClipPath(
-                    clipper: MyHeaderClipper(),
-                    child: SizedBox(
-                      height: 350,
-                      width: double.infinity,
-                      child: Stack(
-                        children: [
-                          Image.asset(
-                            'assets/images/home.png',
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: 350,
-                            errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF0D1B3E)),
-                          ),
-                          Container(color: Colors.black.withOpacity(0.35)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      // Scaffold dibuat transparan agar Container BG di CustomerHomePage terlihat
+      backgroundColor: Colors.transparent,
+      body: SingleChildScrollView(
+        controller: _scrollController,
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                ClipPath(
+                  clipper: MyHeaderClipper(),
+                  child: SizedBox(
+                    height: 350,
+                    width: double.infinity,
+                    child: Stack(
                       children: [
-                        _buildSearchBar(context),
-                        const SizedBox(height: 35),
-                        _buildHeaderText(),
+                        Image.asset(
+                          'assets/images/home.png',
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 350,
+                          errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF0D1B3E)),
+                        ),
+                        // Overlay gelap agar teks Header terbaca
+                        Container(color: Colors.black.withOpacity(0.35)),
                       ],
                     ),
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 10),
-              SizedBox(height: 155, child: _buildCurvedCategories(context, screenWidth)),
-
-              // Section Header dengan klik navigasi
-              _buildSectionHeader(context, "POPULAR"),
-
-              // PRODUCT GRID
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: widget.costumes.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.68,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemBuilder: (context, index) {
-                    final item = widget.costumes[index];
-                    return CostumeCard(
-                      costume: item,
-                      onWishlistToggle: () => setState(() => item.isWishlisted = !item.isWishlisted),
-                    );
-                  },
                 ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSearchBar(context),
+                      const SizedBox(height: 35),
+                      _buildHeaderText(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            // Bagian Kategori
+            SizedBox(height: 155, child: _buildCurvedCategories(context, screenWidth)),
+            _buildSectionHeader(context, "POPULAR"),
+            // Product Grid
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: widget.costumes.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.68,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemBuilder: (context, index) {
+                  final item = widget.costumes[index];
+                  return CostumeCard(
+                    costume: item,
+                    onWishlistToggle: () => setState(() => item.isWishlisted = !item.isWishlisted),
+                  );
+                },
               ),
-              const SizedBox(height: 30),
-            ],
-          ),
+            ),
+            const SizedBox(height: 30),
+          ],
         ),
       ),
     );
   }
 
+  // --- WIDGET HELPER TETAP SAMA ---
   Widget _buildSearchBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withOpacity(0.9), // Sedikit transparan agar estetik
         borderRadius: BorderRadius.circular(30),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))],
       ),
       child: TextField(
         controller: _searchController,
         style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
-        textInputAction: TextInputAction.search,
         onSubmitted: (value) {
           if (value.isNotEmpty) {
-            // Berpindah ke SearchPage saat enter ditekan
-            Navigator.push(
-              context, 
-              MaterialPageRoute(builder: (context) => SearchPage(searchQuery: value))
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (context) => SearchPage(searchQuery: value)));
           }
         },
         decoration: const InputDecoration(
@@ -237,10 +229,7 @@ class _HomeContentState extends State<HomeContent> {
     return GestureDetector(
       onTap: () {
         String categoryToSend = title.replaceAll('\n', ' ');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => CategoryDetailPage(categoryTitle: categoryToSend)),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryDetailPage(categoryTitle: categoryToSend)));
       },
       child: Column(
         children: [
@@ -252,11 +241,7 @@ class _HomeContentState extends State<HomeContent> {
             child: CircleAvatar(radius: 35, backgroundImage: AssetImage(path)),
           ),
           const SizedBox(height: 8),
-          Text(
-            title, 
-            textAlign: TextAlign.center, 
-            style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
-          ),
+          Text(title, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
         ],
       ),
     );
@@ -271,22 +256,9 @@ class _HomeContentState extends State<HomeContent> {
           Text(title, style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 14)),
           GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CategoryDetailPage(categoryTitle: "Semua Kostum"),
-                ),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const CategoryDetailPage(categoryTitle: "Semua Kostum")));
             },
-            child: const Text(
-              'Tersedia >', 
-              style: TextStyle(
-                fontFamily: 'Poppins', 
-                color: Color(0xFFE4B04B), 
-                fontWeight: FontWeight.bold, 
-                fontSize: 14
-              ),
-            ),
+            child: const Text('Tersedia >', style: TextStyle(fontFamily: 'Poppins', color: Color(0xFFE4B04B), fontWeight: FontWeight.bold, fontSize: 14)),
           ),
         ],
       ),
