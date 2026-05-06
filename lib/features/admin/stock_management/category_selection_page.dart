@@ -10,10 +10,10 @@ class CategorySelectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Data Kategori dengan Icon (Kembali ke data awal)
     final List<Map<String, dynamic>> categories = [
-      {'id': 1, 'name': 'Tari', 'icon': Icons.accessibility_new},
-      {'id': 2, 'name': 'Wayang', 'icon': Icons.theater_comedy},
-      {'id': 3, 'name': 'Adat', 'icon': Icons.temple_hindu},
-      {'id': 4, 'name': 'Kebaya', 'icon': Icons.checkroom},
+      {'id': 1, 'name': 'Tari Dewasa', 'icon': Icons.accessibility_new},
+      {'id': 2, 'name': 'Tari Anak', 'icon': Icons.child_care},
+      {'id': 3, 'name': 'Raja & Ratu', 'icon': Icons.castle},
+      {'id': 4, 'name': 'Wayang', 'icon': Icons.theater_comedy},
     ];
 
     return Scaffold(
