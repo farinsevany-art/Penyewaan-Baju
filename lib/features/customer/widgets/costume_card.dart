@@ -3,6 +3,8 @@ import '../../../core/constants/colors.dart';
 import '../../../data/models/costume_model.dart';
 // 🔻 PASTIKAN IMPORT INI ADA
 import '../../../data/services/mock_data.dart';
+// 🔻 Tambahkan import halaman detail produk Anda
+import '../screens/product_detail_page.dart';
 
 class CostumeCard extends StatefulWidget {
   final Costume? costume;
@@ -63,10 +65,8 @@ class _CostumeCardState extends State<CostumeCard> {
     }
   }
 
-  // 🔥 BAGIAN PERBAIKAN: Menambahkan logika memasukkan ke keranjang
   void _handleAddToCart() {
     if (widget.costume != null) {
-      // Tambahkan ke list global agar muncul di halaman Cart
       if (!cartItemsGlobal.contains(widget.costume)) {
         setState(() {
           widget.costume!.isInCart = true;
@@ -98,7 +98,19 @@ class _CostumeCardState extends State<CostumeCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
+      // 🔥 Perbaikan: Menambahkan aksi default untuk navigasi ke halaman detail
+      onTap: widget.onTap ?? () {
+        if (widget.costume != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailPage(
+                costume: widget.costume!,
+              ),
+            ),
+          );
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
+import '../../../data/models/costume_model.dart'; // Sesuaikan path jika diperlukan
 
 class ProductDetailPage extends StatelessWidget {
-  final String title;
-  final String price;
-  final String imagePath;
+  final Costume costume;
 
   const ProductDetailPage({
     super.key,
-    required this.title,
-    required this.price,
-    required this.imagePath,
+    required this.costume,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7F0), // Warna background krem sesuai foto
+      backgroundColor: const Color(0xFFFDF7F0), // Warna background krem
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -25,7 +22,7 @@ class ProductDetailPage extends StatelessWidget {
         ),
         title: Center(
           child: Image.asset(
-            'assets/images/Logotransparan.png', // Ganti dengan logo Kusuma Cantika-mu
+            'assets/images/Logotransparan.png', 
             height: 40,
           ),
         ),
@@ -47,16 +44,24 @@ class ProductDetailPage extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(30),
                 child: Image.asset(
-                  imagePath,
+                  costume.imageUrl ?? '',
                   width: double.infinity,
                   height: 350,
                   fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 350,
+                    color: const Color(0xFFE8DDD0),
+                    child: const Center(
+                      child: Icon(Icons.image_not_supported, color: Colors.grey),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
+              
               // Judul & Harga
               Text(
-                title,
+                costume.name,
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -64,7 +69,7 @@ class ProductDetailPage extends StatelessWidget {
                 ),
               ),
               Text(
-                price,
+                'Rp. ${costume.price}',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
@@ -72,6 +77,7 @@ class ProductDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+
               // Size & Sisa Stok
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,18 +87,9 @@ class ProductDetailPage extends StatelessWidget {
                     children: [
                       const Text("Size", style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
-                      Row(
-                        children: ['S', 'M', 'L', 'XL'].map((size) {
-                          return Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey),
-                            ),
-                            child: Text(size, style: const TextStyle(fontSize: 12)),
-                          );
-                        }).toList(),
+                      Text(
+                        costume.size ?? '-',
+                        style: const TextStyle(fontSize: 14, color: Colors.black87),
                       ),
                     ],
                   ),
@@ -106,26 +103,28 @@ class ProductDetailPage extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.grey),
                         ),
-                        child: const Text("5"),
+                        child: Text("${costume.stock}"), // Mengambil dari properti stock di mock data
                       ),
                     ],
                   ),
                 ],
               ),
               const SizedBox(height: 20),
+
               // Deskripsi
               const Text("Deskripsi", style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              const Text(
-                "Tari Gandrung adalah seni pertunjukan tradisional khas Banyuwangi, Jawa Timur, yang dibawakan sebagai ungkapan syukur pasca panen dan hiburan rakyat.\n\nTari ini menampilkan penari wanita yang mengenakan kostum khas berhias mahkota omprog dan menari dengan kipas, diiringi musik perpaduan Jawa-Bali (biola, kendang, kluncing).",
-                style: TextStyle(fontSize: 14, height: 1.5),
+              Text(
+                costume.description ?? 'Tidak ada deskripsi.',
+                style: const TextStyle(fontSize: 14, height: 1.5),
               ),
               const SizedBox(height: 100), // Space untuk bottom bar
             ],
           ),
         ),
       ),
-      // Bottom Action Bar (Sesuai foto)
+      
+      // Bottom Action Bar
       bottomSheet: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         color: const Color(0xFFFDF7F0),
@@ -134,8 +133,13 @@ class ProductDetailPage extends StatelessWidget {
             Container(
               decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
               child: IconButton(
-                icon: const Icon(Icons.favorite_border, color: Colors.red),
-                onPressed: () {},
+                icon: Icon(
+                  costume.isWishlisted ? Icons.favorite : Icons.favorite_border,
+                  color: Colors.red,
+                ),
+                onPressed: () {
+                  // Aksi wishlisting (optional)
+                },
               ),
             ),
             const SizedBox(width: 15),
