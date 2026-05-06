@@ -143,7 +143,7 @@ class ProductDetailPage extends StatelessWidget {
                       ),
                       icon: const Icon(Icons.edit_note, color: Colors.white),
                       label: const Text(
-                        "Edit",
+                        "Edit"efdsZdumm
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'Poppins',
