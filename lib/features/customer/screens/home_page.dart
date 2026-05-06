@@ -4,8 +4,8 @@ import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
 import 'wishlist_page.dart';
 import 'orders_page.dart';
+import 'search_page.dart';
 import 'category_detail_page.dart';
-
 import 'profile_page.dart';
 import 'cart_page.dart';
 
@@ -22,12 +22,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // List halaman untuk navigasi bawah - Konflik sudah dibersihkan
+    // List halaman navigasi bawah (Tetap 5 Menu)
     final List<Widget> pages = [
       HomeContent(costumes: allCostumes),
       const WishlistPage(),
-      const CartPage(), // Menggunakan CartPage asli
-      const OrdersPage(), // Menggunakan OrdersPage baru sebagai pengganti SearchPage
+      const CartPage(),
+      const OrdersPage(), 
       const ProfilePage(),
     ];
 
@@ -48,7 +48,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.favorite_border), activeIcon: Icon(Icons.favorite), label: 'Wishlist'),
           BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_outlined), activeIcon: Icon(Icons.shopping_cart), label: 'Cart'),
-          BottomNavigationBarItem(icon: Icon(Icons.confirmation_number_outlined), activeIcon: Icon(Icons.confirmation_number), label: 'Orders'),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment_outlined), activeIcon: Icon(Icons.assignment), label: 'Orders'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
@@ -90,8 +90,9 @@ class _HomeContentState extends State<HomeContent> {
           image: DecorationImage(
             image: AssetImage('assets/images/bg.png'),
             fit: BoxFit.cover,
-            opacity: 0.4,
+            opacity: 0.15, 
           ),
+          color: Color(0xFFFBFBFB),
         ),
         child: SingleChildScrollView(
           controller: _scrollController,
@@ -133,11 +134,11 @@ class _HomeContentState extends State<HomeContent> {
                 ],
               ),
 
-              // CATEGORIES
               const SizedBox(height: 10),
               SizedBox(height: 155, child: _buildCurvedCategories(context, screenWidth)),
 
-              _buildSectionHeader("POPULAR"),
+              // Section Header dengan klik navigasi
+              _buildSectionHeader(context, "POPULAR"),
 
               // PRODUCT GRID
               Padding(
@@ -183,8 +184,11 @@ class _HomeContentState extends State<HomeContent> {
         textInputAction: TextInputAction.search,
         onSubmitted: (value) {
           if (value.isNotEmpty) {
-            // Navigasi ke halaman pencarian/orders dengan parameter
-            Navigator.push(context, MaterialPageRoute(builder: (context) => OrdersPage(orderId: value)));
+            // Berpindah ke SearchPage saat enter ditekan
+            Navigator.push(
+              context, 
+              MaterialPageRoute(builder: (context) => SearchPage(searchQuery: value))
+            );
           }
         },
         decoration: const InputDecoration(
@@ -221,71 +225,75 @@ class _HomeContentState extends State<HomeContent> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Positioned(left: 15, top: 0, child: _catItem(context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg', 1)),
-        Positioned(left: width * 0.28, top: 15, child: _catItem(context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg', 2)),
-        Positioned(right: width * 0.28, top: 15, child: _catItem(context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg', 3)),
-        Positioned(right: 15, top: 0, child: _catItem(context, 'Pewayangan', 'assets/images/wayang.jpg', 4)),
+        Positioned(left: 15, top: 0, child: _catItem(context, 'Tari\nDewasa', 'assets/images/taridewasa.jpg')),
+        Positioned(left: width * 0.28, top: 15, child: _catItem(context, 'Tari\nAnak', 'assets/images/kostumtarianak.jpg')),
+        Positioned(right: width * 0.28, top: 15, child: _catItem(context, 'Raja &\nRatu', 'assets/images/rajaratu.jpg')),
+        Positioned(right: 15, top: 0, child: _catItem(context, 'Pewayangan', 'assets/images/wayang.jpg')),
       ],
     );
   }
 
- Widget _catItem(BuildContext context, String title, String path, int type) {
-  return GestureDetector(
-    onTap: () {
-      // Bersihkan karakter \n menjadi spasi agar sama dengan data kategori
-      String categoryToSend = title.replaceAll('\n', ' ');
+  Widget _catItem(BuildContext context, String title, String path) {
+    return GestureDetector(
+      onTap: () {
+        String categoryToSend = title.replaceAll('\n', ' ');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CategoryDetailPage(categoryTitle: categoryToSend)),
+        );
+      },
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle, 
+              border: Border.all(color: Colors.white, width: 2.5),
+            ),
+            child: CircleAvatar(radius: 35, backgroundImage: AssetImage(path)),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title, 
+            textAlign: TextAlign.center, 
+            style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
+          ),
+        ],
+      ),
+    );
+  }
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CategoryDetailPage(
-            categoryTitle: categoryToSend, // Mengirimkan judul yang sudah dibersihkan
-          ),
-        ),
-      );
-    },
-    child: Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle, 
-            border: Border.all(color: Colors.white, width: 2.5),
-          ),
-          child: CircleAvatar(
-            radius: 35, 
-            backgroundImage: AssetImage(path),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title, 
-          textAlign: TextAlign.center, 
-          style: const TextStyle(
-            fontFamily: 'Poppins', 
-            fontSize: 12, 
-            fontWeight: FontWeight.bold, 
-            color: Colors.black87,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 25, 20, 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title, style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 14)),
-          const Text('Tersedia >', style: TextStyle(fontFamily: 'Poppins', color: Color(0xFFE4B04B), fontWeight: FontWeight.bold, fontSize: 14)),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CategoryDetailPage(categoryTitle: "Semua Kostum"),
+                ),
+              );
+            },
+            child: const Text(
+              'Tersedia >', 
+              style: TextStyle(
+                fontFamily: 'Poppins', 
+                color: Color(0xFFE4B04B), 
+                fontWeight: FontWeight.bold, 
+                fontSize: 14
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-// --- CUSTOM CLIPPER ---
 class MyHeaderClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
