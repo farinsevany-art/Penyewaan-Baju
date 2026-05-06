@@ -11,7 +11,6 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  // 🔻 TAMBAHAN: Fungsi ini akan memaksa UI refresh setiap kali tab Cart dibuka
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -26,11 +25,9 @@ class _CartPageState extends State<CartPage> {
 
   double calculateTotal() {
     double total = 0;
-
     for (var item in cartItemsGlobal) {
       total += item.price * item.quantity;
     }
-
     return total;
   }
 
@@ -45,7 +42,6 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Keranjang'), centerTitle: true),
-
       body: cartItemsGlobal.isEmpty
           ? const Center(
               child: Text(
@@ -60,7 +56,6 @@ class _CartPageState extends State<CartPage> {
                     itemCount: cartItemsGlobal.length,
                     itemBuilder: (context, index) {
                       final item = cartItemsGlobal[index];
-
                       return Container(
                         margin: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -82,9 +77,7 @@ class _CartPageState extends State<CartPage> {
                                 fit: BoxFit.cover,
                               ),
                             ),
-
                             const SizedBox(width: 12),
-
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,10 +99,8 @@ class _CartPageState extends State<CartPage> {
                                 ],
                               ),
                             ),
-
                             Row(
                               children: [
-                                // 🔻 MINUS
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -132,22 +123,18 @@ class _CartPageState extends State<CartPage> {
                                     child: const Icon(Icons.remove, size: 16),
                                   ),
                                 ),
-
                                 const SizedBox(width: 8),
                                 Text(
                                   "${item.quantity}",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(width: 8),
-
-                                // 🔺 PLUS
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
                                       item.quantity++;
                                     });
                                   },
-
                                   child: Container(
                                     width: 32,
                                     height: 32,
@@ -172,80 +159,81 @@ class _CartPageState extends State<CartPage> {
                 ),
               ],
             ),
-
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.black12)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Subtotal"),
-                Text(formatRupiah(calculateTotal())),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [Text("Ongkos Kirim"), Text("Rp 0 (Gratis)")],
-            ),
-            const Divider(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Total",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  formatRupiah(calculateTotal()),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1F2A5A),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+      bottomNavigationBar: cartItemsGlobal.isEmpty
+          ? null
+          : Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Colors.black12)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Subtotal"),
+                      Text(formatRupiah(calculateTotal())),
+                    ],
                   ),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ConfirmationPage(),
+                  const SizedBox(height: 6),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [Text("Ongkos Kirim"), Text("Rp 0 (Gratis)")],
+                  ),
+                  const Divider(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Total",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        formatRupiah(calculateTotal()),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1F2A5A),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ConfirmationPage(),
+                          ),
+                        );
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Pesan Sekarang",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(
+                            Icons.shopping_cart_outlined,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
                     ),
-                  );
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Pesan Sekarang",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(
-                      Icons.shopping_cart_outlined,
-                      color: Colors.white,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }
