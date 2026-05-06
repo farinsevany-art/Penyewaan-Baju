@@ -4,6 +4,7 @@ import '../../../data/services/auth_service.dart';
 import '../widgets/auth_background.dart';
 import '../../customer/screens/home_page.dart';
 import '../../admin/screens/admin_dashboard_page.dart';
+import 'register_page.dart'; // PENTING: Tambahkan import ini
 
 class LoginFormPage extends StatefulWidget {
   const LoginFormPage({super.key});
@@ -15,14 +16,16 @@ class LoginFormPage extends StatefulWidget {
 class _LoginFormPageState extends State<LoginFormPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   void _handleLogin(String roleType) async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      _showSnackBar("Harap Masukkan Data Anda", Colors.orange);
+      _showSnackBar("Harap isi semua kolom", Colors.orange);
       return;
     }
 
@@ -33,13 +36,13 @@ class _LoginFormPageState extends State<LoginFormPage> {
 
       if (response['status'] == 'success') {
         final userRole = response['role'];
-
-        // Validasi apakah role yang login sesuai dengan tombol yang ditekan
         if (userRole == roleType.toLowerCase()) {
           if (userRole == 'admin') {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => AdminDashboardPage()),
+              MaterialPageRoute(
+                builder: (context) => const AdminDashboardPage(),
+              ),
             );
           } else {
             Navigator.pushReplacement(
@@ -124,10 +127,22 @@ class _LoginFormPageState extends State<LoginFormPage> {
                     _buildTextField(
                       'Password',
                       controller: _passwordController,
-                      isObscure: true,
+                      isObscure: _obscurePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColors.mediumGrey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                     const SizedBox(height: 40),
-
                     if (_isLoading)
                       const Center(
                         child: CircularProgressIndicator(
@@ -147,14 +162,18 @@ class _LoginFormPageState extends State<LoginFormPage> {
                         () => _handleLogin('Admin'),
                       ),
                     ],
-
                     const SizedBox(height: 20),
                     Center(
                       child: GestureDetector(
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          '/register',
-                        ), // Sesuaikan route
+                        // PERBAIKAN: Menggunakan MaterialPageRoute agar navigasi akurat
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterPage(),
+                            ),
+                          );
+                        },
                         child: RichText(
                           text: const TextSpan(
                             style: TextStyle(
@@ -190,6 +209,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
     String hint, {
     required TextEditingController controller,
     bool isObscure = false,
+    Widget? suffixIcon,
   }) {
     return TextField(
       controller: controller,
@@ -207,6 +227,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide.none,
         ),
+        suffixIcon: suffixIcon,
       ),
     );
   }
