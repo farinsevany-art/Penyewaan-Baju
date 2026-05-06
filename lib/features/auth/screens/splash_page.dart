@@ -104,7 +104,7 @@ class _SplashPageState extends State<SplashPage> {
                             style: Theme.of(context).textTheme.displayMedium
                                 ?.copyWith(
                                   color: AppColors.primaryNavy,
-                                  fontWeight: FontWeight.w900,
+                                  // fontWeight: FontWeight.w900,
                                 ),
                           ),
                           const Text(

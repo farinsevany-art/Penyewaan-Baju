@@ -24,7 +24,6 @@ class _StockManagementPageState extends State<StockManagementPage> {
   late Future<List<StockModel>> _stockFuture;
   String _selectedFilter = "Semua";
 
-  // Variabel untuk fitur pencarian
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
@@ -119,14 +118,14 @@ class _StockManagementPageState extends State<StockManagementPage> {
                     return const Center(child: Text("Belum ada data stok."));
                   }
 
-                  // 1. Filter berdasarkan ukuran (S, M, L, XL, Semua)
+                  // Filter ukuran
                   var filteredList = _selectedFilter == "Semua"
                       ? snapshot.data!
                       : snapshot.data!
                             .where((item) => item.ukuran == _selectedFilter)
                             .toList();
 
-                  // 2. Filter tambahan berdasarkan pencarian nama kostum
+                  // Filter pencarian
                   if (_searchQuery.isNotEmpty) {
                     filteredList = filteredList
                         .where(
@@ -145,7 +144,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
                     onRefresh: () async => _refreshData(),
                     color: AppColors.primaryGold,
                     child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                       itemCount: filteredList.length,
                       itemBuilder: (context, index) =>
                           _buildStockCard(filteredList[index]),
@@ -164,7 +163,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
           MaterialPageRoute(
             builder: (context) => AddStockPage(categoryId: widget.categoryId),
           ),
-        ).then((_) => _refreshData()), // Data otomatis refresh setelah tambah
+        ).then((_) => _refreshData()),
         child: const Icon(Icons.add, color: AppColors.primaryGold),
       ),
     );
@@ -230,10 +229,11 @@ class _StockManagementPageState extends State<StockManagementPage> {
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(14.0), // Sedikit diperbesar paddingnya
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start, // Agar sejajar di atas
           children: [
-            _buildIconPlaceholder(),
+            _buildIconPlaceholder(item.gambar),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -243,14 +243,18 @@ class _StockManagementPageState extends State<StockManagementPage> {
                     item.namaKostum,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 17,
+                      color: AppColors.primaryNavy,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   _buildStockBadge(item.stok),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             _buildPriceAndActions(item, hargaFormatted),
           ],
         ),
@@ -258,18 +262,48 @@ class _StockManagementPageState extends State<StockManagementPage> {
     );
   }
 
-  Widget _buildIconPlaceholder() {
+  Widget _buildIconPlaceholder(String? fotoFileName) {
+    // UKURAN GAMBAR DIPERBESAR MENJADI 85x85
+    if (fotoFileName != null && fotoFileName.isNotEmpty) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            "${StockService.imageBaseUrl}$fotoFileName",
+            width: 85,
+            height: 85,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => _defaultPlaceholder(),
+          ),
+        ),
+      );
+    }
+    return _defaultPlaceholder();
+  }
+
+  Widget _defaultPlaceholder() {
     return Container(
-      width: 60,
-      height: 60,
+      width: 85, // UKURAN DEFAULT PLACEHOLDER DIPERBESAR
+      height: 85,
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
       ),
       child: const Icon(
         Icons.inventory_2_outlined,
         color: AppColors.primaryNavy,
-        size: 30,
+        size: 40, // Ikon diperbesar agar seimbang
       ),
     );
   }
@@ -279,20 +313,24 @@ class _StockManagementPageState extends State<StockManagementPage> {
       children: [
         Text(
           "Stok: $stok",
-          style: const TextStyle(color: Colors.grey, fontSize: 13),
+          style: const TextStyle(
+            color: Colors.grey,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(width: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.green.shade50,
-            borderRadius: BorderRadius.circular(4),
+            color: stok > 0 ? Colors.green.shade50 : Colors.red.shade50,
+            borderRadius: BorderRadius.circular(6),
           ),
-          child: const Text(
-            "Tersedia",
+          child: Text(
+            stok > 0 ? "Tersedia" : "Habis",
             style: TextStyle(
-              color: Colors.green,
-              fontSize: 10,
+              color: stok > 0 ? Colors.green : Colors.red,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -304,11 +342,12 @@ class _StockManagementPageState extends State<StockManagementPage> {
   Widget _buildPriceAndActions(StockModel item, String hargaFormatted) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           "Rp $hargaFormatted",
           style: const TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
             fontSize: 16,
             color: AppColors.primaryNavy,
           ),
@@ -317,27 +356,41 @@ class _StockManagementPageState extends State<StockManagementPage> {
           item.ukuran,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
+            fontSize: 15,
             color: AppColors.primaryGold,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 10),
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: const Icon(Icons.edit, size: 18, color: Colors.blue),
-              onPressed: () =>
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditStockPage(stock: item),
-                    ),
-                  ).then(
-                    (_) => _refreshData(),
-                  ), // Data otomatis refresh setelah edit
+            InkWell(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditStockPage(stock: item),
+                ),
+              ).then((_) => _refreshData()),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.edit, size: 20, color: Colors.blue),
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.delete, size: 18, color: Colors.red),
-              onPressed: () => _confirmDelete(item.idKostum!),
+            const SizedBox(width: 10),
+            InkWell(
+              onTap: () => _confirmDelete(item.idKostum!),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.delete, size: 20, color: Colors.red),
+              ),
             ),
           ],
         ),
@@ -351,12 +404,19 @@ class _StockManagementPageState extends State<StockManagementPage> {
       builder: (context) => AlertDialog(
         title: const Text("Hapus Data?"),
         content: const Text("Data kostum akan dihapus secara permanen."),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Batal"),
+            child: const Text("Batal", style: TextStyle(color: Colors.grey)),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () async {
               final res = await StockService.deleteStock(id);
               if (res['success']) {
@@ -373,7 +433,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
                 }
               }
             },
-            child: const Text("Hapus", style: TextStyle(color: Colors.red)),
+            child: const Text("Hapus", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

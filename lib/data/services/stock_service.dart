@@ -1,15 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart'; // Import XFile
 import '../models/stock_model.dart';
 
 class StockService {
+  // Gunakan IP sesuai environment Anda.
+  // Jika pakai Chrome/localhost, Anda bisa pakai "http://localhost/api_penyewaan"
   static const String baseUrl = "http://localhost/api_penyewaan";
+  static const String imageBaseUrl = "$baseUrl/uploads/";
 
   static Future<List<StockModel>> getStocks(int categoryId) async {
     try {
       final response = await http.get(
         Uri.parse("$baseUrl/get_stocks.php?id_kategori=$categoryId"),
       );
+
       if (response.statusCode == 200) {
         List data = json.decode(response.body);
         return data.map((item) => StockModel.fromJson(item)).toList();
@@ -22,22 +27,38 @@ class StockService {
 
   static Future<Map<String, dynamic>> saveStock(
     StockModel stock,
-    bool isEdit,
-  ) async {
+    bool isEdit, {
+    XFile? imageFile, // Parameter diubah menjadi XFile
+  }) async {
     final url = isEdit ? "$baseUrl/update_stock.php" : "$baseUrl/add_stock.php";
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: {
-          "nama_kostum": stock.namaKostum,
-          "id_kategori": stock.idKategori.toString(),
-          "stok": stock.stok.toString(),
-          "harga_sewa": stock.hargaSewa.toString(),
-          "ukuran": stock.ukuran,
-          "deskripsi": stock.deskripsi,
-          if (isEdit) "id_kostum": stock.idKostum.toString(),
-        },
-      );
+      var request = http.MultipartRequest("POST", Uri.parse(url));
+
+      request.fields['nama_kostum'] = stock.namaKostum;
+      request.fields['id_kategori'] = stock.idKategori.toString();
+      request.fields['stok'] = stock.stok.toString();
+      request.fields['harga_sewa'] = stock.hargaSewa.toString();
+      request.fields['ukuran'] = stock.ukuran;
+      request.fields['deskripsi'] = stock.deskripsi;
+
+      if (isEdit) {
+        request.fields['id_kostum'] = stock.idKostum.toString();
+      }
+
+      // Handle file upload yang kompatibel untuk Web & Mobile
+      if (imageFile != null) {
+        var bytes = await imageFile.readAsBytes();
+        var pic = http.MultipartFile.fromBytes(
+          "foto",
+          bytes,
+          filename: imageFile.name,
+        );
+        request.files.add(pic);
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
       return json.decode(response.body);
     } catch (e) {
       return {"success": false, "message": "Koneksi gagal: $e"};

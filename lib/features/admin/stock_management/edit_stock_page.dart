@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb; // Tambahkan ini
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:apkpenyewaanbaju/data/models/stock_model.dart';
@@ -20,6 +23,8 @@ class _EditStockPageState extends State<EditStockPage> {
   late TextEditingController _hargaController;
   late TextEditingController _deskripsiController;
   late TextEditingController _stokController;
+
+  XFile? _imageFile; // Menggunakan XFile agar kompatibel dengan Web
 
   final List<Map<String, dynamic>> _kategoriList = [
     {'id': 1, 'name': 'Tari Tradisional'},
@@ -55,15 +60,27 @@ class _EditStockPageState extends State<EditStockPage> {
     super.dispose();
   }
 
+  // Fungsi untuk memilih gambar dari galeri
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = pickedFile;
+      });
+    }
+  }
+
   void _handleSave() async {
     if (_formKey.currentState!.validate()) {
       final stockData = StockModel(
-        idKostum: widget.stock.idKostum, // Kirim ID untuk di-Update
+        idKostum: widget.stock.idKostum,
         namaKostum: _namaController.text,
         idKategori: _selectedKategoriId,
         stok: int.tryParse(_stokController.text) ?? 0,
         hargaSewa: int.tryParse(_hargaController.text.replaceAll('.', '')) ?? 0,
-        ukuran: widget.stock.ukuran, // Gunakan ukuran yang sama
+        ukuran: widget.stock.ukuran,
         deskripsi: _deskripsiController.text,
         gambar: widget.stock.gambar,
       );
@@ -71,7 +88,8 @@ class _EditStockPageState extends State<EditStockPage> {
       final res = await StockService.saveStock(
         stockData,
         true,
-      ); // true = mode edit
+        imageFile: _imageFile, // Kirim file gambar
+      );
 
       if (res['success']) {
         if (mounted) Navigator.pop(context);
@@ -163,7 +181,6 @@ class _EditStockPageState extends State<EditStockPage> {
                     _buildCategoryDropdown(),
                     const SizedBox(height: 15),
 
-                    // HANYA MENAMPILKAN UKURAN YANG SEDANG DI-EDIT
                     _buildSizeStockRow(widget.stock.ukuran, _stokController),
 
                     const SizedBox(height: 15),
@@ -191,56 +208,97 @@ class _EditStockPageState extends State<EditStockPage> {
   // --- WIDGET HELPER ---
   Widget _buildImageUpload() {
     return Center(
-      child: CustomPaint(
-        painter: DashedRectPainter(color: AppColors.primaryGold),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 30),
-          child: Column(
-            children: [
-              const Icon(
-                Icons.cloud_upload_outlined,
-                size: 40,
-                color: AppColors.primaryNavy,
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Upload Gambar Kostum",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: AppColors.primaryNavy,
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                "JPG, PNG sampai\n5MB",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-              const SizedBox(height: 15),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 10,
-                  ),
-                ),
-                onPressed: () {},
-                child: const Text(
-                  "Pilih Berkas",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
+      child: GestureDetector(
+        onTap: _pickImage,
+        child: CustomPaint(
+          painter: DashedRectPainter(color: AppColors.primaryGold),
+          child: Container(
+            width: double.infinity,
+            height: 200,
+            alignment: Alignment.center,
+            // Menampilkan gambar (baru dipilih ATAU dari database ATAU placeholder kosong)
+            child: _buildImagePreview(),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildImagePreview() {
+    // 1. Jika ada gambar baru yang dipilih dari Galeri
+    if (_imageFile != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: kIsWeb
+            ? Image.network(
+                _imageFile!.path,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200,
+              )
+            : Image.file(
+                File(_imageFile!.path),
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200,
+              ),
+      );
+    }
+    // 2. Jika tidak pilih gambar baru, tapi ada gambar lama di database
+    if (widget.stock.gambar != null && widget.stock.gambar!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Image.network(
+          "${StockService.imageBaseUrl}${widget.stock.gambar}",
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: 200,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildUploadPlaceholder(),
+        ),
+      );
+    }
+    // 3. Jika kosong
+    return _buildUploadPlaceholder();
+  }
+
+  Widget _buildUploadPlaceholder() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(
+          Icons.cloud_upload_outlined,
+          size: 40,
+          color: AppColors.primaryNavy,
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "Upload Gambar Kostum",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: AppColors.primaryNavy,
+          ),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          "JPG, PNG sampai\n5MB",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.grey, fontSize: 12),
+        ),
+        const SizedBox(height: 15),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Text(
+            "Pilih Berkas",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 
