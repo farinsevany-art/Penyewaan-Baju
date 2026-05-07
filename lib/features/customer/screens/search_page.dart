@@ -3,10 +3,9 @@ import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
 import '../../auth/widgets/auth_background.dart';
-import 'cart_page.dart';
+import 'cart_page.dart'; // PASTIKAN IMPORT INI ADA
 
 class SearchPage extends StatefulWidget {
-  // DISESUAIKAN: Nama parameter diubah menjadi searchQuery agar cocok dengan HomePage
   final String? searchQuery;
 
   const SearchPage({super.key, this.searchQuery});
@@ -22,9 +21,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    // DISESUAIKAN: Menggunakan widget.searchQuery
     _searchController = TextEditingController(text: widget.searchQuery ?? "");
-
     if (widget.searchQuery != null && widget.searchQuery!.isNotEmpty) {
       _runFilter(widget.searchQuery!);
     }
@@ -41,8 +38,8 @@ class _SearchPageState extends State<SearchPage> {
       _filteredCostumes = allCostumes
           .where(
             (costume) => costume.name.toLowerCase().contains(
-                  enteredKeyword.toLowerCase(),
-                ),
+              enteredKeyword.toLowerCase(),
+            ),
           )
           .toList();
     });
@@ -72,7 +69,6 @@ class _SearchPageState extends State<SearchPage> {
         ),
         body: Column(
           children: [
-            // 🔍 SEARCH BAR
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Container(
@@ -99,8 +95,6 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               ),
             ),
-
-            // 📦 GRID
             Expanded(
               child: _filteredCostumes.isEmpty
                   ? _buildNoResult()
@@ -109,14 +103,13 @@ class _SearchPageState extends State<SearchPage> {
                       itemCount: _filteredCostumes.length,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.65,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.65,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
                       itemBuilder: (context, index) {
                         final item = _filteredCostumes[index];
-
                         return CostumeCard(
                           costume: item,
                           onWishlistToggle: () {

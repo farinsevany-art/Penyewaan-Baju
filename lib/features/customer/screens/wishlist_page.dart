@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
-import 'cart_page.dart';
+import 'cart_page.dart'; // PASTIKAN IMPORT INI ADA
 import 'home_page.dart';
 
 class WishlistPage extends StatefulWidget {
@@ -23,7 +23,6 @@ class _WishlistPageState extends State<WishlistPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Menggunakan background putih tulang agar terlihat bersih di sela gambar
       backgroundColor: const Color(0xFFFBFBFB),
       appBar: AppBar(
         backgroundColor: Colors.white.withOpacity(0.9),
@@ -32,13 +31,13 @@ class _WishlistPageState extends State<WishlistPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () {
             if (_isExploring) {
-              // Jika sedang mode jelajah, matikan modenya kembali ke wishlist kosong
               setState(() => _isExploring = false);
             } else {
-              // NAVIGASI BALIK KE HOME (IndexedStack Index 0)
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const CustomerHomePage()),
+                MaterialPageRoute(
+                  builder: (context) => const CustomerHomePage(),
+                ),
               );
             }
           },
@@ -55,7 +54,10 @@ class _WishlistPageState extends State<WishlistPage> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black87),
+            icon: const Icon(
+              Icons.shopping_cart_outlined,
+              color: Colors.black87,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -65,7 +67,6 @@ class _WishlistPageState extends State<WishlistPage> {
           ),
         ],
       ),
-      // BODY DENGAN BACKGROUND GAMBAR
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -73,7 +74,7 @@ class _WishlistPageState extends State<WishlistPage> {
           image: DecorationImage(
             image: AssetImage('assets/images/bg.png'),
             fit: BoxFit.cover,
-            opacity: 0.40, // Opasitas rendah agar kartu kostum tetap terlihat jelas
+            opacity: 0.40,
           ),
         ),
         child: (_itemsToShow.isEmpty && !_isExploring)
@@ -83,14 +84,13 @@ class _WishlistPageState extends State<WishlistPage> {
     );
   }
 
-  // Widget Grid untuk menampilkan daftar kostum
   Widget _buildGrid(List<Costume> items) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: items.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.68, // Rasio kartu yang sama dengan di Home
+        childAspectRatio: 0.68,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
@@ -108,7 +108,6 @@ class _WishlistPageState extends State<WishlistPage> {
     );
   }
 
-  // Widget Tampilan saat Wishlist kosong
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -120,7 +119,11 @@ class _WishlistPageState extends State<WishlistPage> {
               color: Colors.white.withOpacity(0.8),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.favorite_outline, size: 60, color: Colors.grey.shade300),
+            child: Icon(
+              Icons.favorite_outline,
+              size: 60,
+              color: Colors.grey.shade300,
+            ),
           ),
           const SizedBox(height: 20),
           const Text(
@@ -137,14 +140,18 @@ class _WishlistPageState extends State<WishlistPage> {
             child: Text(
               'Simpan kostum favoritmu di sini untuk disewa nanti.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: 'Poppins', color: Colors.grey, fontSize: 13),
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.grey,
+                fontSize: 13,
+              ),
             ),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => setState(() => _isExploring = true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE4B04B), // Warna emas Kusuma Cantika
+              backgroundColor: const Color(0xFFE4B04B),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               shape: RoundedRectangleBorder(
@@ -154,7 +161,10 @@ class _WishlistPageState extends State<WishlistPage> {
             ),
             child: const Text(
               'Mulai Cari Kostum',
-              style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
