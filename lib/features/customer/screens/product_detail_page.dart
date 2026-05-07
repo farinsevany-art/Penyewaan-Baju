@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../../data/models/costume_model.dart'; // Sesuaikan path jika diperlukan
+import '../../../data/models/costume_model.dart';
+import '../../../data/services/mock_data.dart'; // Untuk cartItemsGlobal
+import '../../../data/services/stock_service.dart'; // Untuk imageBaseUrl
 
-class ProductDetailPage extends StatelessWidget {
+class ProductDetailPage extends StatefulWidget {
   final Costume costume;
 
-  const ProductDetailPage({
-    super.key,
-    required this.costume,
-  });
+  const ProductDetailPage({super.key, required this.costume});
+
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  int _quantity = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +27,14 @@ class ProductDetailPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Center(
-          child: Image.asset(
-            'assets/images/Logotransparan.png', 
-            height: 40,
-          ),
+          child: Image.asset('assets/images/Logotransparan.png', height: 40),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              // Navigasi ke search page (opsional)
+            },
           ),
         ],
       ),
@@ -40,28 +45,26 @@ class ProductDetailPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              // Gambar Produk
+              // Gambar Produk dari Database
               ClipRRect(
                 borderRadius: BorderRadius.circular(30),
-                child: Image.asset(
-                  costume.imageUrl ?? '',
-                  width: double.infinity,
-                  height: 350,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    height: 350,
-                    color: const Color(0xFFE8DDD0),
-                    child: const Center(
-                      child: Icon(Icons.image_not_supported, color: Colors.grey),
-                    ),
-                  ),
-                ),
+                child:
+                    widget.costume.imageUrl != null &&
+                        widget.costume.imageUrl!.isNotEmpty
+                    ? Image.network(
+                        "${StockService.imageBaseUrl}${widget.costume.imageUrl}",
+                        width: double.infinity,
+                        height: 350,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _buildNoImage(),
+                      )
+                    : _buildNoImage(),
               ),
               const SizedBox(height: 20),
-              
+
               // Judul & Harga
               Text(
-                costume.name,
+                widget.costume.name,
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -69,7 +72,7 @@ class ProductDetailPage extends StatelessWidget {
                 ),
               ),
               Text(
-                'Rp. ${costume.price}',
+                widget.costume.formattedPrice,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
@@ -85,17 +88,27 @@ class ProductDetailPage extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Size", style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        "Size",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       const SizedBox(height: 8),
                       Text(
-                        costume.size ?? '-',
-                        style: const TextStyle(fontSize: 14, color: Colors.black87),
+                        widget.costume.size ?? '-',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFE4B04B),
+                        ),
                       ),
                     ],
                   ),
                   Column(
                     children: [
-                      const Text("Sisa Stok", style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        "Sisa Stok",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.all(10),
@@ -103,7 +116,10 @@ class ProductDetailPage extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.grey),
                         ),
-                        child: Text("${costume.stock}"), // Mengambil dari properti stock di mock data
+                        child: Text(
+                          "${widget.costume.stock}",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
@@ -112,10 +128,16 @@ class ProductDetailPage extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Deskripsi
-              const Text("Deskripsi", style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                "Deskripsi",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               Text(
-                costume.description ?? 'Tidak ada deskripsi.',
+                widget.costume.description != null &&
+                        widget.costume.description!.isNotEmpty
+                    ? widget.costume.description!
+                    : 'Tidak ada deskripsi.',
                 style: const TextStyle(fontSize: 14, height: 1.5),
               ),
               const SizedBox(height: 100), // Space untuk bottom bar
@@ -123,7 +145,7 @@ class ProductDetailPage extends StatelessWidget {
           ),
         ),
       ),
-      
+
       // Bottom Action Bar
       bottomSheet: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -131,47 +153,165 @@ class ProductDetailPage extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
               child: IconButton(
                 icon: Icon(
-                  costume.isWishlisted ? Icons.favorite : Icons.favorite_border,
+                  widget.costume.isWishlisted
+                      ? Icons.favorite
+                      : Icons.favorite_border,
                   color: Colors.red,
                 ),
                 onPressed: () {
-                  // Aksi wishlisting (optional)
+                  setState(() {
+                    widget.costume.isWishlisted = !widget.costume.isWishlisted;
+                  });
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        widget.costume.isWishlisted
+                            ? '${widget.costume.name} ditambahkan ke wishlist'
+                            : '${widget.costume.name} dihapus dari wishlist',
+                      ),
+                      duration: const Duration(seconds: 1),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                 },
               ),
             ),
             const SizedBox(width: 15),
+
+            // Pengatur Jumlah (Quantity)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Text("- "),
-                  Text("1"),
-                  Text(" +"),
+                  GestureDetector(
+                    onTap: () {
+                      if (_quantity > 1) {
+                        setState(() => _quantity--);
+                      }
+                    },
+                    child: const Text(
+                      " - ",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "$_quantity",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      if (_quantity < widget.costume.stock) {
+                        setState(() => _quantity++);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Maksimal stok tercapai!'),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text(
+                      " + ",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
             const SizedBox(width: 15),
+
+            // Tombol Tambah ke Keranjang
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  if (widget.costume.stock <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Maaf, stok sedang habis!')),
+                    );
+                    return;
+                  }
+
+                  // Logika memasukkan ke keranjang
+                  if (!cartItemsGlobal.contains(widget.costume)) {
+                    setState(() {
+                      widget.costume.isInCart = true;
+                      widget.costume.quantity = _quantity;
+                      cartItemsGlobal.add(widget.costume);
+                    });
+                  } else {
+                    setState(() {
+                      widget.costume.quantity += _quantity;
+                    });
+                  }
+
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '$_quantity ${widget.costume.name} ditambahkan ke keranjang',
+                      ),
+                      backgroundColor: const Color.fromARGB(255, 7, 32, 60),
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0D1B3E),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white),
-                label: const Text("Tambah", style: TextStyle(color: Colors.white)),
+                icon: const Icon(
+                  Icons.shopping_bag_outlined,
+                  color: Colors.white,
+                ),
+                label: const Text(
+                  "Tambah",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildNoImage() {
+    return Container(
+      height: 350,
+      width: double.infinity,
+      color: const Color(0xFFE8DDD0),
+      child: const Center(
+        child: Icon(Icons.image_not_supported, color: Colors.grey, size: 50),
       ),
     );
   }

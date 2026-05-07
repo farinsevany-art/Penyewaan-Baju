@@ -99,7 +99,7 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildHeader() {
+Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.only(top: 32, bottom: 32, left: 24, right: 24),
       width: double.infinity,
@@ -109,17 +109,11 @@ class _ReportScreenState extends State<ReportScreen> {
         children: [
           Positioned(
             left: 0,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primaryGold,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.person,
-                color: AppColors.primaryNavy,
-                size: 20,
-              ),
+            child: Image.asset(
+              'assets/images/Logotransparan.png',
+              width: 50,  // Ukuran sedikit dinaikkan agar lebih jelas
+              height: 50, // Ukuran sedikit dinaikkan agar lebih jelas
+              fit: BoxFit.contain,
             ),
           ),
           const Text(

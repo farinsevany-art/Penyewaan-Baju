@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/costume_model.dart';
-import '../../../data/services/mock_data.dart';
-import '../screens/confirmation_page.dart';
+import '../../../data/services/mock_data.dart'; // Untuk cartItemsGlobal & imageBaseUrl
+import 'confirmation_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -70,12 +70,25 @@ class _CartPageState extends State<CartPage> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.asset(
-                                item.imageUrl,
-                                width: 75,
-                                height: 75,
-                                fit: BoxFit.cover,
-                              ),
+                              child:
+                                  item.imageUrl != null &&
+                                      item.imageUrl!.isNotEmpty
+                                  ? Image.network(
+                                      "$imageBaseUrl${item.imageUrl}",
+                                      width: 75,
+                                      height: 75,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        width: 75,
+                                        height: 75,
+                                        color: Colors.grey,
+                                      ),
+                                    )
+                                  : Container(
+                                      width: 75,
+                                      height: 75,
+                                      color: Colors.grey,
+                                    ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -90,9 +103,9 @@ class _CartPageState extends State<CartPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  const Text(
-                                    "Uk. L",
-                                    style: TextStyle(color: Colors.grey),
+                                  Text(
+                                    "Uk. ${item.size ?? '-'}",
+                                    style: const TextStyle(color: Colors.grey),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(formatRupiah(item.price)),
@@ -127,6 +140,9 @@ class _CartPageState extends State<CartPage> {
                                 Text(
                                   "${item.quantity}",
                                   style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 GestureDetector(
@@ -159,9 +175,9 @@ class _CartPageState extends State<CartPage> {
                 ),
               ],
             ),
+<<<<<<< HEAD
       bottomNavigationBar: cartItemsGlobal.isEmpty
           ? null
-          : Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -176,9 +192,53 @@ class _CartPageState extends State<CartPage> {
                       const Text("Subtotal"),
                       Text(formatRupiah(calculateTotal())),
                     ],
+=======
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Colors.black12)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Subtotal"),
+                Text(formatRupiah(calculateTotal())),
+              ],
+            ),
+            const SizedBox(height: 6),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [Text("Ongkos Kirim"), Text("Rp 0 (Gratis)")],
+            ),
+            const Divider(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Total",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  formatRupiah(calculateTotal()),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1F2A5A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+>>>>>>> 809361b7a3705e6f61bde7d4b68922805c6c5c31
                   ),
                   const SizedBox(height: 6),
-                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [Text("Ongkos Kirim"), Text("Rp 0 (Gratis)")],
                   ),
@@ -230,8 +290,22 @@ class _CartPageState extends State<CartPage> {
                         ],
                       ),
                     ),
+<<<<<<< HEAD
                   ),
                 ],
+=======
+                  );
+                },
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                      "Pesan Sekarang",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                    SizedBox(width: 8),
+                    Icon(Icons.shopping_cart_outlined, color: Colors.white),
+                  ],
+                ),
+>>>>>>> 809361b7a3705e6f61bde7d4b68922805c6c5c31
               ),
             ),
     );

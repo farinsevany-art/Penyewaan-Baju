@@ -15,10 +15,15 @@ class _RegisterPageState extends State<RegisterPage> {
   final _namaController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _alamatController = TextEditingController(); // Controller Alamat
+  final _alamatController = TextEditingController();
   final _passwordController = TextEditingController();
   final _verifyPasswordController = TextEditingController();
+
   bool _isLoading = false;
+
+  // Dua variabel terpisah untuk masing-masing kolom sandi
+  bool _obscurePassword = true;
+  bool _obscureVerifyPassword = true;
 
   void _handleRegister() async {
     final nama = _namaController.text.trim();
@@ -147,23 +152,52 @@ class _RegisterPageState extends State<RegisterPage> {
                       'Alamat',
                       Icons.location_on_outlined,
                       _alamatController,
-                    ), // Input Alamat
+                    ),
                     const SizedBox(height: 15),
+
+                    // Kolom Password Pertama
                     _buildRegisterField(
                       'Password',
                       Icons.lock_outline,
                       _passwordController,
-                      isObscure: true,
+                      isObscure: _obscurePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColors.mediumGrey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                     const SizedBox(height: 15),
+
+                    // Kolom Password Verifikasi
                     _buildRegisterField(
                       'Verifikasi Password',
                       Icons.verified_user_outlined,
                       _verifyPasswordController,
-                      isObscure: true,
+                      isObscure: _obscureVerifyPassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureVerifyPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColors.mediumGrey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureVerifyPassword = !_obscureVerifyPassword;
+                          });
+                        },
+                      ),
                     ),
                     const SizedBox(height: 30),
-
                     if (_isLoading)
                       const Center(
                         child: CircularProgressIndicator(
@@ -172,7 +206,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       )
                     else
                       _buildSubmitButton(),
-
                     const SizedBox(height: 20),
                     Center(
                       child: GestureDetector(
@@ -209,11 +242,13 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  // Tambahkan parameter suffixIcon pada helper ini
   Widget _buildRegisterField(
     String label,
     IconData icon,
     TextEditingController controller, {
     bool isObscure = false,
+    Widget? suffixIcon,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,6 +270,7 @@ class _RegisterPageState extends State<RegisterPage> {
           decoration: InputDecoration(
             hintText: label,
             prefixIcon: Icon(icon, size: 20, color: AppColors.mediumGrey),
+            suffixIcon: suffixIcon, // Masukkan ikon mata ke sini
             filled: true,
             fillColor: AppColors.offWhite,
             contentPadding: const EdgeInsets.symmetric(

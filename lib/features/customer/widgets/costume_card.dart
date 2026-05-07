@@ -108,6 +108,7 @@ class _CostumeCardState extends State<CostumeCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      // 🔥 Perbaikan: Menambahkan aksi default untuk navigasi ke halaman detail
       onTap:
           widget.onTap ??
           () {
@@ -137,18 +138,25 @@ class _CostumeCardState extends State<CostumeCard> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(15),
                     ),
-                    child: Image.asset(
-                      _image,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: const Color(0xFFE8DDD0),
-                        child: const Center(
-                          child: Icon(Icons.image_not_supported_outlined),
-                        ),
-                      ),
-                    ),
+                    child: _image.isNotEmpty
+                        ? Image.network(
+                            "$imageBaseUrl$_image",
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: const Color(0xFFE8DDD0),
+                              child: const Center(
+                                child: Icon(Icons.image_not_supported_outlined),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            color: const Color(0xFFE8DDD0),
+                            child: const Center(
+                              child: Icon(Icons.image_not_supported_outlined),
+                            ),
+                          ),
                   ),
                   Positioned(
                     top: 8,

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:apkpenyewaanbaju/data/models/costume_model.dart';
-import 'package:apkpenyewaanbaju/data/services/mock_data.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../data/models/costume_model.dart';
+import '../../../data/services/mock_data.dart';
+import '../../../data/services/stock_service.dart'; // Untuk imageBaseUrl
+import '../../../data/services/order_service.dart'; // Untuk fitur Checkout
+import 'home_page.dart';
 
 class ConfirmationPage extends StatefulWidget {
   const ConfirmationPage({super.key});
@@ -38,6 +42,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
         );
       },
     );
+
     if (picked != null) {
       setState(() {
         startDate = picked.start;
@@ -133,10 +138,8 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                   ),
                 ),
                 const SizedBox(height: 15),
-
                 // Daftar Baju
                 ...cartItemsGlobal.map((item) => _buildItemCard(item)).toList(),
-
                 const SizedBox(height: 10),
                 const Text(
                   "DELIVERY DETAILS",
@@ -148,7 +151,6 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                 ),
                 const SizedBox(height: 10),
                 _buildDeliverySection(),
-
                 const SizedBox(height: 25),
                 _buildSummarySection(),
                 const SizedBox(height: 30),
@@ -175,14 +177,26 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
         children: [
           Row(
             children: [
+              // PERBAIKAN: Menggunakan Image.network dan handle null
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  item.imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
+                child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                    ? Image.network(
+                        "${StockService.imageBaseUrl}${item.imageUrl}",
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey.shade300,
+                        ),
+                      )
+                    : Container(
+                        width: 80,
+                        height: 80,
+                        color: Colors.grey.shade300,
+                      ),
               ),
               const SizedBox(width: 15),
               Expanded(
@@ -200,9 +214,9 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                       formatRupiah(item.price),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    const Text(
-                      "Size: L",
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    Text(
+                      "Size: ${item.size ?? '-'}",
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],
                 ),
@@ -227,7 +241,17 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.add, size: 18),
-                      onPressed: () => setState(() => item.quantity++),
+                      onPressed: () {
+                        if (item.quantity < item.stock) {
+                          setState(() => item.quantity++);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Batas stok tercapai!'),
+                            ),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -426,7 +450,68 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
             borderRadius: BorderRadius.circular(15),
           ),
         ),
-        onPressed: () {},
+        onPressed: () async {
+          if (cartItemsGlobal.isEmpty) return;
+
+          // 1. Ambil ID Pelanggan yang sedang login
+          final prefs = await SharedPreferences.getInstance();
+          // Gunakan ID default 1 (Misal Budi) jika belum ada sistem login statis
+          int idPelanggan =
+              int.tryParse(prefs.getString('user_id') ?? '1') ?? 1;
+
+          // 2. Hitung total harga & siapkan keranjang
+          double total = 0;
+          List<Map<String, dynamic>> items = [];
+
+          for (var item in cartItemsGlobal) {
+            double subtotal = item.price * item.quantity;
+            total += subtotal;
+            items.add({
+              "id_kostum": int.parse(item.id),
+              "jumlah": item.quantity,
+              "subtotal": subtotal,
+            });
+          }
+
+          // 3. Susun data Order
+          Map<String, dynamic> orderData = {
+            "id_pelanggan": idPelanggan,
+            "tanggal_sewa": DateFormat('yyyy-MM-dd').format(startDate),
+            "tanggal_kembali": DateFormat('yyyy-MM-dd').format(endDate),
+            "total_harga": total,
+            "items": items,
+          };
+
+          // 4. Kirim ke Database Backend
+          final res = await OrderService.checkoutPesanan(orderData);
+
+          if (res['status'] == 'success') {
+            // Jika sukses, kosongkan keranjang
+            setState(() {
+              cartItemsGlobal.clear();
+            });
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Pesanan berhasil dibuat!")),
+              );
+              // Kembali ke halaman Home
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CustomerHomePage(),
+                ),
+                (route) => false,
+              );
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(res['message'])));
+            }
+          }
+        },
         child: const Text(
           "PESAN SEKARANG",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -434,4 +519,4 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
       ),
     );
   }
-} // <--- KURUNG PENUTUP CLASS
+}
