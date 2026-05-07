@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:apkpenyewaanbaju/data/models/stock_model.dart';
@@ -16,22 +19,21 @@ class _AddStockPageState extends State<AddStockPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _namaController = TextEditingController();
-  final TextEditingController _hargaController = TextEditingController();
   final TextEditingController _deskripsiController = TextEditingController();
+  final TextEditingController _stokController = TextEditingController();
+  final TextEditingController _hargaController = TextEditingController();
 
-  final TextEditingController _stokSController = TextEditingController();
-  final TextEditingController _stokMController = TextEditingController();
-  final TextEditingController _stokLController = TextEditingController();
-  final TextEditingController _stokXLController = TextEditingController();
+  XFile? _imageFile;
 
   final List<Map<String, dynamic>> _kategoriList = [
-    {'id': 1, 'name': 'Tari Tradisional'},
-    {'id': 2, 'name': 'Wayang'},
-    {'id': 3, 'name': 'Modern/Karnaval'},
-    {'id': 4, 'name': 'Pakaian Adat'},
+    {'id': 1, 'name': 'Tari Dewasa'},
+    {'id': 2, 'name': 'Tari Anak'},
+    {'id': 3, 'name': 'Raja & Ratu'},
+    {'id': 4, 'name': 'Wayang'},
   ];
 
   late int _selectedKategoriId;
+  String _selectedUkuran = 'M'; // Default ukuran
 
   @override
   void initState() {
@@ -45,59 +47,62 @@ class _AddStockPageState extends State<AddStockPage> {
   @override
   void dispose() {
     _namaController.dispose();
-    _hargaController.dispose();
     _deskripsiController.dispose();
-    _stokSController.dispose();
-    _stokMController.dispose();
-    _stokLController.dispose();
-    _stokXLController.dispose();
+    _stokController.dispose();
+    _hargaController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = pickedFile;
+      });
+    }
   }
 
   void _handleSave() async {
     if (_formKey.currentState!.validate()) {
-      Map<String, TextEditingController> stokControllers = {
-        'S': _stokSController,
-        'M': _stokMController,
-        'L': _stokLController,
-        'XL': _stokXLController,
-      };
+      int stok = int.tryParse(_stokController.text) ?? 0;
+      int harga = int.tryParse(_hargaController.text.replaceAll('.', '')) ?? 0;
 
-      bool isSuccess = true;
-      String errorMessage = "";
-
-      for (var entry in stokControllers.entries) {
-        String ukuran = entry.key;
-        int stok = int.tryParse(entry.value.text) ?? 0;
-
-        if (stok > 0) {
-          // Hanya simpan yang stoknya diisi lebih dari 0
-          final stockData = StockModel(
-            namaKostum: _namaController.text,
-            idKategori: _selectedKategoriId,
-            stok: stok,
-            hargaSewa:
-                int.tryParse(_hargaController.text.replaceAll('.', '')) ?? 0,
-            ukuran: ukuran,
-            deskripsi: _deskripsiController.text,
-          );
-
-          final res = await StockService.saveStock(stockData, false);
-
-          if (!res['success']) {
-            isSuccess = false;
-            errorMessage = res['message'];
-          }
-        }
+      // Validasi agar stok tidak 0
+      if (stok <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Jumlah stok harus lebih dari 0!")),
+        );
+        return;
       }
 
-      if (isSuccess) {
-        if (mounted) Navigator.pop(context);
+      final stockData = StockModel(
+        namaKostum: _namaController.text,
+        idKategori: _selectedKategoriId,
+        stok: stok,
+        hargaSewa: harga,
+        ukuran: _selectedUkuran,
+        deskripsi: _deskripsiController.text,
+      );
+
+      final res = await StockService.saveStock(
+        stockData,
+        false,
+        imageFile: _imageFile,
+      );
+
+      if (res['success'] == true) {
+        if (mounted) Navigator.pop(context); // Kembali jika sukses
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Gagal: $errorMessage")));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Gagal: ${res['message'] ?? 'Error tidak diketahui'}",
+              ),
+            ),
+          );
         }
       }
     }
@@ -171,33 +176,61 @@ class _AddStockPageState extends State<AddStockPage> {
                   children: [
                     _buildImageUpload(),
                     const SizedBox(height: 25),
-                    _buildLabel("Nama"),
+
+                    _buildLabel("Nama Kostum"),
                     _buildTextField(
                       controller: _namaController,
                       hint: "Contoh: Kebaya Clara 1",
                     ),
                     const SizedBox(height: 15),
+
                     _buildLabel("Kategori"),
                     _buildCategoryDropdown(),
                     const SizedBox(height: 15),
-                    _buildSizeStockRow("S", _stokSController),
-                    const SizedBox(height: 10),
-                    _buildSizeStockRow("M", _stokMController),
-                    const SizedBox(height: 10),
-                    _buildSizeStockRow("L", _stokLController),
-                    const SizedBox(height: 10),
-                    _buildSizeStockRow("XL", _stokXLController),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel("Ukuran"),
+                              _buildSizeDropdown(),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel("Jumlah Stok"),
+                              _buildTextField(
+                                controller: _stokController,
+                                hint: "0",
+                                isNumber: true,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 15),
+
                     _buildLabel("Harga Sewa"),
                     _buildPriceField(),
                     const SizedBox(height: 15),
+
                     _buildLabel("Deskripsi"),
                     _buildTextField(
                       controller: _deskripsiController,
-                      hint: "",
+                      hint: "Tuliskan deskripsi...",
                       maxLines: 4,
                     ),
                     const SizedBox(height: 30),
+
                     _buildSubmitButton(),
                   ],
                 ),
@@ -212,53 +245,74 @@ class _AddStockPageState extends State<AddStockPage> {
   // --- WIDGET HELPER ---
   Widget _buildImageUpload() {
     return Center(
-      child: CustomPaint(
-        painter: DashedRectPainter(color: AppColors.primaryGold),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 30),
-          child: Column(
-            children: [
-              const Icon(
-                Icons.cloud_upload_outlined,
-                size: 40,
-                color: AppColors.primaryNavy,
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Upload Gambar Kostum",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: AppColors.primaryNavy,
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                "JPG, PNG sampai\n5MB",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-              const SizedBox(height: 15),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+      child: GestureDetector(
+        onTap: _pickImage,
+        child: CustomPaint(
+          painter: DashedRectPainter(color: AppColors.primaryGold),
+          child: Container(
+            width: double.infinity,
+            height: 200,
+            alignment: Alignment.center,
+            child: _imageFile != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: kIsWeb
+                        ? Image.network(
+                            _imageFile!.path,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 200,
+                          )
+                        : Image.file(
+                            File(_imageFile!.path),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 200,
+                          ),
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.cloud_upload_outlined,
+                        size: 40,
+                        color: AppColors.primaryNavy,
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        "Upload Gambar Kostum",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: AppColors.primaryNavy,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        "JPG, PNG sampai\n5MB",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      const SizedBox(height: 15),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          "Pilih Berkas",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 10,
-                  ),
-                ),
-                onPressed: () {},
-                child: const Text(
-                  "Pilih Berkas",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
           ),
         ),
       ),
@@ -284,27 +338,13 @@ class _AddStockPageState extends State<AddStockPage> {
     required TextEditingController controller,
     required String hint,
     int maxLines = 1,
+    bool isNumber = false,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       decoration: _inputDecoration(hint: hint),
-      validator: (value) => value!.isEmpty ? "Wajib diisi" : null,
-    );
-  }
-
-  Widget _buildPriceField() {
-    return TextFormField(
-      controller: _hargaController,
-      keyboardType: TextInputType.number,
-      decoration: _inputDecoration().copyWith(
-        prefixText: "Rp  ",
-        prefixStyle: const TextStyle(
-          color: Colors.grey,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
       validator: (value) => value!.isEmpty ? "Wajib diisi" : null,
     );
   }
@@ -325,40 +365,32 @@ class _AddStockPageState extends State<AddStockPage> {
     );
   }
 
-  Widget _buildSizeStockRow(String size, TextEditingController controller) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLabel("Ukuran"),
-              TextFormField(
-                initialValue: size,
-                readOnly: true,
-                textAlign: TextAlign.center,
-                decoration: _inputDecoration(),
-              ),
-            ],
-          ),
+  Widget _buildSizeDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedUkuran,
+      decoration: _inputDecoration(),
+      items: ['S', 'M', 'L', 'XL'].map((size) {
+        return DropdownMenuItem<String>(value: size, child: Text(size));
+      }).toList(),
+      onChanged: (val) {
+        setState(() => _selectedUkuran = val!);
+      },
+    );
+  }
+
+  Widget _buildPriceField() {
+    return TextFormField(
+      controller: _hargaController,
+      keyboardType: TextInputType.number,
+      decoration: _inputDecoration(hint: "Contoh: 75000").copyWith(
+        prefixText: "Rp  ",
+        prefixStyle: const TextStyle(
+          color: Colors.grey,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
         ),
-        const SizedBox(width: 15),
-        Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLabel("Jumlah Stok"),
-              TextFormField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                decoration: _inputDecoration(),
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
+      validator: (value) => value!.isEmpty ? "Wajib diisi" : null,
     );
   }
 

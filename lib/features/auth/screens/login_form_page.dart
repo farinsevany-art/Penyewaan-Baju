@@ -22,7 +22,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      _showSnackBar("Harap isi semua kolom", Colors.orange);
+      _showSnackBar("Harap Masukkan Data Anda", Colors.orange);
       return;
     }
 

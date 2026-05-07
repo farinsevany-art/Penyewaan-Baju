@@ -6,9 +6,10 @@ import '../../auth/widgets/auth_background.dart';
 import 'cart_page.dart';
 
 class SearchPage extends StatefulWidget {
-  final String? initialQuery;
+  // DISESUAIKAN: Nama parameter diubah menjadi searchQuery agar cocok dengan HomePage
+  final String? searchQuery;
 
-  const SearchPage({super.key, this.initialQuery});
+  const SearchPage({super.key, this.searchQuery});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -21,10 +22,11 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController(text: widget.initialQuery ?? "");
+    // DISESUAIKAN: Menggunakan widget.searchQuery
+    _searchController = TextEditingController(text: widget.searchQuery ?? "");
 
-    if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
-      _runFilter(widget.initialQuery!);
+    if (widget.searchQuery != null && widget.searchQuery!.isNotEmpty) {
+      _runFilter(widget.searchQuery!);
     }
   }
 
@@ -39,8 +41,8 @@ class _SearchPageState extends State<SearchPage> {
       _filteredCostumes = allCostumes
           .where(
             (costume) => costume.name.toLowerCase().contains(
-              enteredKeyword.toLowerCase(),
-            ),
+                  enteredKeyword.toLowerCase(),
+                ),
           )
           .toList();
     });
@@ -107,18 +109,16 @@ class _SearchPageState extends State<SearchPage> {
                       itemCount: _filteredCostumes.length,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.65,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.65,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
                       itemBuilder: (context, index) {
                         final item = _filteredCostumes[index];
 
                         return CostumeCard(
                           costume: item,
-
-                          // ❤️ WISHLIST (Tetap pakai setState agar UI Search Page update)
                           onWishlistToggle: () {
                             setState(() {
                               item.isWishlisted = !item.isWishlisted;
@@ -135,11 +135,7 @@ class _SearchPageState extends State<SearchPage> {
                               ),
                             );
                           },
-
-                          // 🛒 ADD TO CART (FIXED: Logika dihapus agar tidak double)
                           onAddToCart: () {
-                            // Cukup tampilkan SnackBar saja.
-                            // Logika "cartItemsGlobal.add" sudah dihandle otomatis oleh CostumeCard internal.
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
