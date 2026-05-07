@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:io';
 
 class AuthService {
-  // Gunakan IP Laptop jika pakai emulator/HP asli, misal: 192.168.1.5
   static const String baseUrl = "http://localhost/api_penyewaan";
 
   static Future<Map<String, dynamic>> login(

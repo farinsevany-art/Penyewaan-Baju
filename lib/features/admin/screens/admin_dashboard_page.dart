@@ -115,7 +115,7 @@ class _DashboardContentState extends State<DashboardContent> {
           padding: const EdgeInsets.only(
             top: 50, // Disesuaikan untuk notch
             left: 20,
-            right: 20,
+            right: 15, // Disesuaikan sedikit agar ikon pas
             bottom: 25,
           ),
           color: AppColors.primaryNavy,
@@ -141,9 +141,32 @@ class _DashboardContentState extends State<DashboardContent> {
                   ),
                 ],
               ),
-              IconButton(
-                onPressed: _fetchDashboardData,
-                icon: const Icon(Icons.refresh, color: AppColors.primaryGold),
+              // PERBAIKAN: Menambahkan Row untuk menampung ikon refresh & notifikasi
+              Row(
+                children: [
+                  // IconButton(
+                  //   onPressed: _fetchDashboardData,
+                  //   icon: const Icon(
+                  //     Icons.refresh,
+                  //     color: AppColors.primaryGold,
+                  //   ),
+                  // ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationPage(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.notifications_outlined, // Ikon Notifikasi
+                      color: AppColors.primaryGold,
+                      size: 26,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../auth/widgets/auth_background.dart';
 import '../../../core/constants/colors.dart';
-// Pastikan file ini ada di folder yang sama dan tidak ada error di dalamnya
 import 'rent_details_page.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 // --- MODEL DATA ---
 class PesananData {
+  final String id; // Tambahkan ini
   final String name;
   final String category;
   final String status;
@@ -13,12 +15,24 @@ class PesananData {
   final bool isUrgent;
 
   PesananData({
+    required this.id, // Tambahkan ini
     required this.name,
     required this.category,
     required this.status,
     required this.imageUrl,
     this.isUrgent = false,
   });
+
+  // Fungsi untuk konversi dari JSON database PHP
+  factory PesananData.fromJson(Map<String, dynamic> json) {
+    return PesananData(
+      id: json['id_penyewaan'].toString(),
+      name: json['nama'] ?? '',
+      category: '', // Mengosongkan default karena data join difokuskan ke nama & status
+      imageUrl: '',
+      status: json['status_penyewaan'] ?? "Baru", 
+    );
+  }
 }
 
 class ManajemenPesananScreen extends StatefulWidget {
@@ -30,45 +44,21 @@ class ManajemenPesananScreen extends StatefulWidget {
 
 class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final TextEditingController _searchController = TextEditingController();
-  String _searchText = "";
-  bool _isSearching = false;
+late TabController _tabController;
+final TextEditingController _searchController = TextEditingController();
+String _searchText = "";
 
-  final List<PesananData> _allOrders = [
-    PesananData(
-      name: "Sarah Jenkins",
-      category: "Clara 1",
-      status: "Baru",
-      imageUrl: "",
-      isUrgent: true,
-    ),
-    PesananData(
-      name: "Michael Chen",
-      category: "Rama",
-      status: "Baru",
-      imageUrl: "",
-    ),
-    PesananData(
-      name: "Elena Rodriguez",
-      category: "Shinta",
-      status: "Baru",
-      imageUrl: "",
-    ),
-    PesananData(
-      name: "Andi Wijaya",
-      category: "Laksamana",
-      status: "Aktif",
-      imageUrl: "",
-    ),
-  ];
+bool _isSearching = false;
+
+List<PesananData> _allOrders = [];
+bool _isLoading = true;
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
+void initState() {
+  super.initState();
+  _tabController = TabController(length: 3, vsync: this);
+  _fetchOrders(); // Panggil fungsi ambil data database di sini
+}
   @override
   void dispose() {
     _tabController.dispose();
@@ -76,7 +66,28 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
     super.dispose();
   }
 
-  @override
+  // FUNGSI BARU: Ambil data dari database melalui API PHP
+Future<void> _fetchOrders() async {
+  try {
+    // Catatan: Jika pakai emulator Android, ganti localhost menjadi 10.0.2.2
+    final response = await http.get(Uri.parse('http://localhost/api_penyewaan/get_orders.php'));
+
+    if (response.statusCode == 200) {
+      List jsonResponse = json.decode(response.body);
+      setState(() {
+        _allOrders = jsonResponse.map((data) => PesananData.fromJson(data)).toList();
+        _isLoading = false;
+      });
+    } else {
+      setState(() => _isLoading = false);
+    }
+  } catch (e) {
+    print("Error koneksi database: $e");
+    setState(() => _isLoading = false);
+  }
+}
+
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -112,9 +123,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
               )
             : Text(
                 'Manajemen Pesanan',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(color: AppColors.primaryGold),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.primaryGold),
               ),
         actions: [
           IconButton(
@@ -132,47 +141,52 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
           ),
         ],
       ),
-      body: AuthBackground(
-        child: Column(
-          children: [
-            Container(
-              color: AppColors.primaryNavy,
-              child: TabBar(
-                controller: _tabController,
-                indicatorColor: AppColors.primaryGold,
-                indicatorWeight: 3,
-                labelColor: AppColors.primaryGold,
-                unselectedLabelColor: Colors.white60,
-                tabs: const [
-                  Tab(text: "Baru"),
-                  Tab(text: "Aktif"),
-                  Tab(text: "Selesai"),
-                ],
-              ),
-            ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
+      body: _isLoading 
+          ? const Center(child: CircularProgressIndicator()) 
+          : AuthBackground(
+              child: Column(
                 children: [
-                  _buildFilteredPesananList("Baru"),
-                  _buildFilteredPesananList("Aktif"),
-                  _buildFilteredPesananList("Selesai"),
+                  Container(
+                    color: AppColors.primaryNavy,
+                    child: TabBar(
+                      controller: _tabController,
+                      indicatorColor: AppColors.primaryGold,
+                      indicatorWeight: 3,
+                      labelColor: AppColors.primaryGold,
+                      unselectedLabelColor: Colors.white60,
+                      tabs: const [
+                        Tab(text: "Baru"),
+                        Tab(text: "Aktif"),
+                        Tab(text: "Selesai"),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildFilteredPesananList("Baru"),
+                        _buildFilteredPesananList("Aktif"),
+                        _buildFilteredPesananList("Selesai"),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildFilteredPesananList(String statusTab) {
-    final filteredList = _allOrders.where((p) {
-      return p.status == statusTab &&
-          p.name.toLowerCase().contains(_searchText.toLowerCase());
-    }).toList();
+  final filteredList = _allOrders.where((p) {
+    return p.status == statusTab &&
+        p.name.toLowerCase().contains(_searchText.toLowerCase());
+  }).toList();
 
-    return ListView.builder(
+  // MODIFIKASI DISINI: Bungkus dengan RefreshIndicator
+  return RefreshIndicator(
+    onRefresh: _fetchOrders, // Jalankan fungsi ambil data ulang saat di-refresh
+    child: ListView.builder(
       padding: const EdgeInsets.all(20),
       itemCount: filteredList.length + 1,
       itemBuilder: (context, index) {
@@ -180,8 +194,9 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
         final item = filteredList[index - 1];
         return _buildOrderItem(item);
       },
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildHeader(int count, String statusTab) {
     return Padding(
@@ -266,10 +281,10 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
           color: AppColors.primaryGold,
         ),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const RentDetailsPage(orderId: "123"),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RentDetailsPage(orderId: item.id),
             ),
           );
         },

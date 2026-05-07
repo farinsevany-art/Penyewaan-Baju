@@ -38,6 +38,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   fl_chart: ^0.70.0
   shared_preferences: ^2.2.2
+  image_picker: ^1.2.2
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,8 @@ flutter:
     - assets/images/logomitra.jpeg
     - assets/images/Logotransparan.png
     - assets/images/home.png
+    - assets/images/anime_cowok.png
+    - assets/images/anime_cewek.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

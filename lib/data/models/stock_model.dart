@@ -23,12 +23,29 @@ class StockModel {
     return StockModel(
       idKostum: int.tryParse(json['id_kostum'].toString()),
       namaKostum: json['nama_kostum'] ?? '',
+      // Memastikan id_kategori dibaca dengan benar dari database
       idKategori: int.tryParse(json['id_kategori'].toString()) ?? 0,
       stok: int.tryParse(json['stok'].toString()) ?? 0,
-      hargaSewa: int.tryParse(json['harga_sewa'].toString()) ?? 0,
+      // Mengonversi Decimal SQL ke Double lalu ke Int agar tidak 0
+      hargaSewa: double.tryParse(json['harga_sewa'].toString())?.toInt() ?? 0,
       ukuran: json['ukuran'] ?? '',
       deskripsi: json['deskripsi'] ?? '',
-      gambar: json['gambar'],
+      // Disesuaikan dengan kolom 'foto' di phpMyAdmin[cite: 3]
+      gambar: json['foto'],
     );
+  }
+
+  // Tambahkan method toMap untuk mempermudah pengiriman data ke API/Service
+  Map<String, dynamic> toJson() {
+    return {
+      'id_kostum': idKostum,
+      'nama_kostum': namaKostum,
+      'id_kategori': idKategori,
+      'stok': stok,
+      'harga_sewa': hargaSewa,
+      'ukuran': ukuran,
+      'deskripsi': deskripsi,
+      'foto': gambar,
+    };
   }
 }

@@ -1,135 +1,40 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../models/costume_model.dart';
 
-final List<Costume> allCostumes = [
-  Costume(
-    id: '1',
-    name: 'Sinta',
-    category: 'Pewayangan',
-    price: 125000,
-    stock: 3,
-    imageUrl: 'assets/images/sinta.png',
-    description:
-        'Kostum tokoh Sinta dari Ramayana, cocok untuk pementasan wayang orang.',
-    size: 'S - L',
-  ),
-  Costume(
-    id: '2',
-    name: 'Kunthiwayang',
-    category: 'Pewayangan',
-    price: 80000,
-    stock: 5,
-    imageUrl: 'assets/images/kunthiwayang.png',
-    description: 'Kostum Dewi Kunti dari cerita Mahabharata.',
-    size: 'M - XL',
-  ),
-  Costume(
-    id: '3',
-    name: 'Tari Kreasi Baru',
-    category: 'Tari Dewasa',
-    price: 75000,
-    stock: 4,
-    imageUrl: 'assets/images/tarikreasibaru.png',
-    description: 'Kostum tari kreasi kontemporer dengan sentuhan budaya Jawa.',
-    size: 'S - XL',
-  ),
-  Costume(
-    id: '4',
-    name: 'Srikandi',
-    category: 'Pewayangan',
-    price: 95000,
-    stock: 2,
-    imageUrl: 'assets/images/srikandi.png',
-    description: 'Kostum Srikandi, ksatria wanita dari Mahabharata.',
-    size: 'S - L',
-  ),
-  Costume(
-    id: '5',
-    name: 'Rama',
-    category: 'Pewayangan',
-    price: 110000,
-    stock: 3,
-    imageUrl: 'assets/images/rama.png',
-    description: 'Kostum Rama dari epos Ramayana untuk pertunjukan panggung.',
-    size: 'M - XL',
-  ),
-  Costume(
-    id: '6',
-    name: 'Tari Tradisional',
-    category: 'Tari Dewasa',
-    price: 90000,
-    stock: 6,
-    imageUrl: 'assets/images/tarikreasitradisional.png',
-    description: 'Kostum tari tradisional Jawa lengkap dengan aksesori.',
-    size: 'M - XL',
-  ),
-  Costume(
-    id: '7',
-    name: 'Laksamana',
-    category: 'Pewayangan',
-    price: 105000,
-    stock: 2,
-    imageUrl: 'assets/images/laksamana.png',
-    description: 'Kostum Laksmana adik Rama dari Ramayana.',
-    size: 'M - XL',
-  ),
-  Costume(
-    id: '8',
-    name: 'Golek Kreasi',
-    category: 'Tari Dewasa',
-    price: 65000,
-    stock: 7,
-    imageUrl: 'assets/images/golekkreasi.png',
-    description: 'Kostum tari golek kreasi untuk dewasa.',
-    size: 'S - M',
-  ),
-  Costume(
-    id: '9',
-    name: 'Baju Bodo',
-    category: 'Tari Anak',
-    price: 70000,
-    stock: 5,
-    imageUrl: 'assets/images/bajubodo.png',
-    description: 'Baju adat Sulawesi Selatan untuk penampilan budaya.',
-    size: 'S - XL',
-  ),
-  Costume(
-    id: '10',
-    name: 'Adat Anak Daro',
-    category: 'Tari Anak',
-    price: 85000,
-    stock: 4,
-    imageUrl: 'assets/images/adatanakdaro.png',
-    description: 'Kostum pengantin adat Minangkabau untuk anak.',
-    size: 'S - M',
-  ),
-  Costume(
-    id: '11',
-    name: 'Raja',
-    category: 'Raja & Ratu',
-    price: 150000,
-    stock: 2,
-    imageUrl: 'assets/images/raja.png',
-    description: 'Kostum raja lengkap dengan mahkota dan jubah kebesaran.',
-    size: 'M - XL',
-  ),
-  Costume(
-    id: '12',
-    name: 'Kostum Adat Minangkabau',
-    category: 'Tari Anak',
-    price: 60000,
-    stock: 8,
-    imageUrl: 'assets/images/minangkabau.png',
-    description: 'Kostum tari anak warna-warni untuk pertunjukan sekolah.',
-    size: 'S - M',
-  ),
-];
+// Ganti URL dengan IP Anda jika di HP asli (contoh: 192.168.1.10)
+const String baseUrl = "http://localhost/api_penyewaan";
+const String imageBaseUrl = "$baseUrl/uploads/";
 
-List<Costume> getWishlistedCostumes() {
-  return allCostumes.where((c) => c.isWishlisted).toList();
-}
-
-List<Costume> getCostumesByCategory(String category) {
-  return allCostumes.where((c) => c.category == category).toList();
-}
-
+List<Costume> allCostumes = [];
 List<Costume> cartItemsGlobal = [];
+
+Future<void> fetchCostumesFromDB() async {
+  try {
+    final response = await http.get(Uri.parse("$baseUrl/get_stocks.php"));
+
+    if (response.statusCode == 200) {
+      List data = json.decode(response.body);
+
+      // Ambil data dan filter: Hanya kostum yang stoknya > 0 yang bisa dilihat customer
+      List<Costume> fetchedCostumes = data
+          .map((item) => Costume.fromJson(item))
+          .where((c) => c.stock > 0)
+          .toList();
+
+      // Sinkronisasi data lama (agar Wishlist & Keranjang tidak hilang saat layar direfresh)
+      for (var newC in fetchedCostumes) {
+        final existingIdx = allCostumes.indexWhere((c) => c.id == newC.id);
+        if (existingIdx != -1) {
+          newC.isWishlisted = allCostumes[existingIdx].isWishlisted;
+          newC.isInCart = allCostumes[existingIdx].isInCart;
+          newC.quantity = allCostumes[existingIdx].quantity;
+        }
+      }
+
+      allCostumes = fetchedCostumes;
+    }
+  } catch (e) {
+    print("Gagal mengambil data kostum: $e");
+  }
+}
