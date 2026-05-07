@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Tambahkan ini
 import '../../../core/constants/colors.dart';
 import '../../../data/services/auth_service.dart';
 import '../widgets/auth_background.dart';
 import '../../customer/screens/home_page.dart';
 import '../../admin/screens/admin_dashboard_page.dart';
-import 'register_page.dart'; // PENTING: Tambahkan import ini
+import 'register_page.dart';
 
 class LoginFormPage extends StatefulWidget {
   const LoginFormPage({super.key});
@@ -35,14 +36,23 @@ class _LoginFormPageState extends State<LoginFormPage> {
       final response = await AuthService.login(email, password);
 
       if (response['status'] == 'success') {
+        // --- PROSES PENYIMPANAN DATA KE SESSION ---
+        final prefs = await SharedPreferences.getInstance();
+        final userData = response['data']; // Mengambil data dari login.php[cite: 1]
+
+        // Simpan data pelanggan agar otomatis muncul di ProfilePage
+        await prefs.setString('name', userData['nama'] ?? '');
+        await prefs.setString('email', userData['email'] ?? '');
+        await prefs.setString('phone', userData['no_hp'] ?? '');
+        await prefs.setString('address', userData['alamat'] ?? '');
+        // -------------------------------------------
+
         final userRole = response['role'];
         if (userRole == roleType.toLowerCase()) {
           if (userRole == 'admin') {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder: (context) => const AdminDashboardPage(),
-              ),
+              MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
             );
           } else {
             Navigator.pushReplacement(
@@ -51,10 +61,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
             );
           }
         } else {
-          _showSnackBar(
-            "Akun Anda tidak terdaftar sebagai $roleType",
-            Colors.red,
-          );
+          _showSnackBar("Akun Anda tidak terdaftar sebagai $roleType", Colors.red);
         }
       } else {
         _showSnackBar(response['message'] ?? "Login Gagal", Colors.red);
@@ -66,10 +73,11 @@ class _LoginFormPageState extends State<LoginFormPage> {
     }
   }
 
+  // ... (Widget build tetap sama seperti kode sebelumnya)
   void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: color)
+    );
   }
 
   @override
@@ -130,65 +138,32 @@ class _LoginFormPageState extends State<LoginFormPage> {
                       isObscure: _obscurePassword,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
                           color: AppColors.mediumGrey,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                     ),
                     const SizedBox(height: 40),
                     if (_isLoading)
-                      const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryGold,
-                        ),
-                      )
+                      const Center(child: CircularProgressIndicator(color: AppColors.primaryGold))
                     else ...[
-                      _buildLoginButton(
-                        'Login Pelanggan',
-                        AppColors.primaryGold,
-                        () => _handleLogin('Pelanggan'),
-                      ),
+                      _buildLoginButton('Login Pelanggan', AppColors.primaryGold, () => _handleLogin('Pelanggan')),
                       const SizedBox(height: 15),
-                      _buildLoginButton(
-                        'Login Admin',
-                        AppColors.primaryGold,
-                        () => _handleLogin('Admin'),
-                      ),
+                      _buildLoginButton('Login Admin', AppColors.primaryGold, () => _handleLogin('Admin')),
                     ],
                     const SizedBox(height: 20),
                     Center(
                       child: GestureDetector(
-                        // PERBAIKAN: Menggunakan MaterialPageRoute agar navigasi akurat
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterPage(),
-                            ),
-                          );
-                        },
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPage())),
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(
-                              color: AppColors.mediumGrey,
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                            ),
+                            style: TextStyle(color: AppColors.mediumGrey, fontSize: 12, fontFamily: 'Poppins'),
                             children: [
                               TextSpan(text: 'Belum punya akun? '),
                               TextSpan(
                                 text: 'Daftar di sini',
-                                style: TextStyle(
-                                  color: Colors.deepOrange,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -205,28 +180,15 @@ class _LoginFormPageState extends State<LoginFormPage> {
     );
   }
 
-  Widget _buildTextField(
-    String hint, {
-    required TextEditingController controller,
-    bool isObscure = false,
-    Widget? suffixIcon,
-  }) {
+  Widget _buildTextField(String hint, {required TextEditingController controller, bool isObscure = false, Widget? suffixIcon}) {
     return TextField(
       controller: controller,
       obscureText: isObscure,
-      style: const TextStyle(fontFamily: 'Poppins'),
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
         fillColor: AppColors.offWhite,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 15,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide.none,
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
         suffixIcon: suffixIcon,
       ),
     );
@@ -238,20 +200,8 @@ class _LoginFormPageState extends State<LoginFormPage> {
       height: 45,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: AppColors.primaryNavy,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Poppins',
-          ),
-        ),
+        style: ElevatedButton.styleFrom(backgroundColor: color, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+        child: Text(text, style: const TextStyle(color: AppColors.primaryNavy, fontWeight: FontWeight.bold)),
       ),
     );
   }
