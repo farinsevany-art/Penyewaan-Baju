@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../data/models/costume_model.dart';
+// 🔻 PASTIKAN IMPORT INI ADA
 import '../../../data/services/mock_data.dart';
+// 🔻 Tambahkan import halaman detail produk Anda
 import '../screens/product_detail_page.dart';
 
 class CostumeCard extends StatefulWidget {
@@ -32,7 +34,6 @@ class CostumeCard extends StatefulWidget {
 }
 
 class _CostumeCardState extends State<CostumeCard> {
-  // Getter untuk mempermudah akses data
   String get _name => widget.costume?.name ?? widget.name ?? '';
   String get _image => widget.costume?.imageUrl ?? widget.image ?? '';
   String get _price =>
@@ -66,7 +67,6 @@ class _CostumeCardState extends State<CostumeCard> {
 
   void _handleAddToCart() {
     if (widget.costume != null) {
-      // 1. Logika penambahan ke data global (cartItemsGlobal dari mock_data.dart)
       if (!cartItemsGlobal.contains(widget.costume)) {
         setState(() {
           widget.costume!.isInCart = true;
@@ -78,31 +78,21 @@ class _CostumeCardState extends State<CostumeCard> {
           widget.costume!.quantity++;
         });
       }
-
-      // 2. Trigger callback refresh jika ada (biasanya untuk refresh Home)
-      if (widget.onAddToCart != null) {
-        widget.onAddToCart!();
-      }
-
-      // 3. Menampilkan Pop-up SnackBar dengan tombol CEK
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$_name ditambahkan ke keranjang'),
-          backgroundColor: const Color(0xFF0D1B3E),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: 'CEK',
-            textColor: Colors.orangeAccent,
-            onPressed: () {
-              // Kembali ke halaman utama agar user bisa melihat Tab Cart
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-          ),
-        ),
-      );
     }
+
+    if (widget.onAddToCart != null) {
+      widget.onAddToCart!();
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$_name ditambahkan ke keranjang'),
+        backgroundColor: const Color.fromARGB(255, 7, 32, 60),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
   @override
@@ -227,9 +217,6 @@ class _CostumeCardState extends State<CostumeCard> {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 7, 32, 60),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
                       ),
                     ),
                   ),

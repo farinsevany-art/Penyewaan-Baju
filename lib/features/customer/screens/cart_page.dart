@@ -47,128 +47,120 @@ class _CartPageState extends State<CartPage> {
                 style: TextStyle(color: Colors.grey),
               ),
             )
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: cartItemsGlobal.length,
-                    itemBuilder: (context, index) {
-                      final item = cartItemsGlobal[index];
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Row(
+          : ListView.builder(
+              itemCount: cartItemsGlobal.length,
+              itemBuilder: (context, index) {
+                final item = cartItemsGlobal[index];
+                return Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                            ? Image.network(
+                                "$imageBaseUrl${item.imageUrl}",
+                                width: 75,
+                                height: 75,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: 75,
+                                  height: 75,
+                                  color: Colors.grey,
+                                ),
+                              )
+                            : Container(
+                                width: 75,
+                                height: 75,
+                                color: Colors.grey,
+                              ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: item.imageUrl != null &&
-                                      item.imageUrl!.isNotEmpty
-                                  ? Image.network(
-                                      "$imageBaseUrl${item.imageUrl}",
-                                      width: 75,
-                                      height: 75,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Container(
-                                        width: 75,
-                                        height: 75,
-                                        color: Colors.grey,
-                                      ),
-                                    )
-                                  : Container(
-                                      width: 75,
-                                      height: 75,
-                                      color: Colors.grey,
-                                    ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Uk. ${item.size ?? '-'}",
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(formatRupiah(item.price)),
-                                ],
+                            Text(
+                              item.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
-                            Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      if (item.quantity > 1) {
-                                        item.quantity--;
-                                      } else {
-                                        removeItem(item);
-                                      }
-                                    });
-                                  },
-                                  child: Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey.shade400,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.remove, size: 16),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  "${item.quantity}",
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      item.quantity++;
-                                    });
-                                  },
-                                  child: Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.add,
-                                      size: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(height: 4),
+                            Text(
+                              "Uk. ${item.size ?? '-'}",
+                              style: const TextStyle(color: Colors.grey),
                             ),
+                            const SizedBox(height: 4),
+                            Text(formatRupiah(item.price)),
                           ],
                         ),
-                      );
-                    },
+                      ),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (item.quantity > 1) {
+                                  item.quantity--;
+                                } else {
+                                  removeItem(item);
+                                }
+                              });
+                            },
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.grey.shade400,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.remove, size: 16),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "${item.quantity}",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                item.quantity++;
+                              });
+                            },
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: const BoxDecoration(
+                                color: Colors.black,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.add,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                );
+              },
             ),
       bottomNavigationBar: cartItemsGlobal.isEmpty
           ? null
