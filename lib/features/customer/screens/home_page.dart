@@ -37,7 +37,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           image: DecorationImage(
             image: AssetImage('assets/images/bg.png'),
             fit: BoxFit.cover,
-            opacity: 0.25, 
+            opacity: 0.40, 
           ),
         ),
         child: IndexedStack(
