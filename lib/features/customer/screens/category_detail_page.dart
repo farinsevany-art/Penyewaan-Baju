@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../data/models/costume_model.dart'; 
 import '../../../data/services/mock_data.dart';
-import '../widgets/costume_card.dart'; 
+import '../widgets/costume_card.dart';
 import 'product_detail_page.dart';
 
 class CategoryDetailPage extends StatefulWidget {
@@ -20,15 +20,17 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
   @override
   void initState() {
     super.initState();
-    // Mengambil title dari Home Page untuk dijadikan nilai awal
     _currentSelected = widget.categoryTitle;
   }
 
   @override
   Widget build(BuildContext context) {
-    // 1. Melakukan filter otomatis dari allCostumes berdasarkan _currentSelected
+    // 1. Filter yang lebih aman dan robust (mengatasi null dan spasi)
     final filteredCostumes = allCostumes.where((item) {
-      return item.category.trim().toLowerCase() == _currentSelected.trim().toLowerCase();
+      final itemCategory = (item.category ?? '').trim().toLowerCase();
+      final selectedCategory = _currentSelected.trim().toLowerCase();
+      
+      return itemCategory == selectedCategory;
     }).toList();
 
     return Scaffold(
@@ -77,11 +79,9 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     itemCount: filteredCostumes.length,
                     itemBuilder: (context, index) {
                       final item = filteredCostumes[index];
-                      // Menampilkan card sesuai data yang sudah terfilter
                       return CostumeCard(
                         costume: item,
                         onAddToCart: () {
-                          // Aksi keranjang
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

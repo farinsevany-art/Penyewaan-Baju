@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
-import '../../../data/models/costume_model.dart'; // Sesuaikan path jika diperlukan
+import '../../../data/models/costume_model.dart';
 
-class ProductDetailPage extends StatelessWidget {
+class ProductDetailPage extends StatefulWidget {
   final Costume costume;
 
   const ProductDetailPage({
     super.key,
     required this.costume,
   });
+
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  // List ukuran yang tersedia
+  final List<String> sizes = ['S', 'M', 'L', 'XL'];
+  
+  // Variabel untuk menyimpan ukuran yang sedang dipilih
+  String selectedSize = 'M'; 
+
+  // Variabel untuk jumlah item (quantity)
+  int quantity = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +58,7 @@ class ProductDetailPage extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(30),
                 child: Image.asset(
-                  costume.imageUrl ?? '',
+                  widget.costume.imageUrl ?? '',
                   width: double.infinity,
                   height: 350,
                   fit: BoxFit.cover,
@@ -61,64 +75,84 @@ class ProductDetailPage extends StatelessWidget {
               
               // Judul & Harga
               Text(
-                costume.name,
+                widget.costume.name,
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF0D1B3E),
                 ),
               ),
+              const SizedBox(height: 4),
               Text(
-                'Rp. ${costume.price}',
+                'Rp. ${widget.costume.price}',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                   color: Color(0xFF0D1B3E),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
-              // Size & Sisa Stok
+              // --- BAGIAN PILIH UKURAN ---
+              const Text(
+                "Pilih Ukuran",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 12),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Size", style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Text(
-                        costume.size ?? '-',
-                        style: const TextStyle(fontSize: 14, color: Colors.black87),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      const Text("Sisa Stok", style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey),
+                children: sizes.map((size) {
+                  bool isSelected = selectedSize == size;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedSize = size;
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      width: 55,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFF0D1B3E) : Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: isSelected ? const Color(0xFF0D1B3E) : Colors.grey.shade300,
                         ),
-                        child: Text("${costume.stock}"), // Mengambil dari properti stock di mock data
+                        boxShadow: isSelected 
+                          ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))]
+                          : [],
                       ),
-                    ],
-                  ),
+                      child: Center(
+                        child: Text(
+                          size,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 25),
+
+              // Sisa Stok & Deskripsi
+              Row(
+                children: [
+                  const Text("Sisa Stok: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${widget.costume.stock} pcs", style: const TextStyle(color: Colors.black54)),
                 ],
               ),
-              const SizedBox(height: 20),
-
-              // Deskripsi
+              const SizedBox(height: 15),
               const Text("Deskripsi", style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Text(
-                costume.description ?? 'Tidak ada deskripsi.',
-                style: const TextStyle(fontSize: 14, height: 1.5),
+                widget.costume.description ?? 'Tidak ada deskripsi.',
+                style: const TextStyle(fontSize: 14, height: 1.5, color: Colors.black87),
               ),
-              const SizedBox(height: 100), // Space untuk bottom bar
+              const SizedBox(height: 120), // Space agar tidak tertutup bottom bar
             ],
           ),
         ),
@@ -127,47 +161,92 @@ class ProductDetailPage extends StatelessWidget {
       // Bottom Action Bar
       bottomSheet: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        color: const Color(0xFFFDF7F0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFDF7F0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
         child: Row(
           children: [
+            // Wishlist Button
             Container(
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey.shade200),
+              ),
               child: IconButton(
                 icon: Icon(
-                  costume.isWishlisted ? Icons.favorite : Icons.favorite_border,
+                  widget.costume.isWishlisted ? Icons.favorite : Icons.favorite_border,
                   color: Colors.red,
                 ),
                 onPressed: () {
-                  // Aksi wishlisting (optional)
+                  // Tambahkan logika toggle wishlist di sini
                 },
               ),
             ),
             const SizedBox(width: 15),
+            
+            // Quantity Selector
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(color: Colors.grey.shade200),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Text("- "),
-                  Text("1"),
-                  Text(" +"),
+                  IconButton(
+                    icon: const Icon(Icons.remove, size: 18),
+                    onPressed: () {
+                      if (quantity > 1) setState(() => quantity--);
+                    },
+                  ),
+                  Text(
+                    "$quantity",
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add, size: 18),
+                    onPressed: () {
+                      if (quantity < widget.costume.stock) setState(() => quantity++);
+                    },
+                  ),
                 ],
               ),
             ),
             const SizedBox(width: 15),
+            
+            // Add to Cart Button
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  // Logika tambah ke keranjang
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Berhasil menambah $quantity item (Size $selectedSize)"),
+                      backgroundColor: const Color(0xFF0D1B3E),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0D1B3E),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  elevation: 0,
                 ),
-                icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white),
-                label: const Text("Tambah", style: TextStyle(color: Colors.white)),
+                icon: const Icon(Icons.shopping_bag_outlined),
+                label: const Text(
+                  "Tambah",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],

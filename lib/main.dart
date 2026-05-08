@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/splash_page.dart';
-import 'features/customer/screens/home_page.dart'; 
+import 'features/customer/screens/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,14 +16,12 @@ class MyApp extends StatelessWidget {
       title: 'Kusuma Cantika Collections',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      
+
       // Halaman awal aplikasi
-      home: const SplashPage(),
+      home: const CustomerHomePage(),
 
       // Daftar rute navigasi
-      routes: {
-        '/home': (context) => const CustomerHomePage(),
-      },
+      routes: {'/home': (context) => const CustomerHomePage()},
     );
   }
 }

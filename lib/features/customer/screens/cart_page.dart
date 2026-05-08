@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/costume_model.dart';
-import '../../../data/services/mock_data.dart';
-import '../screens/confirmation_page.dart';
+import '../../../data/services/mock_data.dart'; // Untuk cartItemsGlobal & imageBaseUrl
+import 'confirmation_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -11,7 +11,6 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  // 🔻 TAMBAHAN: Fungsi ini akan memaksa UI refresh setiap kali tab Cart dibuka
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -26,11 +25,9 @@ class _CartPageState extends State<CartPage> {
 
   double calculateTotal() {
     double total = 0;
-
     for (var item in cartItemsGlobal) {
       total += item.price * item.quantity;
     }
-
     return total;
   }
 
@@ -45,7 +42,6 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Keranjang'), centerTitle: true),
-
       body: cartItemsGlobal.isEmpty
           ? const Center(
               child: Text(
@@ -60,7 +56,6 @@ class _CartPageState extends State<CartPage> {
                     itemCount: cartItemsGlobal.length,
                     itemBuilder: (context, index) {
                       final item = cartItemsGlobal[index];
-
                       return Container(
                         margin: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -75,16 +70,27 @@ class _CartPageState extends State<CartPage> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.asset(
-                                item.imageUrl,
-                                width: 75,
-                                height: 75,
-                                fit: BoxFit.cover,
-                              ),
+                              child:
+                                  item.imageUrl != null &&
+                                      item.imageUrl!.isNotEmpty
+                                  ? Image.network(
+                                      "$imageBaseUrl${item.imageUrl}",
+                                      width: 75,
+                                      height: 75,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        width: 75,
+                                        height: 75,
+                                        color: Colors.grey,
+                                      ),
+                                    )
+                                  : Container(
+                                      width: 75,
+                                      height: 75,
+                                      color: Colors.grey,
+                                    ),
                             ),
-
                             const SizedBox(width: 12),
-
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,19 +103,17 @@ class _CartPageState extends State<CartPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  const Text(
-                                    "Uk. L",
-                                    style: TextStyle(color: Colors.grey),
+                                  Text(
+                                    "Uk. ${item.size ?? '-'}",
+                                    style: const TextStyle(color: Colors.grey),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(formatRupiah(item.price)),
                                 ],
                               ),
                             ),
-
                             Row(
                               children: [
-                                // 🔻 MINUS
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -132,22 +136,20 @@ class _CartPageState extends State<CartPage> {
                                     child: const Icon(Icons.remove, size: 16),
                                   ),
                                 ),
-
                                 const SizedBox(width: 8),
                                 Text(
                                   "${item.quantity}",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
-
-                                // 🔺 PLUS
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
                                       item.quantity++;
                                     });
                                   },
-
                                   child: Container(
                                     width: 32,
                                     height: 32,
@@ -172,7 +174,6 @@ class _CartPageState extends State<CartPage> {
                 ),
               ],
             ),
-
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
@@ -190,9 +191,9 @@ class _CartPageState extends State<CartPage> {
               ],
             ),
             const SizedBox(height: 6),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [Text("Ongkos Kirim"), Text("Rp 0 (Gratis)")],
+              children: [Text("Ongkos Kirim"), Text("Rp 0 (Gratis)")],
             ),
             const Divider(height: 20),
             Row(
@@ -227,18 +228,15 @@ class _CartPageState extends State<CartPage> {
                     ),
                   );
                 },
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       "Pesan Sekarang",
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
-                    const SizedBox(width: 8),
-                    const Icon(
-                      Icons.shopping_cart_outlined,
-                      color: Colors.white,
-                    ),
+                    SizedBox(width: 8),
+                    Icon(Icons.shopping_cart_outlined, color: Colors.white),
                   ],
                 ),
               ),
