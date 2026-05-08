@@ -21,8 +21,6 @@ class _CartPageState extends State<CartPage> {
     return "Rp ${number.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
   }
 
-  List<Costume> get cartItems => cartItemsGlobal;
-
   double calculateTotal() {
     double total = 0;
     for (var item in cartItemsGlobal) {
@@ -70,8 +68,7 @@ class _CartPageState extends State<CartPage> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child:
-                                  item.imageUrl != null &&
+                              child: item.imageUrl != null &&
                                       item.imageUrl!.isNotEmpty
                                   ? Image.network(
                                       "$imageBaseUrl${item.imageUrl}",
@@ -139,10 +136,8 @@ class _CartPageState extends State<CartPage> {
                                 const SizedBox(width: 8),
                                 Text(
                                   "${item.quantity}",
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                   style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(width: 8),
                                 GestureDetector(
@@ -175,9 +170,9 @@ class _CartPageState extends State<CartPage> {
                 ),
               ],
             ),
-<<<<<<< HEAD
       bottomNavigationBar: cartItemsGlobal.isEmpty
           ? null
+          : Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -192,55 +187,14 @@ class _CartPageState extends State<CartPage> {
                       const Text("Subtotal"),
                       Text(formatRupiah(calculateTotal())),
                     ],
-=======
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.black12)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Subtotal"),
-                Text(formatRupiah(calculateTotal())),
-              ],
-            ),
-            const SizedBox(height: 6),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text("Ongkos Kirim"), Text("Rp 0 (Gratis)")],
-            ),
-            const Divider(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Total",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  formatRupiah(calculateTotal()),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1F2A5A),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
->>>>>>> 809361b7a3705e6f61bde7d4b68922805c6c5c31
                   ),
                   const SizedBox(height: 6),
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [Text("Ongkos Kirim"), Text("Rp 0 (Gratis)")],
+                    children: [
+                      Text("Ongkos Kirim"),
+                      Text("Rp 0 (Gratis)"),
+                    ],
                   ),
                   const Divider(height: 20),
                   Row(
@@ -290,22 +244,8 @@ class _CartPageState extends State<CartPage> {
                         ],
                       ),
                     ),
-<<<<<<< HEAD
                   ),
                 ],
-=======
-                  );
-                },
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                      "Pesan Sekarang",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.shopping_cart_outlined, color: Colors.white),
-                  ],
-                ),
->>>>>>> 809361b7a3705e6f61bde7d4b68922805c6c5c31
               ),
             ),
     );

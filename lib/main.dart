@@ -18,7 +18,8 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
 
       // Halaman awal aplikasi
-      home: const CustomerHomePage(),
+      // Ubah bagian ini di main.dart
+      home: const SplashPage(),
 
       // Daftar rute navigasi
       routes: {'/home': (context) => const CustomerHomePage()},

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../auth/screens/login_form_page.dart';
+import '../../../data/services/mock_data.dart'; // IMPORT INI UNTUK AKSES KERANJANG
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -25,12 +27,10 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _nameController.text = prefs.getString('name') ?? "Budi Santoso";
-      _emailController.text =
-          prefs.getString('email') ?? "budi.santoso@example.com";
-      _phoneController.text = prefs.getString('phone') ?? "+62 812 3456 7890";
-      _addressController.text =
-          prefs.getString('address') ?? "Jl. Senopati No. 45, Jakarta";
+      _nameController.text = prefs.getString('name') ?? "Pelanggan Cantika";
+      _emailController.text = prefs.getString('email') ?? "email@example.com";
+      _phoneController.text = prefs.getString('phone') ?? "-";
+      _addressController.text = prefs.getString('address') ?? "-";
       _isLoading = false;
     });
   }
@@ -46,13 +46,26 @@ class _ProfilePageState extends State<ProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profil Berhasil Disimpan!")),
       );
-      // Refresh nama yang tampil di header avatar
       setState(() {});
     }
   }
 
-  void _handleLogout() {
-    Navigator.of(context).popUntil((route) => route.isFirst);
+  Future<void> _handleLogout() async {
+    // 1. HAPUS SEMUA SESI DARI MEMORI HP
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    // 2. KOSONGKAN KERANJANG AGAR TIDAK DILIHAT AKUN LAIN
+    cartItemsGlobal.clear();
+
+    // 3. KEMBALI KE LOGIN
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginFormPage()),
+        (route) => false,
+      );
+    }
   }
 
   @override
@@ -73,7 +86,6 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text(
           "KUSUMA CANTIKA",
           style: TextStyle(
-            // PERBAIKAN: typo "0Header8B6D43" → "0xFF8B6D43"
             color: Color(0xFF8B6D43),
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -85,7 +97,6 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Area Foto Profil
             Center(
               child: Stack(
                 children: [
@@ -94,8 +105,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     backgroundColor: Colors.amber,
                     child: CircleAvatar(
                       radius: 52,
-                      backgroundImage:
-                          NetworkImage('https://i.pravatar.cc/300'),
+                      backgroundImage: NetworkImage(
+                        'https://i.pravatar.cc/300',
+                      ),
                     ),
                   ),
                   Positioned(
@@ -117,19 +129,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
             ),
-
             const SizedBox(height: 15),
-
-            // Nama tampil realtime setelah disimpan
             Text(
               _nameController.text,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 5),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(20),
@@ -143,7 +150,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-
             const SizedBox(height: 25),
             const Align(
               alignment: Alignment.centerLeft,
@@ -157,16 +163,23 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             const SizedBox(height: 10),
-
-            // Form Input
-            _buildEditField("NAMA LENGKAP", _nameController, Icons.person_outline),
+            _buildEditField(
+              "NAMA LENGKAP",
+              _nameController,
+              Icons.person_outline,
+            ),
             _buildEditField("EMAIL", _emailController, Icons.email_outlined),
-            _buildEditField("TELEPON", _phoneController, Icons.phone_android_outlined),
-            _buildEditField("ALAMAT", _addressController, Icons.location_on_outlined),
-
+            _buildEditField(
+              "TELEPON",
+              _phoneController,
+              Icons.phone_android_outlined,
+            ),
+            _buildEditField(
+              "ALAMAT",
+              _addressController,
+              Icons.location_on_outlined,
+            ),
             const SizedBox(height: 20),
-
-            // Tombol Simpan
             ElevatedButton.icon(
               onPressed: _saveUserData,
               icon: const Icon(Icons.save, color: Colors.white),
@@ -182,17 +195,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
-
-            // Tombol Logout
             OutlinedButton.icon(
               onPressed: _handleLogout,
               icon: const Icon(Icons.logout, color: Colors.red),
-              label: const Text(
-                "LOGOUT",
-                style: TextStyle(color: Colors.red),
-              ),
+              label: const Text("LOGOUT", style: TextStyle(color: Colors.red)),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 side: const BorderSide(color: Colors.red),
@@ -219,10 +226,7 @@ class _ProfilePageState extends State<ProfilePage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10),
         ],
       ),
       child: Column(
@@ -231,10 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Text(label, style: const TextStyle(fontSize: 9, color: Colors.grey)),
           TextField(
             controller: controller,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             decoration: InputDecoration(
               isDense: true,
               border: InputBorder.none,

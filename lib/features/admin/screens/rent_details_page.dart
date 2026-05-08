@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../widgets/status_update_sheet.dart';
 import '../../auth/widgets/auth_background.dart';
+import '../../../data/services/order_service.dart';
 
 class RentDetailsPage extends StatefulWidget {
   final String orderId; // Variabel penampung ID wajib dikirim saat navigasi
@@ -22,59 +23,73 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
   List<dynamic> _rentedItems = [];  // Menampung array pakaian yang disewa
   bool _isLoading = true;           // Status loading database
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchOrderDetails(); // Jalankan ambil data dari DB saat halaman dibuka
-  }
+// 1. Pastikan initState memanggil data
+@override
+void initState() {
+  super.initState();
+  _fetchOrderDetails();
+}
 
-  Future<void> _fetchOrderDetails() async {
-    try {
-      // Catatan: Jika pakai emulator Android bawaan, ubah localhost menjadi 10.0.2.2
-      final response = await http.get(
-        Uri.parse('http://localhost/api_penyewaan/get_order_details.php?id=${widget.orderId}'),
-      );
+// 2. Ambil data dan set currentStatus dari DB
+Future<void> _fetchOrderDetails() async {
+  try {
+    final response = await http.get(
+      Uri.parse('http://localhost/api_penyewaan/get_order_details.php?id=${widget.orderId}'),
+    );
 
-      if (response.statusCode == 200) {
-        final resBody = json.decode(response.body);
-        if (resBody['status'] == 'success') {
-          setState(() {
-            _orderData = resBody['data'][0]; // Ambil baris pertama untuk data profil
-            _rentedItems = resBody['data'];  // Simpan list item pakaian
-            currentStatus = _orderData!['status_penyewaan'] ?? "Baru";
-            _isLoading = false;
-          });
-        } else {
-          setState(() => _isLoading = false);
-        }
-      } else {
-        setState(() => _isLoading = false);
+    if (response.statusCode == 200) {
+      final resBody = json.decode(response.body);
+      
+      if (resBody['status'] == 'success') {
+        setState(() {
+          _orderData = resBody['data']; 
+          _rentedItems = resBody['items'];
+          // Ambil status dari DB agar variabel currentStatus tidak default "Baru" terus
+          currentStatus = _orderData?['status_penyewaan'] ?? "Baru"; 
+          _isLoading = false;
+        });
       }
-    } catch (e) {
-      print("Error koneksi detail database: $e");
-      setState(() => _isLoading = false);
     }
+  } catch (e) {
+    debugPrint("Error Fetch: $e");
+    setState(() => _isLoading = false);
   }
+}
 
-  void _showStatusPopup() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
-      builder: (context) {
-        return StatusUpdateSheet(
-          currentStatus: currentStatus,
-          onSave: (newStatus) {
+// 3. Fungsi Popup dengan OrderService yang sudah di-import
+void _showStatusPopup() {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+    ),
+    builder: (context) {
+      return StatusUpdateSheet(
+        currentStatus: currentStatus,
+        onSave: (newStatus) async {
+          // Memanggil OrderService 
+          bool success = await OrderService.updateOrderStatus(
+            int.parse(widget.orderId),
+            newStatus,
+          );
+
+          if (success) {
             setState(() {
               currentStatus = newStatus;
             });
-          },
-        );
-      },
-    );
-  }
+            if (mounted) {
+              Navigator.pop(context); // Tutup bottom sheet
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Status berhasil diperbarui!")),
+              );
+            }
+          }
+        },
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +100,9 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.yellow),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
         ),
         title: const Text(
           'Detail Penyewaan',

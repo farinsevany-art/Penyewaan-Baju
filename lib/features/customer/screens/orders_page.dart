@@ -1,210 +1,285 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/constants/colors.dart';
+import '../../../data/services/order_service.dart';
+import '../../auth/widgets/auth_background.dart';
 
 class OrdersPage extends StatefulWidget {
-  // 1. Tambahkan variabel untuk menerima kiriman data dari Search Bar
-  final String? orderId; 
-
-  // 2. Masukkan ke dalam constructor
-  const OrdersPage({super.key, this.orderId});
+  const OrdersPage({super.key});
 
   @override
   State<OrdersPage> createState() => _OrdersPageState();
 }
 
 class _OrdersPageState extends State<OrdersPage> {
-  // Simulasi status dari database (nanti ini dihubungkan dengan backend/admin)
-  // 0: Menunggu Deposit, 1: Diproses, 2: Aktif, 3: Selesai, 4: Batal
-  int currentStatusIndex = 1; 
+  List<dynamic> _myOrders = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMyOrders();
+  }
+
+  Future<void> _fetchMyOrders() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+
+    // Mengambil ID Pelanggan yang tersimpan saat login
+    final prefs = await SharedPreferences.getInstance();
+    String? userIdStr = prefs.getString('user_id');
+
+    // Jika ada ID yang tersimpan, gunakan itu. Jika tidak, default ke 1
+    int idPelanggan = 1;
+    if (userIdStr != null && userIdStr.isNotEmpty) {
+      idPelanggan = int.tryParse(userIdStr) ?? 1;
+    }
+
+    // Memanggil API dengan filter ID Pelanggan yang spesifik
+    final data = await OrderService.getOrders(idPelanggan: idPelanggan);
+
+    if (mounted) {
+      setState(() {
+        _myOrders = data;
+        _isLoading = false;
+      });
+    }
+  }
+
+  String formatRupiah(String numberStr) {
+    double number = double.tryParse(numberStr) ?? 0;
+    return "Rp ${number.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(
-          // 3. Judul dinamis: Jika sedang mencari, tampilkan ID-nya
-          widget.orderId != null ? "Search: ${widget.orderId}" : "My Orders",
-          style: const TextStyle(
-            fontFamily: 'Poppins', 
-            fontWeight: FontWeight.bold, 
-            fontSize: 18, 
-            color: Color(0xFF0D1B3E)
+        backgroundColor: Colors.white.withOpacity(0.9),
+        elevation: 0.5,
+        title: const Text(
+          "Pesanan Saya",
+          style: TextStyle(
+            color: Color(0xFF0D1B3E),
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+            fontSize: 18,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        automaticallyImplyLeading: widget.orderId != null, // Tampilkan tombol back hanya jika hasil pencarian
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.black87),
+            onPressed: _fetchMyOrders,
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.orderId != null ? "Hasil Pencarian" : "Status Pesanan",
-              style: const TextStyle(
-                fontFamily: 'PlayfairDisplay', 
-                fontSize: 24, 
-                fontWeight: FontWeight.bold, 
-                color: Color(0xFF0D1B3E)
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.orderId != null 
-                ? "Menampilkan detail pesanan untuk ID: ${widget.orderId}"
-                : "Pantau tahapan penyewaan kostum kamu",
-              style: const TextStyle(
-                fontFamily: 'Poppins', 
-                fontSize: 14, 
-                color: Color(0xFFE4B04B)
-              ),
-            ),
-            const SizedBox(height: 25),
-            
-            // Kartu Pesanan (Data ID diambil dari widget.orderId jika tersedia)
-            _buildOrderCard(
-              context,
-              costumeName: "Kostum Tari Legong Bali",
-              orderId: widget.orderId ?? "KC-2024-001",
-              date: "12 Mei 2024",
-            ),
-          ],
+      body: AuthBackground(
+        child: SafeArea(
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryNavy,
+                  ),
+                )
+              : _myOrders.isEmpty
+              ? _buildEmptyState()
+              : RefreshIndicator(
+                  onRefresh: _fetchMyOrders,
+                  color: AppColors.primaryNavy,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _myOrders.length,
+                    itemBuilder: (context, index) {
+                      final order = _myOrders[index];
+                      return _buildOrderCard(order);
+                    },
+                  ),
+                ),
         ),
       ),
     );
   }
 
-  // --- Widget helper tetap sama seperti sebelumnya ---
-  Widget _buildOrderCard(
-    BuildContext context, {
-    required String costumeName,
-    required String orderId,
-    required String date,
-  }) {
+  Widget _buildOrderCard(Map<String, dynamic> order) {
+    // Mengambil nama satu orderan saja untuk judul
+    String itemsRaw = order['items_summary'] ?? "";
+    String firstItemName = itemsRaw.split(',').first.split('x ').last;
+
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
+            blurRadius: 10,
             offset: const Offset(0, 5),
-          )
+          ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header Order
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Menampilkan HANYA NAMA KOSTUM sebagai judul utama (ID dihapus)
+              Expanded(
+                child: Text(
+                  firstItemName.isNotEmpty ? firstItemName : "Kostum Pesanan",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                    color: AppColors.primaryNavy,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              _buildStatusBadge(order['status_penyewaan'] ?? 'Menunggu'),
+            ],
+          ),
+          const Divider(height: 25),
+
+          // Detail Order
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE4B04B).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.shopping_bag_outlined, color: Color(0xFFE4B04B)),
+              const Icon(
+                Icons.calendar_month_outlined,
+                size: 20,
+                color: Colors.grey,
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: 8),
+              Text(
+                "${order['tanggal_sewa']} s/d ${order['tanggal_kembali']}",
+                style: const TextStyle(color: Colors.black87, fontSize: 13),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.shopping_bag_outlined,
+                size: 20,
+                color: Colors.grey,
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      costumeName,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins', 
-                        fontWeight: FontWeight.bold, 
-                        fontSize: 15
-                      ),
-                    ),
-                    Text(
-                      "$orderId • $date",
-                      style: const TextStyle(
-                        fontFamily: 'Poppins', 
-                        color: Colors.grey, 
-                        fontSize: 11
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  order['items_summary'] ?? '-',
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ],
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 20),
-            child: Divider(thickness: 1, height: 1),
-          ),
+          const SizedBox(height: 15),
 
-          _statusStep("Menunggu Deposit", "Awaiting Deposit", Icons.account_balance_wallet_outlined, 0),
-          _statusStep("Diproses", "Processing", Icons.sync, 1),
-          _statusStep("Aktif/Disewa", "Active/Rented", Icons.check_circle_outline, 2),
-          _statusStep("Selesai/Kembali", "Completed/Returned", Icons.assignment_returned_outlined, 3),
-          _statusStep("Dibatalkan", "Cancelled", Icons.cancel_outlined, 4),
+          // Total Harga
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F9FA),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Total Pembayaran",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                  ),
+                ),
+                Text(
+                  formatRupiah(order['total_harga'].toString()),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                    color: AppColors.primaryNavy,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _statusStep(String title, String subtitle, IconData icon, int index) {
-    bool isActive = currentStatusIndex == index;
-    bool isPast = currentStatusIndex > index && currentStatusIndex != 4; 
+  Widget _buildStatusBadge(String status) {
+    Color bgColor = Colors.grey.shade200;
+    Color textColor = Colors.black;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        decoration: BoxDecoration(
-          color: isActive ? Colors.white : const Color(0xFFF2F2F7).withOpacity(0.5),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isActive ? const Color(0xFFE4B04B) : Colors.transparent,
-            width: 1.5,
+    if (status.contains('Menunggu')) {
+      bgColor = Colors.orange.shade50;
+      textColor = Colors.orange.shade800;
+    } else if (status.contains('Diproses')) {
+      bgColor = Colors.blue.shade50;
+      textColor = Colors.blue.shade800;
+    } else if (status.contains('Disewa')) {
+      bgColor = Colors.green.shade50;
+      textColor = Colors.green.shade800;
+    } else if (status.contains('Selesai')) {
+      bgColor = Colors.teal.shade50;
+      textColor = Colors.teal.shade800;
+    } else if (status.contains('Batal')) {
+      bgColor = Colors.red.shade50;
+      textColor = Colors.red.shade800;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.assignment_outlined,
+            size: 80,
+            color: Colors.grey.shade300,
           ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              isActive ? Icons.radio_button_checked : (isPast ? Icons.check_circle : Icons.radio_button_off),
-              color: isActive ? const Color(0xFFE4B04B) : (isPast ? Colors.green : Colors.grey[400]),
-              size: 22,
+          const SizedBox(height: 16),
+          const Text(
+            "Belum ada pesanan",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryNavy,
             ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                      fontSize: 14,
-                      color: isActive ? Colors.black : Colors.grey[600],
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontFamily: 'Poppins', 
-                      fontSize: 11, 
-                      color: Colors.grey[400]
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              icon,
-              color: isActive ? const Color(0xFFE4B04B) : Colors.grey[300],
-              size: 20,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            "Pesanan yang Anda buat akan muncul di sini.",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ],
       ),
     );
   }

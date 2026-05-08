@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Tambahkan ini
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/colors.dart';
 import '../../../data/services/auth_service.dart';
 import '../widgets/auth_background.dart';
@@ -36,23 +36,47 @@ class _LoginFormPageState extends State<LoginFormPage> {
       final response = await AuthService.login(email, password);
 
       if (response['status'] == 'success') {
-        // --- PROSES PENYIMPANAN DATA KE SESSION ---
-        final prefs = await SharedPreferences.getInstance();
-        final userData = response['data']; // Mengambil data dari login.php[cite: 1]
-
-        // Simpan data pelanggan agar otomatis muncul di ProfilePage
-        await prefs.setString('name', userData['nama'] ?? '');
-        await prefs.setString('email', userData['email'] ?? '');
-        await prefs.setString('phone', userData['no_hp'] ?? '');
-        await prefs.setString('address', userData['alamat'] ?? '');
-        // -------------------------------------------
-
         final userRole = response['role'];
+        final userData =
+            response['data']; // Mengambil object data dari login.php
+
+        // MENCARI ID DAN PROFIL DARI DALAM "data"
+        String userId = '1';
+        String userName = 'Pengguna';
+        String userEmail = email;
+        String userPhone = '-';
+        String userAddress = '-';
+
+        if (userData != null) {
+          // Tangkap ID
+          userId =
+              userData['id_pelanggan']?.toString() ??
+              userData['id_admin']?.toString() ??
+              '1';
+
+          // Tangkap Info Profil (sesuaikan dengan nama kolom tabel database Anda)
+          userName = userData['nama']?.toString() ?? 'Pengguna';
+          userEmail = userData['email']?.toString() ?? email;
+          userPhone = userData['no_hp']?.toString() ?? '-';
+          userAddress = userData['alamat']?.toString() ?? '-';
+        }
+
+        final prefs = await SharedPreferences.getInstance();
+
+        // SIMPAN SEMUA DATA KE PENYIMPANAN HP
+        await prefs.setString('user_id', userId);
+        await prefs.setString('name', userName);
+        await prefs.setString('email', userEmail);
+        await prefs.setString('phone', userPhone);
+        await prefs.setString('address', userAddress);
+
         if (userRole == roleType.toLowerCase()) {
           if (userRole == 'admin') {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
+              MaterialPageRoute(
+                builder: (context) => const AdminDashboardPage(),
+              ),
             );
           } else {
             Navigator.pushReplacement(
@@ -61,7 +85,10 @@ class _LoginFormPageState extends State<LoginFormPage> {
             );
           }
         } else {
-          _showSnackBar("Akun Anda tidak terdaftar sebagai $roleType", Colors.red);
+          _showSnackBar(
+            "Akun Anda tidak terdaftar sebagai $roleType",
+            Colors.red,
+          );
         }
       } else {
         _showSnackBar(response['message'] ?? "Login Gagal", Colors.red);
@@ -73,11 +100,10 @@ class _LoginFormPageState extends State<LoginFormPage> {
     }
   }
 
-  // ... (Widget build tetap sama seperti kode sebelumnya)
   void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: color)
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 
   @override
@@ -138,32 +164,60 @@ class _LoginFormPageState extends State<LoginFormPage> {
                       isObscure: _obscurePassword,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           color: AppColors.mediumGrey,
                         ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 40),
                     if (_isLoading)
-                      const Center(child: CircularProgressIndicator(color: AppColors.primaryGold))
+                      const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryGold,
+                        ),
+                      )
                     else ...[
-                      _buildLoginButton('Login Pelanggan', AppColors.primaryGold, () => _handleLogin('Pelanggan')),
+                      _buildLoginButton(
+                        'Login Pelanggan',
+                        AppColors.primaryGold,
+                        () => _handleLogin('Pelanggan'),
+                      ),
                       const SizedBox(height: 15),
-                      _buildLoginButton('Login Admin', AppColors.primaryGold, () => _handleLogin('Admin')),
+                      _buildLoginButton(
+                        'Login Admin',
+                        AppColors.primaryGold,
+                        () => _handleLogin('Admin'),
+                      ),
                     ],
                     const SizedBox(height: 20),
                     Center(
                       child: GestureDetector(
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPage())),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RegisterPage(),
+                          ),
+                        ),
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(color: AppColors.mediumGrey, fontSize: 12, fontFamily: 'Poppins'),
+                            style: TextStyle(
+                              color: AppColors.mediumGrey,
+                              fontSize: 12,
+                              fontFamily: 'Poppins',
+                            ),
                             children: [
                               TextSpan(text: 'Belum punya akun? '),
                               TextSpan(
                                 text: 'Daftar di sini',
-                                style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  color: Colors.deepOrange,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
@@ -180,15 +234,28 @@ class _LoginFormPageState extends State<LoginFormPage> {
     );
   }
 
-  Widget _buildTextField(String hint, {required TextEditingController controller, bool isObscure = false, Widget? suffixIcon}) {
+  Widget _buildTextField(
+    String hint, {
+    required TextEditingController controller,
+    bool isObscure = false,
+    Widget? suffixIcon,
+  }) {
     return TextField(
       controller: controller,
       obscureText: isObscure,
+      style: const TextStyle(fontFamily: 'Poppins'),
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
         fillColor: AppColors.offWhite,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 15,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
         suffixIcon: suffixIcon,
       ),
     );
@@ -200,8 +267,20 @@ class _LoginFormPageState extends State<LoginFormPage> {
       height: 45,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(backgroundColor: color, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-        child: Text(text, style: const TextStyle(color: AppColors.primaryNavy, fontWeight: FontWeight.bold)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: AppColors.primaryNavy,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+          ),
+        ),
       ),
     );
   }

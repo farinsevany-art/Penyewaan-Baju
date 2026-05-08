@@ -2,11 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class OrderService {
-  // Sesuaikan dengan URL server Anda.
-  // Jika menggunakan emulator Android, gunakan "http://10.0.2.2/api_penyewaan"
   static const String baseUrl = "http://localhost/api_penyewaan";
 
-  // Fungsi untuk melakukan checkout ke database
+  // 1. Fungsi Checkout (Sudah ada sebelumnya)
   static Future<Map<String, dynamic>> checkoutPesanan(
     Map<String, dynamic> orderData,
   ) async {
@@ -14,18 +12,63 @@ class OrderService {
       final response = await http.post(
         Uri.parse("$baseUrl/checkout.php"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode(orderData), // Kirim data order dalam format JSON
+        body: jsonEncode(orderData),
       );
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
-      return {
-        "status": "error",
-        "message": "Gagal terhubung ke server (Code: ${response.statusCode})",
-      };
+      return {"status": "error", "message": "Gagal terhubung ke server"};
     } catch (e) {
       return {"status": "error", "message": "Terjadi kesalahan: $e"};
+    }
+  }
+
+  // 2. Fungsi Ambil Data Pesanan (Admin & Customer)
+  static Future<List<dynamic>> getOrders({int? idPelanggan}) async {
+    try {
+      String url = "$baseUrl/get_orders.php";
+      if (idPelanggan != null) {
+        url += "?id_pelanggan=$idPelanggan"; // Filter khusus customer
+      }
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success') {
+          return data['data'];
+        }
+      }
+      return [];
+    } catch (e) {
+      print("Error getOrders: $e");
+      return [];
+    }
+  }
+
+  // 3. Fungsi Ubah Status Pesanan (Khusus Admin)
+  static Future<bool> updateOrderStatus(
+    int idPenyewaan,
+    String statusBaru,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/update_status.php"),
+        body: {
+          "id_penyewaan": idPenyewaan.toString(),
+          "status_penyewaan": statusBaru,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['status'] == 'success';
+      }
+      return false;
+    } catch (e) {
+      print("Error updateOrderStatus: $e");
+      return false;
     }
   }
 }
