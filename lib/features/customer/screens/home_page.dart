@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart'; // Tempat fetch API
-
+import '../../auth/widgets/auth_background.dart';
 import '../widgets/costume_card.dart';
 import 'wishlist_page.dart';
 import 'orders_page.dart';
@@ -20,6 +20,9 @@ class CustomerHomePage extends StatefulWidget {
 class _CustomerHomePageState extends State<CustomerHomePage> {
   int _selectedIndex = 0;
   bool _isLoading = true; // Penanda Loading
+
+  // 🔻 TAMBAHAN: GlobalKey agar Home bisa menyuruh Wishlist refresh
+  final GlobalKey<WishlistPageState> _wishlistKey = GlobalKey();
 
   @override
   void initState() {
@@ -47,10 +50,11 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       );
     }
 
+    // 🔻 PERBAIKAN: Menghapus 'const' pada Wishlist dan memasukkan key
     final List<Widget> pages = [
       HomeContent(costumes: allCostumes),
-      const WishlistPage(),
-      CartPage(), // <--- CONST DIHAPUS DI SINI
+      WishlistPage(key: _wishlistKey), // <--- PERUBAHAN DI SINI
+      CartPage(),
       const OrdersPage(),
       const ProfilePage(),
     ];
@@ -73,7 +77,13 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         backgroundColor: Colors.white,
         selectedItemColor: const Color(0xFF0D1B3E),
         unselectedItemColor: Colors.grey,
-        onTap: (index) => setState(() => _selectedIndex = index),
+        onTap: (index) {
+          setState(() => _selectedIndex = index);
+          // 🔻 REFRESH OTOMATIS: Jika user klik tab Wishlist (index 1), paksa refresh!
+          if (index == 1) {
+            _wishlistKey.currentState?.refreshData();
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
@@ -138,86 +148,89 @@ class _HomeContentState extends State<HomeContent> {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          children: [
-            Stack(
+      body: AuthBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
               children: [
-                ClipPath(
-                  clipper: MyHeaderClipper(),
-                  child: SizedBox(
-                    height: 350,
-                    width: double.infinity,
-                    child: Stack(
-                      children: [
-                        Image.asset(
-                          'assets/images/home.png',
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: 350,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(color: const Color(0xFF0D1B3E)),
+                Stack(
+                  children: [
+                    ClipPath(
+                      clipper: MyHeaderClipper(),
+                      child: SizedBox(
+                        height: 350,
+                        width: double.infinity,
+                        child: Stack(
+                          children: [
+                            Image.asset(
+                              'assets/images/home.png',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 350,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(color: const Color(0xFF0D1B3E)),
+                            ),
+                            Container(color: Colors.black.withOpacity(0.35)),
+                          ],
                         ),
-                        Container(color: Colors.black.withOpacity(0.35)),
-                      ],
+                      ),
                     ),
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSearchBar(context),
+                          const SizedBox(height: 35),
+                          _buildHeaderText(),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 155,
+                  child: _buildCurvedCategories(context, screenWidth),
+                ),
+                _buildSectionHeader(context, "POPULAR"),
+
+                // Product Grid
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSearchBar(context),
-                      const SizedBox(height: 35),
-                      _buildHeaderText(),
-                    ],
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: widget.costumes.isEmpty
+                      ? const Center(
+                          child: Text(
+                            "Belum ada kostum tersedia.",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        )
+                      : GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: widget.costumes.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.68,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                              ),
+                          itemBuilder: (context, index) {
+                            final item = widget.costumes[index];
+                            return CostumeCard(
+                              costume: item,
+                              onWishlistToggle: () => setState(
+                                () => item.isWishlisted = !item.isWishlisted,
+                              ),
+                            );
+                          },
+                        ),
                 ),
+                const SizedBox(height: 30),
               ],
             ),
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 155,
-              child: _buildCurvedCategories(context, screenWidth),
-            ),
-            _buildSectionHeader(context, "POPULAR"),
-
-            // Product Grid
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: widget.costumes.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "Belum ada kostum tersedia.",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: widget.costumes.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.68,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
-                      itemBuilder: (context, index) {
-                        final item = widget.costumes[index];
-                        return CostumeCard(
-                          costume: item,
-                          onWishlistToggle: () => setState(
-                            () => item.isWishlisted = !item.isWishlisted,
-                          ),
-                        );
-                      },
-                    ),
-            ),
-            const SizedBox(height: 30),
-          ],
+          ),
         ),
       ),
     );
@@ -418,7 +431,7 @@ class _HomeContentState extends State<HomeContent> {
               'Tersedia >',
               style: TextStyle(
                 fontFamily: 'Poppins',
-                color: Color(0xFFE4B04B),
+                color: Color(0xFF0D1B3E),
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),

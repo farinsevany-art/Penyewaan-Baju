@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../data/models/costume_model.dart';
-// 🔻 PASTIKAN IMPORT INI ADA
 import '../../../data/services/mock_data.dart';
-// 🔻 Tambahkan import halaman detail produk Anda
 import '../screens/product_detail_page.dart';
 
 class CostumeCard extends StatefulWidget {
@@ -66,39 +64,30 @@ class _CostumeCardState extends State<CostumeCard> {
   }
 
   void _handleAddToCart() {
-    if (widget.costume != null) {
-      if (!cartItemsGlobal.contains(widget.costume)) {
-        setState(() {
-          widget.costume!.isInCart = true;
-          widget.costume!.quantity = 1;
-          cartItemsGlobal.add(widget.costume!);
-        });
-      } else {
-        setState(() {
-          widget.costume!.quantity++;
-        });
-      }
-    }
-
     if (widget.onAddToCart != null) {
       widget.onAddToCart!();
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$_name ditambahkan ke keranjang'),
-        backgroundColor: const Color.fromARGB(255, 7, 32, 60),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 1),
-      ),
-    );
+    if (widget.costume != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailPage(
+            costume: widget.costume!,
+            product: widget.costume!,
+          ),
+        ),
+      ).then((_) {
+        // 🔻 REFRESH OTOMATIS SAAT KEMBALI 🔻
+        if (mounted) setState(() {});
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // 🔥 Perbaikan: Menambahkan aksi default untuk navigasi ke halaman detail
       onTap:
           widget.onTap ??
           () {
@@ -106,10 +95,15 @@ class _CostumeCardState extends State<CostumeCard> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      ProductDetailPage(costume: widget.costume!),
+                  builder: (context) => ProductDetailPage(
+                    costume: widget.costume!,
+                    product: widget.costume!,
+                  ),
                 ),
-              );
+              ).then((_) {
+                // 🔻 REFRESH OTOMATIS SAAT KEMBALI 🔻
+                if (mounted) setState(() {});
+              });
             }
           },
       child: Container(

@@ -50,12 +50,15 @@ class _LineChart extends StatelessWidget {
     return LineChart(
       LineChartData(
         gridData: const FlGridData(show: false),
+        // ... kode sebelumnya ...
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
+              interval: 1, // 🔻 TAMBAHKAN BARIS INI AGAR HARI TIDAK DOUBLE 🔻
               getTitlesWidget: (value, meta) {
                 int index = value.toInt();
+                // ... kode setelahnya ...
                 if (index >= 0 && index < data.length) {
                   return Text(
                     data[index]['day'],

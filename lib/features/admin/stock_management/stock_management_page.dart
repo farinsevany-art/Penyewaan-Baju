@@ -229,9 +229,9 @@ class _StockManagementPageState extends State<StockManagementPage> {
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
-        padding: const EdgeInsets.all(14.0), // Sedikit diperbesar paddingnya
+        padding: const EdgeInsets.all(14.0),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start, // Agar sejajar di atas
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildIconPlaceholder(item.gambar),
             const SizedBox(width: 16),
@@ -263,7 +263,6 @@ class _StockManagementPageState extends State<StockManagementPage> {
   }
 
   Widget _buildIconPlaceholder(String? fotoFileName) {
-    // UKURAN GAMBAR DIPERBESAR MENJADI 85x85
     if (fotoFileName != null && fotoFileName.isNotEmpty) {
       return Container(
         decoration: BoxDecoration(
@@ -293,7 +292,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
 
   Widget _defaultPlaceholder() {
     return Container(
-      width: 85, // UKURAN DEFAULT PLACEHOLDER DIPERBESAR
+      width: 85,
       height: 85,
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
@@ -303,11 +302,12 @@ class _StockManagementPageState extends State<StockManagementPage> {
       child: const Icon(
         Icons.inventory_2_outlined,
         color: AppColors.primaryNavy,
-        size: 40, // Ikon diperbesar agar seimbang
+        size: 40,
       ),
     );
   }
 
+  // FUNGSI YANG SEBELUMNYA TIDAK SENGAJA TERHAPUS
   Widget _buildStockBadge(int stok) {
     return Row(
       children: [
@@ -364,32 +364,40 @@ class _StockManagementPageState extends State<StockManagementPage> {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            InkWell(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditStockPage(stock: item),
+            // TOMBOL EDIT
+            Material(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditStockPage(stock: item),
+                  ),
+                ).then((_) => _refreshData()),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.edit, size: 20, color: Colors.blue),
                 ),
-              ).then((_) => _refreshData()),
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.edit, size: 20, color: Colors.blue),
               ),
             ),
             const SizedBox(width: 10),
-            InkWell(
-              onTap: () => _confirmDelete(item.idKostum!),
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
+            // TOMBOL HAPUS (Sudah diperlebar area tap-nya)
+            Material(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(8),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () {
+                  if (item.idKostum != null) {
+                    _confirmDelete(item.idKostum!);
+                  }
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.delete, size: 20, color: Colors.red),
                 ),
-                child: const Icon(Icons.delete, size: 20, color: Colors.red),
               ),
             ),
           ],
@@ -404,36 +412,31 @@ class _StockManagementPageState extends State<StockManagementPage> {
       builder: (context) => AlertDialog(
         title: const Text("Hapus Data?"),
         content: const Text("Data kostum akan dihapus secara permanen."),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Batal", style: TextStyle(color: Colors.grey)),
+            child: const Text("Batal"),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+          TextButton(
             onPressed: () async {
               final res = await StockService.deleteStock(id);
               if (res['success']) {
-                if (context.mounted) Navigator.pop(context);
-                _refreshData();
-              } else {
-                if (context.mounted) {
+                if (mounted) {
                   Navigator.pop(context);
+                  _refreshData();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Gagal menghapus: ${res['message']}"),
-                    ),
+                    const SnackBar(content: Text("Berhasil dihapus")),
+                  );
+                }
+              } else {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Error: ${res['message']}")),
                   );
                 }
               }
             },
-            child: const Text("Hapus", style: TextStyle(color: Colors.white)),
+            child: const Text("Hapus", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

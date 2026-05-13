@@ -1,3 +1,4 @@
+import 'dart:async'; // TAMBAHKAN IMPORT INI UNTUK TIMER
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/colors.dart';
@@ -14,34 +15,44 @@ class OrdersPage extends StatefulWidget {
 class _OrdersPageState extends State<OrdersPage> {
   List<dynamic> _myOrders = [];
   bool _isLoading = true;
+  Timer? _timer; // VARIABEL TIMER
 
   @override
   void initState() {
     super.initState();
-    _fetchMyOrders();
+    _fetchMyOrders(showLoading: true);
+
+    // FITUR REAL-TIME: Mengecek database secara diam-diam setiap 3 detik
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      _fetchMyOrders(showLoading: false);
+    });
   }
 
-  Future<void> _fetchMyOrders() async {
-    if (!mounted) return;
-    setState(() => _isLoading = true);
+  @override
+  void dispose() {
+    _timer?.cancel(); // MATIKAN TIMER SAAT PINDAH HALAMAN
+    super.dispose();
+  }
 
-    // Mengambil ID Pelanggan yang tersimpan saat login
+  // Parameter showLoading agar saat auto-refresh layarnya tidak kedap-kedip
+  Future<void> _fetchMyOrders({bool showLoading = false}) async {
+    if (!mounted) return;
+    if (showLoading) setState(() => _isLoading = true);
+
     final prefs = await SharedPreferences.getInstance();
     String? userIdStr = prefs.getString('user_id');
 
-    // Jika ada ID yang tersimpan, gunakan itu. Jika tidak, default ke 1
     int idPelanggan = 1;
     if (userIdStr != null && userIdStr.isNotEmpty) {
       idPelanggan = int.tryParse(userIdStr) ?? 1;
     }
 
-    // Memanggil API dengan filter ID Pelanggan yang spesifik
     final data = await OrderService.getOrders(idPelanggan: idPelanggan);
 
     if (mounted) {
       setState(() {
         _myOrders = data;
-        _isLoading = false;
+        if (showLoading) _isLoading = false;
       });
     }
   }
@@ -71,7 +82,7 @@ class _OrdersPageState extends State<OrdersPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.black87),
-            onPressed: _fetchMyOrders,
+            onPressed: () => _fetchMyOrders(showLoading: true),
           ),
         ],
       ),
@@ -86,7 +97,7 @@ class _OrdersPageState extends State<OrdersPage> {
               : _myOrders.isEmpty
               ? _buildEmptyState()
               : RefreshIndicator(
-                  onRefresh: _fetchMyOrders,
+                  onRefresh: () => _fetchMyOrders(showLoading: true),
                   color: AppColors.primaryNavy,
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -103,9 +114,9 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Widget _buildOrderCard(Map<String, dynamic> order) {
-    // Mengambil nama satu orderan saja untuk judul
-    String itemsRaw = order['items_summary'] ?? "";
-    String firstItemName = itemsRaw.split(',').first.split('x ').last;
+    // 🔻 PERBAIKAN: Menggunakan ID Penyewaan sesuai saran Anda 🔻
+    String orderId = order['id_penyewaan']?.toString() ?? '-';
+    String displayTitle = "ID Penyewaan: $orderId";
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -124,14 +135,12 @@ class _OrdersPageState extends State<OrdersPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Order
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Menampilkan HANYA NAMA KOSTUM sebagai judul utama (ID dihapus)
               Expanded(
                 child: Text(
-                  firstItemName.isNotEmpty ? firstItemName : "Kostum Pesanan",
+                  displayTitle,
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 16,
@@ -144,8 +153,6 @@ class _OrdersPageState extends State<OrdersPage> {
             ],
           ),
           const Divider(height: 25),
-
-          // Detail Order
           Row(
             children: [
               const Icon(
@@ -183,8 +190,6 @@ class _OrdersPageState extends State<OrdersPage> {
             ],
           ),
           const SizedBox(height: 15),
-
-          // Total Harga
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(

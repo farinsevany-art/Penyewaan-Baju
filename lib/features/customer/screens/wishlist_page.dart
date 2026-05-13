@@ -9,16 +9,25 @@ class WishlistPage extends StatefulWidget {
   const WishlistPage({super.key});
 
   @override
-  State<WishlistPage> createState() => _WishlistPageState();
+  // 🔻 PERBAIKAN: Menghapus underscore '_' agar class menjadi public
+  State<WishlistPage> createState() => WishlistPageState();
 }
 
-class _WishlistPageState extends State<WishlistPage> {
+// 🔻 PERBAIKAN: Nama class dibuat public (WishlistPageState)
+class WishlistPageState extends State<WishlistPage> {
   bool _isExploring = false;
 
   // Filter untuk menampilkan kostum yang di-wishlist saja
   List<Costume> get _itemsToShow => _isExploring
       ? allCostumes
       : allCostumes.where((c) => c.isWishlisted).toList();
+
+  // 🔻 TAMBAHAN: Fungsi ini akan dipanggil oleh Bottom Navigation saat tab diklik
+  void refreshData() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,21 +36,6 @@ class _WishlistPageState extends State<WishlistPage> {
       appBar: AppBar(
         backgroundColor: Colors.white.withOpacity(0.9),
         elevation: 0.5,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () {
-            if (_isExploring) {
-              setState(() => _isExploring = false);
-            } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CustomerHomePage(),
-                ),
-              );
-            }
-          },
-        ),
         title: Text(
           _isExploring ? 'Jelajahi Kostum' : 'Wishlist Saya',
           style: const TextStyle(

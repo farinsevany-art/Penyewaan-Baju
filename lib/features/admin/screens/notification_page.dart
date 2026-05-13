@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../../core/constants/colors.dart';
-import 'rent_details_page.dart'; // Pastikan path import ini benar
+import 'rent_details_page.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -11,6 +13,41 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   bool _isShowingUnreadOnly = true;
+  List<dynamic> _notifications = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotifications();
+  }
+
+  Future<void> _fetchNotifications() async {
+    try {
+      // Menggunakan localhost untuk testing di Web (Chrome)
+      final response = await http.get(
+        Uri.parse("http://localhost/api_penyewaan/get_notifications.php"),
+      );
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result['status'] == 'success') {
+          setState(() {
+            _notifications = result['data'];
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // Filter notifikasi berdasarkan Tab yang dipilih
+  List<dynamic> get _filteredNotifications {
+    if (!_isShowingUnreadOnly) return _notifications;
+    return _notifications.where((n) => n['is_unread'] == true).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,18 +86,47 @@ class _NotificationPageState extends State<NotificationPage> {
             ),
           ),
           Expanded(
-            child: ListView(
-              children: _isShowingUnreadOnly
-                  ? _buildUnreadList()
-                  : _buildAllList(),
-            ),
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryNavy,
+                    ),
+                  )
+                : _filteredNotifications.isEmpty
+                ? const Center(
+                    child: Text(
+                      "Tidak ada notifikasi saat ini",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _fetchNotifications,
+                    color: AppColors.primaryNavy,
+                    child: ListView.builder(
+                      itemCount: _filteredNotifications.length,
+                      itemBuilder: (context, index) {
+                        final notif = _filteredNotifications[index];
+                        return _buildNotificationItem(
+                          notif['title'],
+                          notif['sub'],
+                          notif['time'], // Menampilkan tanggal pesanan
+                          notif['code'].toString(),
+                          notif['is_unread'],
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTabItem(String title, {required bool isActive, required VoidCallback onTap}) {
+  Widget _buildTabItem(
+    String title, {
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -87,68 +153,86 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  List<Widget> _buildUnreadList() {
-    return [
-      _buildSectionHeader("HARI INI"),
-      _buildNotificationItem("Pesanan Baru", "Menyewa kostum 'Anoman'", "2m lalu", "#CR-8821"),
-      _buildNotificationItem("Pesanan Baru", "Menyewa kostum 'Clara I'", "1j lalu", "#CR-8795"),
-    ];
-  }
-
-  List<Widget> _buildAllList() {
-    return [
-      ..._buildUnreadList(),
-      _buildSectionHeader("KEMARIN"),
-      _buildNotificationItem("Pesanan Baru", "Menyewa 'Raja dan Ratu'", "1h lalu", "#CR-8642"),
-      _buildNotificationItem("Pesanan Baru", "Menyewa 'Shinta'", "1h lalu", "#CR-8511"),
-    ];
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: AppColors.offWhite,
-      child: Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
-    );
-  }
-
-  Widget _buildNotificationItem(String title, String sub, String time, String code) {
-    return InkWell( // Menggunakan InkWell agar ada efek tekan (ripple)
+  Widget _buildNotificationItem(
+    String title,
+    String sub,
+    String time,
+    String code,
+    bool isUnread,
+  ) {
+    return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => RentDetailsPage(orderId: code),
           ),
-        );
+        ).then((_) {
+          // Refresh notifikasi setelah menutup halaman detail (berjaga-jaga jika admin mengubah status)
+          _fetchNotifications();
+        });
       },
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Color(0xFFFDF6E9),
-          border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+        decoration: BoxDecoration(
+          // Memberikan warna background berbeda jika belum dibaca
+          color: isUnread ? const Color(0xFFFDF6E9) : Colors.white,
+          border: const Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
         ),
         child: Row(
           children: [
-            const Icon(Icons.shopping_bag_outlined),
+            Icon(
+              Icons.shopping_bag_outlined,
+              color: isUnread ? AppColors.primaryNavy : Colors.grey,
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text(sub),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: isUnread
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isUnread ? Colors.black : Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    sub,
+                    style: TextStyle(
+                      color: isUnread ? Colors.black87 : Colors.grey,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(color: AppColors.primaryGold, borderRadius: BorderRadius.circular(4)),
-                    child: Text(code, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isUnread
+                          ? AppColors.primaryGold
+                          : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      "ID: $code",
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isUnread ? Colors.black : Colors.black54,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            Text(time, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+            Text(
+              time,
+              style: const TextStyle(color: Colors.grey, fontSize: 11),
+            ),
           ],
         ),
       ),

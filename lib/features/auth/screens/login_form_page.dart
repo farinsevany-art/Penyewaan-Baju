@@ -46,6 +46,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
         String userEmail = email;
         String userPhone = '-';
         String userAddress = '-';
+        String? userFoto; // 🔻 VARIABEL BARU UNTUK FOTO
 
         if (userData != null) {
           // Tangkap ID
@@ -59,6 +60,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
           userEmail = userData['email']?.toString() ?? email;
           userPhone = userData['no_hp']?.toString() ?? '-';
           userAddress = userData['alamat']?.toString() ?? '-';
+          userFoto = userData['foto']?.toString(); // 🔻 TANGKAP NAMA FILE FOTO
         }
 
         final prefs = await SharedPreferences.getInstance();
@@ -69,6 +71,11 @@ class _LoginFormPageState extends State<LoginFormPage> {
         await prefs.setString('email', userEmail);
         await prefs.setString('phone', userPhone);
         await prefs.setString('address', userAddress);
+
+        // 🔻 SIMPAN FOTO KE PENYIMPANAN JIKA ADA 🔻
+        if (userFoto != null && userFoto.isNotEmpty) {
+          await prefs.setString('foto', userFoto);
+        }
 
         if (userRole == roleType.toLowerCase()) {
           if (userRole == 'admin') {
@@ -190,7 +197,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
                       const SizedBox(height: 15),
                       _buildLoginButton(
                         'Login Admin',
-                        AppColors.primaryGold,
+                        AppColors.primaryNavy,
                         () => _handleLogin('Admin'),
                       ),
                     ],
@@ -276,7 +283,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
         child: Text(
           text,
           style: const TextStyle(
-            color: AppColors.primaryNavy,
+            color: Color.fromARGB(255, 250, 250, 250),
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
           ),

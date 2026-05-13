@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/costume_model.dart';
-import '../../../data/services/mock_data.dart'; // Untuk cartItemsGlobal & imageBaseUrl
+import '../../../data/services/mock_data.dart';
+import '../../auth/widgets/auth_background.dart';
 import 'confirmation_page.dart';
 
 class CartPage extends StatefulWidget {
@@ -24,7 +25,8 @@ class _CartPageState extends State<CartPage> {
   double calculateTotal() {
     double total = 0;
     for (var item in cartItemsGlobal) {
-      total += item.price * item.quantity;
+      // PERBAIKAN: Total harga = harga x jumlah x lama hari sewa
+      total += item.price * item.quantity * item.rentDays;
     }
     return total;
   }
@@ -39,136 +41,201 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Keranjang'), centerTitle: true),
-      body: cartItemsGlobal.isEmpty
-          ? const Center(
-              child: Text(
-                'Keranjang masih kosong',
-                style: TextStyle(color: Colors.grey),
-              ),
-            )
-          : ListView.builder(
-              itemCount: cartItemsGlobal.length,
-              itemBuilder: (context, index) {
-                final item = cartItemsGlobal[index];
-                return Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-                            ? Image.network(
-                                "$imageBaseUrl${item.imageUrl}",
-                                width: 75,
-                                height: 75,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
+      backgroundColor:
+          Colors.transparent, // Transparan agar AuthBackground terlihat
+      appBar: AppBar(
+        title: const Text(
+          'Keranjang Saya',
+          style: TextStyle(
+            color: Color(0xFF0D1B3E),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white.withOpacity(0.9),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF0D1B3E)),
+      ),
+      // PERBAIKAN: Menggunakan AuthBackground
+      body: AuthBackground(
+        child: cartItemsGlobal.isEmpty
+            ? const Center(
+                child: Text(
+                  'Keranjang masih kosong',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+              )
+            : ListView.builder(
+                itemCount: cartItemsGlobal.length,
+                itemBuilder: (context, index) {
+                  final item = cartItemsGlobal[index];
+
+                  int maxStock = 1;
+                  // Memastikan batas limit stok untuk ukuran yang dipilih
+                  if (item.selectedSize != null &&
+                      item.sizeStocks.containsKey(item.selectedSize)) {
+                    maxStock = item.sizeStocks[item.selectedSize!]!;
+                  } else {
+                    maxStock = item.stock;
+                  }
+
+                  return Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(
+                        0.95,
+                      ), // Agak putih agar kontras dengan AuthBackground
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child:
+                              item.imageUrl != null && item.imageUrl!.isNotEmpty
+                              ? Image.network(
+                                  "$imageBaseUrl${item.imageUrl}",
+                                  width: 75,
+                                  height: 75,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 75,
+                                    height: 75,
+                                    color: Colors.grey,
+                                  ),
+                                )
+                              : Container(
                                   width: 75,
                                   height: 75,
                                   color: Colors.grey,
                                 ),
-                              )
-                            : Container(
-                                width: 75,
-                                height: 75,
-                                color: Colors.grey,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                               ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                              const SizedBox(height: 4),
+                              // PERBAIKAN: Menampilkan Ukuran Spesifik dan Durasi Sewa
+                              Text(
+                                "Uk. ${item.selectedSize ?? '-'} | ${item.rentDays} Hari",
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                formatRupiah(item.price),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0D1B3E),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
                           children: [
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  if (item.quantity > 1) {
+                                    item.quantity--;
+                                  } else {
+                                    removeItem(item);
+                                  }
+                                });
+                              },
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey.shade400,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.remove, size: 16),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             Text(
-                              item.name,
+                              "${item.quantity}",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "Uk. ${item.size ?? '-'}",
-                              style: const TextStyle(color: Colors.grey),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                if (item.quantity < maxStock) {
+                                  setState(() => item.quantity++);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Stok ukuran ${item.selectedSize} sisa $maxStock!",
+                                      ),
+                                      duration: const Duration(seconds: 1),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: item.quantity < maxStock
+                                      ? const Color(0xFF0D1B3E)
+                                      : Colors.grey,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(formatRupiah(item.price)),
                           ],
                         ),
-                      ),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                if (item.quantity > 1) {
-                                  item.quantity--;
-                                } else {
-                                  removeItem(item);
-                                }
-                              });
-                            },
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.grey.shade400,
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.remove, size: 16),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            "${item.quantity}",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                item.quantity++;
-                              });
-                            },
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                color: Colors.black,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.add,
-                                size: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+      ),
       bottomNavigationBar: cartItemsGlobal.isEmpty
           ? null
           : Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border(top: BorderSide(color: Colors.black12)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -176,41 +243,29 @@ class _CartPageState extends State<CartPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Subtotal"),
-                      Text(formatRupiah(calculateTotal())),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Ongkos Kirim"),
-                      Text("Rp 0 (Gratis)"),
-                    ],
-                  ),
-                  const Divider(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
                       const Text(
-                        "Total",
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        "Total Pembayaran",
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                       Text(
                         formatRupiah(calculateTotal()),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                          color: Color(0xFF0D1B3E),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 15),
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: 55,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1F2A5A),
+                        backgroundColor: const Color(0xFF0D1B3E),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                       ),
                       onPressed: () {
@@ -221,19 +276,13 @@ class _CartPageState extends State<CartPage> {
                           ),
                         );
                       },
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Pesan Sekarang",
-                            style: TextStyle(fontSize: 16, color: Colors.white),
-                          ),
-                          SizedBox(width: 8),
-                          Icon(
-                            Icons.shopping_cart_outlined,
-                            color: Colors.white,
-                          ),
-                        ],
+                      child: const Text(
+                        "Konfirmasi Pesanan",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

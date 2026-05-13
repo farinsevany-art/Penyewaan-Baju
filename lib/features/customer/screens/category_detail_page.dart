@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
-import '../../../data/models/costume_model.dart'; 
+import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
 import 'product_detail_page.dart';
@@ -29,7 +29,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
     final filteredCostumes = allCostumes.where((item) {
       final itemCategory = (item.category ?? '').trim().toLowerCase();
       final selectedCategory = _currentSelected.trim().toLowerCase();
-      
+
       return itemCategory == selectedCategory;
     }).toList();
 
@@ -39,7 +39,11 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black87,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: SizedBox(
@@ -63,33 +67,35 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
       body: Column(
         children: [
           const SizedBox(height: 10),
-          _buildFilterTabs(), 
+          _buildFilterTabs(),
           const SizedBox(height: 15),
           Expanded(
             child: filteredCostumes.isEmpty
                 ? _buildEmpty(context)
                 : GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.62,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
                     ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.62,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
+                        ),
                     itemCount: filteredCostumes.length,
                     itemBuilder: (context, index) {
                       final item = filteredCostumes[index];
                       return CostumeCard(
-                        costume: item,
-                        onAddToCart: () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${item.name} ditambah ke keranjang'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
+                        costume:
+                            item, // atau nama variabel kostum Anda di file ini (misal: kostum, data, dll)
+                        onWishlistToggle: () {
+                          setState(() {
+                            item.isWishlisted = !item.isWishlisted;
+                          });
                         },
+                        // Jika masih ada baris onAddToCart di sini, biarkan saja atau hapus juga tidak apa-apa
                       );
                     },
                   ),
@@ -100,8 +106,13 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
   }
 
   Widget _buildFilterTabs() {
-    final categories = ['Tari Dewasa', 'Tari Anak', 'Raja & Ratu', 'Pewayangan'];
-    
+    final categories = [
+      'Tari Dewasa',
+      'Tari Anak',
+      'Raja & Ratu',
+      'Pewayangan',
+    ];
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -117,7 +128,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 if (cat == _currentSelected) return;
 
                 setState(() {
-                  _currentSelected = cat; 
+                  _currentSelected = cat;
                 });
               },
               selectedColor: Colors.black87,
@@ -127,8 +138,12 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              side: BorderSide(color: isSelected ? Colors.transparent : Colors.grey[300]!),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              side: BorderSide(
+                color: isSelected ? Colors.transparent : Colors.grey[300]!,
+              ),
               showCheckmark: false,
             ),
           );
@@ -147,8 +162,8 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
           const Text(
             'Kostum Kosong',
             style: TextStyle(
-              fontSize: 18, 
-              fontWeight: FontWeight.bold, 
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
               color: Color(0xFF0D1B3E),
             ),
           ),
@@ -159,7 +174,9 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
               backgroundColor: const Color(0xFF0D1B3E),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
             ),
             child: const Text('Kembali'),
           ),

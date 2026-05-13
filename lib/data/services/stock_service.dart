@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart'; // Import XFile
+import 'package:image_picker/image_picker.dart';
 import '../models/stock_model.dart';
 
 class StockService {
-  // Gunakan IP sesuai environment Anda.
-  // Jika pakai Chrome/localhost, Anda bisa pakai "http://localhost/api_penyewaan"
   static const String baseUrl = "http://localhost/api_penyewaan";
   static const String imageBaseUrl = "$baseUrl/uploads/";
 
@@ -28,7 +26,7 @@ class StockService {
   static Future<Map<String, dynamic>> saveStock(
     StockModel stock,
     bool isEdit, {
-    XFile? imageFile, // Parameter diubah menjadi XFile
+    XFile? imageFile,
   }) async {
     final url = isEdit ? "$baseUrl/update_stock.php" : "$baseUrl/add_stock.php";
     try {
@@ -45,7 +43,6 @@ class StockService {
         request.fields['id_kostum'] = stock.idKostum.toString();
       }
 
-      // Handle file upload yang kompatibel untuk Web & Mobile
       if (imageFile != null) {
         var bytes = await imageFile.readAsBytes();
         var pic = http.MultipartFile.fromBytes(
@@ -65,15 +62,32 @@ class StockService {
     }
   }
 
-  static Future<Map<String, dynamic>> deleteStock(int id) async {
+  static Future<Map<String, dynamic>> deleteStock(int idKostum) async {
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/delete_stock.php"),
-        body: {"id_kostum": id.toString()},
+        body: {"id_kostum": idKostum.toString()},
       );
-      return json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        try {
+          // Coba jadikan JSON
+          return json.decode(response.body);
+        } catch (e) {
+          // JIKA BUKAN JSON (ADA SPASI/ERROR), TAMPILKAN ISI ASLINYA DARI SERVER!
+          return {
+            "success": false,
+            "message": "Balasan Server Tidak Dikenal:\n${response.body}",
+          };
+        }
+      } else {
+        return {
+          "success": false,
+          "message": "Server error dengan kode ${response.statusCode}",
+        };
+      }
     } catch (e) {
-      return {"success": false, "message": "Gagal menghapus: $e"};
+      return {"success": false, "message": "Terjadi kesalahan koneksi: $e"};
     }
   }
 }

@@ -3,13 +3,22 @@ class Costume {
   final String name;
   final String category;
   final double price;
-  final int stock;
+  int stock;
   final String? imageUrl;
   final String? description;
-  final String? size;
+  String? size;
+  Map<String, int> sizeStocks = {};
+
   bool isWishlisted;
   int quantity = 1;
   bool isInCart = false;
+
+  // FITUR BARU: Menyimpan tanggal sewa saat produk dimasukkan keranjang
+  DateTime? rentStartDate;
+  DateTime? rentEndDate;
+
+  String? selectedSize; // Untuk menyimpan ukuran spesifik (Misal: M)
+  int rentDays = 1;
 
   Costume({
     required this.id,
@@ -31,9 +40,7 @@ class Costume {
     return 'Rp. $formatted';
   }
 
-  // Fungsi untuk konversi JSON dari MySQL ke Model Dart
   factory Costume.fromJson(Map<String, dynamic> json) {
-    // Mapping ID Kategori ke String sesuai database
     String catName = "Lainnya";
     int idKat = int.tryParse(json['id_kategori'].toString()) ?? 0;
     if (idKat == 1) catName = "Tari Dewasa";
@@ -47,7 +54,7 @@ class Costume {
       category: catName,
       price: double.tryParse(json['harga_sewa'].toString()) ?? 0,
       stock: int.tryParse(json['stok'].toString()) ?? 0,
-      imageUrl: json['foto'], // Hanya mengambil nama filenya saja
+      imageUrl: json['foto'],
       description: json['deskripsi'] ?? '',
       size: json['ukuran'] ?? '',
     );

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/colors.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/income_chart.dart';
-// Import CategorySelectionPage untuk memperbaiki error alur stok
 import '../stock_management/category_selection_page.dart';
 import 'rent_management_page.dart';
 import 'reports.dart';
 import '../../auth/widgets/auth_background.dart';
 import 'notification_page.dart';
 import '../../../data/services/dashboard_service.dart';
+import '../../auth/screens/auth_selection_page.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -19,12 +20,11 @@ class AdminDashboardPage extends StatefulWidget {
 
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   int _selectedIndex = 0;
+  final GlobalKey<_DashboardContentState> _dashboardKey = GlobalKey();
 
-  // DAFTAR HALAMAN UTAMA
-  final List<Widget> _pages = [
-    const DashboardContent(),
+  late final List<Widget> _pages = [
+    DashboardContent(key: _dashboardKey),
     const ManajemenPesananScreen(),
-    // PERBAIKAN: Diarahkan ke CategorySelectionPage agar user memilih kategori dulu
     const CategorySelectionPage(),
     const ReportScreen(),
   ];
@@ -33,17 +33,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     setState(() {
       _selectedIndex = index;
     });
+
+    if (index == 0) {
+      _dashboardKey.currentState?.fetchDashboardData();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryNavy,
-      body: IndexedStack(
-        // Menggunakan IndexedStack agar state halaman tetap terjaga
-        index: _selectedIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -84,10 +84,10 @@ class _DashboardContentState extends State<DashboardContent> {
   @override
   void initState() {
     super.initState();
-    _fetchDashboardData();
+    fetchDashboardData();
   }
 
-  Future<void> _fetchDashboardData() async {
+  Future<void> fetchDashboardData() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
     try {
@@ -108,14 +108,25 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   Widget build(BuildContext context) {
+    int incomeToday =
+        double.tryParse(_stats?['income_today']?.toString() ?? '0')?.toInt() ??
+        0;
+    int incomeMonthly =
+        double.tryParse(
+          _stats?['income_monthly']?.toString() ?? '0',
+        )?.toInt() ??
+        0;
+    int rentedCount =
+        int.tryParse(_stats?['rented_count']?.toString() ?? '0') ?? 0;
+
     return Column(
       children: [
         // 1. Header
         Container(
           padding: const EdgeInsets.only(
-            top: 50, // Disesuaikan untuk notch
+            top: 50,
             left: 20,
-            right: 15, // Disesuaikan sedikit agar ikon pas
+            right: 15,
             bottom: 25,
           ),
           color: AppColors.primaryNavy,
@@ -141,28 +152,97 @@ class _DashboardContentState extends State<DashboardContent> {
                   ),
                 ],
               ),
-              // PERBAIKAN: Menambahkan Row untuk menampung ikon refresh & notifikasi
               Row(
                 children: [
-                  // IconButton(
-                  //   onPressed: _fetchDashboardData,
-                  //   icon: const Icon(
-                  //     Icons.refresh,
-                  //     color: AppColors.primaryGold,
-                  //   ),
-                  // ),
+                  // 🔻 PERBAIKAN: Fitur Dot Merah pada Notifikasi 🔻
+                  Stack(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotificationPage(),
+                            ),
+                          ).then((_) {
+                            // Refresh dashboard saat kembali agar dot merah otomatis hilang jika sudah dibaca
+                            fetchDashboardData();
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.notifications_outlined,
+                          color: AppColors.primaryGold,
+                          size: 26,
+                        ),
+                      ),
+
+                      if ((int.tryParse(
+                                _stats?['unread_notif']?.toString() ?? '0',
+                              ) ??
+                              0) >
+                          0)
+                        Positioned(
+                          right: 12,
+                          top: 12,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.primaryNavy,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                   IconButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NotificationPage(),
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Konfirmasi Logout"),
+                          content: const Text(
+                            "Apakah Anda yakin ingin keluar dari halaman Admin?",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Batal"),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                              ),
+                              onPressed: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.clear();
+                                if (context.mounted) {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const AuthSelectionPage(),
+                                    ),
+                                    (route) => false,
+                                  );
+                                }
+                              },
+                              child: const Text(
+                                "Logout",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
                     icon: const Icon(
-                      Icons.notifications_outlined, // Ikon Notifikasi
-                      color: AppColors.primaryGold,
+                      Icons.logout,
+                      color: Colors.redAccent,
                       size: 26,
                     ),
                   ),
@@ -182,7 +262,7 @@ class _DashboardContentState extends State<DashboardContent> {
                     ),
                   )
                 : RefreshIndicator(
-                    onRefresh: _fetchDashboardData,
+                    onRefresh: fetchDashboardData,
                     color: AppColors.primaryNavy,
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -195,8 +275,7 @@ class _DashboardContentState extends State<DashboardContent> {
                               Expanded(
                                 child: StatCard(
                                   title: 'Pendapatan Hari Ini',
-                                  value:
-                                      'Rp ${_stats?['income_today']?.toInt() ?? 0}',
+                                  value: 'Rp $incomeToday',
                                   percentage: 'Live',
                                   isIncrease: true,
                                 ),
@@ -205,8 +284,7 @@ class _DashboardContentState extends State<DashboardContent> {
                               Expanded(
                                 child: StatCard(
                                   title: 'Pendapatan Bulanan',
-                                  value:
-                                      'Rp ${_stats?['income_monthly']?.toInt() ?? 0}',
+                                  value: 'Rp $incomeMonthly',
                                   percentage: '+5%',
                                   isIncrease: true,
                                 ),
@@ -216,39 +294,43 @@ class _DashboardContentState extends State<DashboardContent> {
                           const SizedBox(height: 15),
                           StatCard(
                             title: 'Jumlah Kostum Sedang Disewa',
-                            value: '${_stats?['rented_count'] ?? 0} Unit',
+                            value: '$rentedCount Unit',
                             percentage: 'Aktif',
-                            isIncrease: (_stats?['rented_count'] ?? 0) > 0,
+                            isIncrease: rentedCount > 0,
                           ),
                           const SizedBox(height: 20),
                           IncomeChart(chartData: _stats?['chart_data'] ?? []),
                           const SizedBox(height: 30),
+
                           const Text(
-                            'Kostum Terpopuler',
+                            'Sering Disewa',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
                           const SizedBox(height: 15),
-                          _buildPopularItem(
-                            'Tari Kreasi Baru',
-                            'Tari Anak',
-                            '24 Disewa',
-                            true,
-                          ),
-                          _buildPopularItem(
-                            'Clara 1',
-                            'Tari Dewasa',
-                            '18 Disewa',
-                            false,
-                          ),
-                          _buildPopularItem(
-                            'Anoman',
-                            'Wayang',
-                            '15 Disewa',
-                            true,
-                          ),
+                          if (_stats?['top_costumes'] != null &&
+                              (_stats!['top_costumes'] as List).isNotEmpty)
+                            ...(_stats!['top_costumes'] as List).map((item) {
+                              return _buildPopularItem(
+                                item['nama_kostum']?.toString() ?? 'Unknown',
+                                item['kategori']?.toString() ?? 'Kategori',
+                                '${item['total_disewa']} Disewa',
+                                true,
+                                item['foto_kostum']?.toString() ?? '',
+                              );
+                            }).toList()
+                          else
+                            const Padding(
+                              padding: EdgeInsets.only(top: 20),
+                              child: Center(
+                                child: Text(
+                                  "Belum ada data penyewaan",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -264,6 +346,7 @@ class _DashboardContentState extends State<DashboardContent> {
     String cat,
     String count,
     bool isPopuler,
+    String foto,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -275,14 +358,27 @@ class _DashboardContentState extends State<DashboardContent> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.image, color: Colors.grey),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: foto.isNotEmpty
+                ? Image.network(
+                    "${DashboardService.baseUrl}/uploads/$foto",
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 50,
+                      height: 50,
+                      color: Colors.grey.shade200,
+                      child: const Icon(Icons.image, color: Colors.grey),
+                    ),
+                  )
+                : Container(
+                    width: 50,
+                    height: 50,
+                    color: Colors.grey.shade200,
+                    child: const Icon(Icons.image, color: Colors.grey),
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
