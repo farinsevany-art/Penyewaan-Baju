@@ -88,7 +88,7 @@ class AuthSelectionPage extends StatelessWidget {
         child: Text(
           text,
           style: const TextStyle(
-            color: AppColors.primaryNavy,
+            color: AppColors.offWhite,
             fontWeight: FontWeight.bold,
           ),
         ),

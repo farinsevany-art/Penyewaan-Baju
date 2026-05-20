@@ -159,7 +159,7 @@ class _SplashPageState extends State<SplashPage> {
                       child: const Text(
                         'Mulai',
                         style: TextStyle(
-                          color: AppColors.primaryNavy,
+                          color: AppColors.offWhite,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),

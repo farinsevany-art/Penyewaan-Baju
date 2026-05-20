@@ -307,7 +307,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: const Text(
             'Daftar',
             style: TextStyle(
-              color: AppColors.primaryNavy,
+              color: AppColors.offWhite,
               fontWeight: FontWeight.bold,
               fontFamily: 'Poppins',
             ),

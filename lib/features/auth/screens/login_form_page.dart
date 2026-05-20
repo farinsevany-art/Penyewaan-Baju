@@ -197,7 +197,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
                       const SizedBox(height: 15),
                       _buildLoginButton(
                         'Login Admin',
-                        AppColors.primaryNavy,
+                        AppColors.primaryGold,
                         () => _handleLogin('Admin'),
                       ),
                     ],
@@ -283,7 +283,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
         child: Text(
           text,
           style: const TextStyle(
-            color: Color.fromARGB(255, 250, 250, 250),
+            color: AppColors.offWhite,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
           ),
