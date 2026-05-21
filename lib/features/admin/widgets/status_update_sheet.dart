@@ -86,10 +86,10 @@ class _StatusUpdateSheetState extends State<StatusUpdateSheet> {
                 ); // Kirim data kembali ke halaman utama
                 Navigator.pop(context); // Tutup pop-up
               },
-              icon: const Icon(Icons.save_outlined, color: Colors.orangeAccent),
+              icon: const Icon(Icons.save_outlined, color: Colors.white),
               label: const Text(
                 'Simpan Perubahan',
-                style: TextStyle(color: Colors.orangeAccent, fontSize: 16),
+                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1A234E),

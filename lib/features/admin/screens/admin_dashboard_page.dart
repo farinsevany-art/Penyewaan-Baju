@@ -62,7 +62,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Stok'),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: 'Reports',
+            label: 'Laporan',
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/constants/colors.dart';
+import '../../auth/widgets/auth_background.dart';
 import 'rent_details_page.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -24,13 +25,13 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Future<void> _fetchNotifications() async {
     try {
-      // Menggunakan localhost untuk testing di Web (Chrome)
       final response = await http.get(
         Uri.parse("http://localhost/api_penyewaan/get_notifications.php"),
       );
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
+
         if (result['status'] == 'success') {
           setState(() {
             _notifications = result['data'];
@@ -43,81 +44,124 @@ class _NotificationPageState extends State<NotificationPage> {
     }
   }
 
-  // Filter notifikasi berdasarkan Tab yang dipilih
   List<dynamic> get _filteredNotifications {
     if (!_isShowingUnreadOnly) return _notifications;
+
     return _notifications.where((n) => n['is_unread'] == true).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primaryNavy,
+
       appBar: AppBar(
         backgroundColor: AppColors.primaryNavy,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text('Notifikasi', style: TextStyle(color: Colors.white)),
-        centerTitle: true,
         elevation: 0,
-      ),
-      body: Column(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(bottom: BorderSide(color: Colors.black12)),
-            ),
-            child: Row(
-              children: [
-                _buildTabItem(
-                  "Belum Dibaca",
-                  isActive: _isShowingUnreadOnly,
-                  onTap: () => setState(() => _isShowingUnreadOnly = true),
-                ),
-                _buildTabItem(
-                  "Semua",
-                  isActive: !_isShowingUnreadOnly,
-                  onTap: () => setState(() => _isShowingUnreadOnly = false),
-                ),
-              ],
-            ),
+
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Image.asset(
+            'assets/images/Logotransparan.png',
+            fit: BoxFit.contain,
           ),
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primaryNavy,
-                    ),
-                  )
-                : _filteredNotifications.isEmpty
-                ? const Center(
-                    child: Text(
-                      "Tidak ada notifikasi saat ini",
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _fetchNotifications,
-                    color: AppColors.primaryNavy,
-                    child: ListView.builder(
-                      itemCount: _filteredNotifications.length,
-                      itemBuilder: (context, index) {
-                        final notif = _filteredNotifications[index];
-                        return _buildNotificationItem(
-                          notif['title'],
-                          notif['sub'],
-                          notif['time'], // Menampilkan tanggal pesanan
-                          notif['code'].toString(),
-                          notif['is_unread'],
-                        );
-                      },
-                    ),
-                  ),
+        ),
+
+        leadingWidth: 48,
+
+        title: const Text(
+          'Notifikasi',
+          style: TextStyle(
+            color: AppColors.primaryGold,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        centerTitle: true,
+
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: AppColors.primaryGold,
+            ),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
+      ),
+
+      body: AuthBackground(
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+
+                border: Border.all(color: AppColors.primaryGold, width: 1),
+              ),
+
+              child: Row(
+                children: [
+                  _buildTabItem(
+                    "Belum Dibaca",
+                    isActive: _isShowingUnreadOnly,
+                    onTap: () => setState(() => _isShowingUnreadOnly = true),
+                  ),
+
+                  _buildTabItem(
+                    "Semua",
+                    isActive: !_isShowingUnreadOnly,
+                    onTap: () => setState(() => _isShowingUnreadOnly = false),
+                  ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryGold,
+                      ),
+                    )
+                  : _filteredNotifications.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "Tidak ada notifikasi saat ini",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _fetchNotifications,
+                      color: AppColors.primaryGold,
+
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+
+                        itemCount: _filteredNotifications.length,
+
+                        itemBuilder: (context, index) {
+                          final notif = _filteredNotifications[index];
+
+                          return _buildNotificationItem(
+                            notif['title'],
+                            notif['sub'],
+                            notif['time'],
+                            notif['code'].toString(),
+                            notif['is_unread'],
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -130,22 +174,32 @@ class _NotificationPageState extends State<NotificationPage> {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
+
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 15),
+
           decoration: BoxDecoration(
+            color: isActive
+                ? AppColors.primaryGold.withOpacity(0.12)
+                : Colors.transparent,
+
+            borderRadius: BorderRadius.circular(16),
+
             border: Border(
               bottom: BorderSide(
-                color: isActive ? AppColors.primaryNavy : Colors.transparent,
+                color: isActive ? AppColors.primaryGold : Colors.transparent,
                 width: 3,
               ),
             ),
           ),
+
           child: Text(
             title,
             textAlign: TextAlign.center,
+
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: isActive ? Colors.black : Colors.grey,
+              color: isActive ? AppColors.primaryNavy : Colors.grey,
             ),
           ),
         ),
@@ -161,6 +215,8 @@ class _NotificationPageState extends State<NotificationPage> {
     bool isUnread,
   ) {
     return InkWell(
+      borderRadius: BorderRadius.circular(20),
+
       onTap: () {
         Navigator.push(
           context,
@@ -168,57 +224,96 @@ class _NotificationPageState extends State<NotificationPage> {
             builder: (context) => RentDetailsPage(orderId: code),
           ),
         ).then((_) {
-          // Refresh notifikasi setelah menutup halaman detail (berjaga-jaga jika admin mengubah status)
           _fetchNotifications();
         });
       },
+
       child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
+
         decoration: BoxDecoration(
-          // Memberikan warna background berbeda jika belum dibaca
-          color: isUnread ? const Color(0xFFFDF6E9) : Colors.white,
-          border: const Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.shopping_bag_outlined,
-              color: isUnread ? AppColors.primaryNavy : Colors.grey,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+
+          border: Border.all(
+            color: isUnread ? AppColors.primaryGold : Colors.grey.shade200,
+            width: 1.2,
+          ),
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
+          ],
+        ),
+
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+
+              decoration: BoxDecoration(
+                color: isUnread
+                    ? AppColors.primaryGold.withOpacity(0.15)
+                    : Colors.grey.shade100,
+
+                borderRadius: BorderRadius.circular(14),
+              ),
+
+              child: Icon(
+                Icons.shopping_bag_outlined,
+                color: isUnread ? AppColors.primaryNavy : Colors.grey,
+              ),
+            ),
+
             const SizedBox(width: 16),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
+
                     style: TextStyle(
-                      fontWeight: isUnread
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      color: isUnread ? Colors.black : Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryNavy,
+                      fontSize: 15,
                     ),
                   ),
+
+                  const SizedBox(height: 4),
+
                   Text(
                     sub,
-                    style: TextStyle(
-                      color: isUnread ? Colors.black87 : Colors.grey,
-                    ),
+
+                    style: TextStyle(color: Colors.grey.shade700, height: 1.4),
                   ),
-                  const SizedBox(height: 8),
+
+                  const SizedBox(height: 10),
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 4,
+                      vertical: 5,
                     ),
+
                     decoration: BoxDecoration(
                       color: isUnread
                           ? AppColors.primaryGold
                           : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(4),
+
+                      borderRadius: BorderRadius.circular(8),
                     ),
+
                     child: Text(
                       "ID: $code",
+
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -229,8 +324,12 @@ class _NotificationPageState extends State<NotificationPage> {
                 ],
               ),
             ),
+
+            const SizedBox(width: 10),
+
             Text(
               time,
+
               style: const TextStyle(color: Colors.grey, fontSize: 11),
             ),
           ],

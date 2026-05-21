@@ -116,7 +116,7 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget _buildOrderCard(Map<String, dynamic> order) {
     // 🔻 PERBAIKAN: Menggunakan ID Penyewaan sesuai saran Anda 🔻
     String orderId = order['id_penyewaan']?.toString() ?? '-';
-    String displayTitle = "ID Penyewaan: $orderId";
+    String displayTitle = "Nomor Penyewaan: $orderId";
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

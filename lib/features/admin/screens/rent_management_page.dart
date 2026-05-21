@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/services/order_service.dart';
+import '../../auth/widgets/auth_background.dart';
 import 'rent_details_page.dart';
 
 class ManajemenPesananScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _fetchOrders(showLoading: true);
+
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
       _fetchOrders(showLoading: false);
     });
@@ -42,7 +44,9 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
 
   Future<void> _fetchOrders({bool showLoading = false}) async {
     if (showLoading && mounted) setState(() => _isLoading = true);
+
     final data = await OrderService.getOrders();
+
     if (mounted) {
       setState(() {
         _allOrders = data;
@@ -54,6 +58,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
   List<dynamic> _filterOrders(String type) {
     List<dynamic> filteredByStatus = _allOrders.where((o) {
       String s = o['status_penyewaan'] ?? "";
+
       if (type == 'Baru') {
         return s.contains('Menunggu') || s.contains('Diproses');
       } else if (type == 'Aktif') {
@@ -71,8 +76,11 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
       String customerName = (o['nama_pelanggan'] ?? "")
           .toString()
           .toLowerCase();
+
       String items = (o['items_summary'] ?? "").toString().toLowerCase();
+
       String query = _searchQuery.toLowerCase();
+
       return customerName.contains(query) || items.contains(query);
     }).toList();
   }
@@ -80,9 +88,21 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.primaryNavy,
+
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Image.asset(
+            'assets/images/Logotransparan.png',
+            fit: BoxFit.contain,
+          ),
+        ),
+
+        leadingWidth: 48,
+
         title: _isSearching
             ? TextField(
                 controller: _searchController,
@@ -95,7 +115,17 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                 ),
                 onChanged: (value) => setState(() => _searchQuery = value),
               )
-            : const Text("Manajemen Pesanan"),
+            : Text(
+                "Manajemen Pesanan",
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: AppColors.primaryGold,
+                ),
+              ),
+
+        backgroundColor: AppColors.primaryNavy,
+        foregroundColor: AppColors.primaryGold,
+        elevation: 0,
+
         actions: [
           IconButton(
             onPressed: () {
@@ -115,6 +145,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
             ),
           ),
         ],
+
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: AppColors.primaryGold,
@@ -128,18 +159,21 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
           ],
         ),
       ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGold),
-            )
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOrderList('Baru'),
-                _buildOrderList('Aktif'),
-                _buildOrderList('Selesai'),
-              ],
-            ),
+
+      body: AuthBackground(
+        child: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryGold),
+              )
+            : TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildOrderList('Baru'),
+                  _buildOrderList('Aktif'),
+                  _buildOrderList('Selesai'),
+                ],
+              ),
+      ),
     );
   }
 
@@ -152,13 +186,16 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.assignment_outlined,
-              size: 80,
-              color: Colors.grey.shade300,
-            ),
+            Icon(Icons.assignment_outlined, size: 80, color: Colors.white24),
+
             const SizedBox(height: 16),
-            Text("Tidak ada pesanan $type.", style: theme.textTheme.bodyMedium),
+
+            Text(
+              "Tidak ada pesanan $type.",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.white70,
+              ),
+            ),
           ],
         ),
       );
@@ -167,21 +204,24 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
     return RefreshIndicator(
       onRefresh: () => _fetchOrders(showLoading: true),
       color: AppColors.primaryGold,
+
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: orders.length,
+
         itemBuilder: (context, index) {
           final order = orders[index];
 
           String itemsRaw = order['items_summary'] ?? "";
+
           String costumeName = itemsRaw.isNotEmpty
               ? itemsRaw.split(',').first.split('x ').first
               : "Tanpa Item";
 
-          // --- AMBIL FOTO DAN NAMA PELANGGAN ---
           String customerName =
               order['nama_pelanggan']?.toString() ??
               "Pelanggan #${order['id_pelanggan']}";
+
           String customerPhoto = order['foto_pelanggan']?.toString() ?? "";
 
           return GestureDetector(
@@ -194,35 +234,43 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                   ),
                 ),
               );
-              if (result == true) _fetchOrders(showLoading: true);
+
+              if (result == true) {
+                _fetchOrders(showLoading: true);
+              }
             },
+
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
+
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: AppColors.primaryGold.withOpacity(0.15),
-                ),
+
+                border: Border.all(color: AppColors.primaryGold, width: 1.2),
+
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 12,
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
+
               child: Padding(
                 padding: const EdgeInsets.all(14),
+
                 child: Row(
                   children: [
-                    // --- AVATAR FOTO PELANGGAN ---
                     Container(
                       width: 65,
                       height: 65,
+
                       decoration: BoxDecoration(
                         color: AppColors.primaryNavy.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(16),
+
                         image: customerPhoto.isNotEmpty
                             ? DecorationImage(
                                 image: NetworkImage(
@@ -232,6 +280,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                               )
                             : null,
                       ),
+
                       child: customerPhoto.isEmpty
                           ? const Icon(
                               Icons.person,
@@ -240,10 +289,13 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                             )
                           : null,
                     ),
+
                     const SizedBox(width: 16),
+
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+
                         children: [
                           Text(
                             customerName,
@@ -253,7 +305,9 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
+
                           const SizedBox(height: 6),
+
                           Text(
                             costumeName,
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -261,7 +315,9 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
+
                           const SizedBox(height: 10),
+
                           _buildStatusBadge(order['status_penyewaan'] ?? '-'),
                         ],
                       ),
@@ -279,6 +335,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
   Widget _buildStatusBadge(String status) {
     Color bgColor = Colors.grey.shade200;
     Color textColor = Colors.black;
+
     if (status.contains('Menunggu')) {
       bgColor = Colors.orange.shade100;
       textColor = Colors.orange.shade800;
@@ -298,10 +355,12 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(30),
       ),
+
       child: Text(
         status,
         style: TextStyle(

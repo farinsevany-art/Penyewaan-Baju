@@ -115,127 +115,267 @@ class _LoginFormPageState extends State<LoginFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AuthBackground(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/images/Logotransparan.png', width: 40),
-                const SizedBox(width: 10),
-                const Text(
-                  'KUSUMA CANTIKA',
-                  style: TextStyle(
-                    fontFamily: 'PlayfairDisplay',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+
+      body: AuthBackground(
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // ================= ORNAMEN ATAS =================
+              Positioned(
+                top: -40,
+                right: -30,
+                child: Container(
+                  width: 170,
+                  height: 170,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGold.withOpacity(0.12),
+                    shape: BoxShape.circle,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 50),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Container(
-                padding: const EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
+              ),
+
+              Positioned(
+                top: 80,
+                left: -40,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGold.withOpacity(0.08),
+                    shape: BoxShape.circle,
+                  ),
                 ),
+              ),
+
+              // ================= ISI =================
+              SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 24,
+                ),
+
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Login',
-                      style: TextStyle(
-                        fontFamily: 'PlayfairDisplay',
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    _buildTextField('Email', controller: _emailController),
-                    const SizedBox(height: 20),
-                    _buildTextField(
-                      'Password',
-                      controller: _passwordController,
-                      isObscure: _obscurePassword,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: AppColors.mediumGrey,
-                        ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    if (_isLoading)
-                      const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryGold,
-                        ),
-                      )
-                    else ...[
-                      _buildLoginButton(
-                        'Login Pelanggan',
-                        AppColors.primaryGold,
-                        () => _handleLogin('Pelanggan'),
-                      ),
-                      const SizedBox(height: 15),
-                      _buildLoginButton(
-                        'Login Admin',
-                        AppColors.primaryGold,
-                        () => _handleLogin('Admin'),
-                      ),
-                    ],
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
+
+                    // ================= LOGO =================
                     Center(
-                      child: GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RegisterPage(),
-                          ),
-                        ),
-                        child: RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
-                              color: AppColors.mediumGrey,
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(18),
+
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              shape: BoxShape.circle,
+
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.06),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
                             ),
-                            children: [
-                              TextSpan(text: 'Belum punya akun? '),
-                              TextSpan(
-                                text: 'Daftar di sini',
-                                style: TextStyle(
-                                  color: Colors.deepOrange,
-                                  fontWeight: FontWeight.bold,
+
+                            child: Image.asset(
+                              'assets/images/Logotransparan.png',
+                              width: 65,
+                            ),
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          const Text(
+                            'KUSUMA CANTIKA',
+
+                            style: TextStyle(
+                              fontFamily: 'PlayfairDisplay',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                              color: AppColors.primaryNavy,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Text(
+                            'Penyewaan Kostum',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 13,
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 45),
+
+                    // ================= CARD LOGIN =================
+                    Container(
+                      padding: const EdgeInsets.all(30),
+
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.97),
+
+                        borderRadius: BorderRadius.circular(32),
+
+                        border: Border.all(
+                          color: AppColors.pureWhite,
+                          width: 1.2,
+                        ),
+
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 25,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [
+                          const Text(
+                            'Selamat Datang',
+
+                            style: TextStyle(
+                              fontFamily: 'PlayfairDisplay',
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryNavy,
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Text(
+                            'Masuk untuk melanjutkan ke aplikasi',
+
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+
+                          const SizedBox(height: 35),
+
+                          // EMAIL
+                          _buildTextField(
+                            'Email',
+                            controller: _emailController,
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // PASSWORD
+                          _buildTextField(
+                            'Password',
+
+                            controller: _passwordController,
+
+                            isObscure: _obscurePassword,
+
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off_rounded
+                                    : Icons.visibility_rounded,
+
+                                color: AppColors.mediumGrey,
+                              ),
+
+                              onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 35),
+
+                          // LOADING
+                          if (_isLoading)
+                            const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primaryGold,
+                              ),
+                            )
+                          // BUTTON
+                          else ...[
+                            _buildLoginButton(
+                              'Login Pelanggan',
+                              AppColors.primaryGold,
+                              () => _handleLogin('Pelanggan'),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            _buildLoginButton(
+                              'Login Admin',
+                              AppColors.primaryGold,
+                              () => _handleLogin('Admin'),
+                            ),
+                          ],
+
+                          const SizedBox(height: 28),
+
+                          // REGISTER
+                          Center(
+                            child: GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+
+                                MaterialPageRoute(
+                                  builder: (context) => const RegisterPage(),
                                 ),
                               ),
-                            ],
+
+                              child: RichText(
+                                text: const TextSpan(
+                                  style: TextStyle(
+                                    color: AppColors.mediumGrey,
+
+                                    fontSize: 13,
+
+                                    fontFamily: 'Poppins',
+                                  ),
+
+                                  children: [
+                                    TextSpan(text: 'Belum punya akun? '),
+
+                                    TextSpan(
+                                      text: 'Daftar di sini',
+
+                                      style: TextStyle(
+                                        color: Color.fromARGB(255, 255, 0, 0),
+
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
+
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

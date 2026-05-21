@@ -121,7 +121,7 @@ class WishlistPageState extends State<WishlistPage> {
           ),
           const SizedBox(height: 20),
           const Text(
-            'Wishlist Kamu Kosong',
+            'Kostum Favorit Kamu Kosong',
             style: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 18,
