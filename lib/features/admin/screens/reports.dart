@@ -299,7 +299,7 @@ class _ReportScreenState extends State<ReportScreen> {
           padding: const EdgeInsets.only(
             top: 50,
             left: 20,
-            right: 20,
+            right: 15,
             bottom: 25,
           ),
           color: AppColors.primaryNavy,
@@ -343,174 +343,191 @@ class _ReportScreenState extends State<ReportScreen> {
           ),
         ),
 
+        // 🔻 PERBAIKAN: Mengganti AuthBackground dengan Stack biasa (Tanpa SafeArea) 🔻
         Expanded(
-          child: AuthBackground(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 🔻 DESAIN FILTER RENTANG WAKTU (PILL / TAB SEPERTI SEBELUMNYA) 🔻
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 15,
+          child: Stack(
+            children: [
+              // 1. Gambar Background Motif
+              Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/bg.png'),
+                    fit: BoxFit.cover,
                   ),
-                  color: Colors.white.withOpacity(0.9),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: ['Harian', 'Bulanan', 'Tahunan'].map((filter) {
-                        bool isSelected = _selectedFilter == filter;
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedFilter = filter;
-                              _fetchReportData(); // Muat ulang data
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primaryNavy
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(25),
-                              border: Border.all(
-                                color: AppColors.primaryNavy,
-                                width: 1.5,
+                ),
+              ),
+
+              // 2. Konten Halaman
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // DESAIN FILTER RENTANG WAKTU
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 15,
+                    ),
+                    color: Colors.white.withOpacity(0.9),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: ['Harian', 'Bulanan', 'Tahunan'].map((
+                          filter,
+                        ) {
+                          bool isSelected = _selectedFilter == filter;
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedFilter = filter;
+                                _fetchReportData(); // Muat ulang data
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              margin: const EdgeInsets.only(right: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 23,
+                                vertical: 10,
                               ),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: AppColors.primaryNavy
-                                            .withOpacity(0.3),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ]
-                                  : [],
-                            ),
-                            child: Text(
-                              filter,
-                              style: TextStyle(
+                              decoration: BoxDecoration(
                                 color: isSelected
-                                    ? Colors.white
-                                    : AppColors.primaryNavy,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                                    ? AppColors.primaryNavy
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(25),
+                                border: Border.all(
+                                  color: AppColors.primaryNavy,
+                                  width: 1.5,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: AppColors.primaryNavy
+                                              .withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                    : [],
+                              ),
+                              child: Text(
+                                filter,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : AppColors.primaryNavy,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      }).toList(),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
 
-                // KONTEN UTAMA
-                Expanded(
-                  child: _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primaryNavy,
-                          ),
-                        )
-                      : SingleChildScrollView(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Ringkasan $_selectedFilter",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: AppColors.primaryNavy,
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildSummaryCard(
-                                      "Pendapatan",
-                                      formatRupiah(incomeTotal),
-                                      Icons.account_balance_wallet,
-                                    ),
+                  // KONTEN UTAMA RINGKASAN
+                  Expanded(
+                    child: _isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primaryNavy,
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Ringkasan $_selectedFilter",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: AppColors.primaryNavy,
                                   ),
-                                  const SizedBox(width: 15),
-                                  Expanded(
-                                    child: _buildSummaryCard(
-                                      "Transaksi",
-                                      "$totalOrders Pesanan",
-                                      Icons.shopping_bag,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 15),
-                              _buildSummaryCard(
-                                "Pesanan Aktif / Disewa",
-                                "$activeOrders Kostum",
-                                Icons.local_shipping,
-                              ),
-
-                              const SizedBox(height: 30),
-                              Text(
-                                "Grafik Pendapatan $_selectedFilter",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: AppColors.primaryNavy,
                                 ),
-                              ),
-                              const SizedBox(height: 15),
-                              IncomeChart(
-                                chartData: _stats?['chart_data'] ?? [],
-                              ),
+                                const SizedBox(height: 15),
 
-                              const SizedBox(height: 30),
-                              const Text(
-                                "Kostum Sering Disewa",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: AppColors.primaryNavy,
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-
-                              if (_stats?['top_costumes'] != null &&
-                                  (_stats!['top_costumes'] as List).isNotEmpty)
-                                ...(_stats!['top_costumes'] as List)
-                                    .map(
-                                      (item) => _buildPopularItem(
-                                        item['nama_kostum']?.toString() ?? '',
-                                        item['kategori']?.toString() ?? '',
-                                        "${item['total_disewa']} disewa",
-                                        item['foto_kostum']?.toString() ?? '',
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildSummaryCard(
+                                        "Pendapatan",
+                                        formatRupiah(incomeTotal),
+                                        Icons.account_balance_wallet,
                                       ),
-                                    )
-                                    .toList()
-                              else
-                                const Center(
-                                  child: Text(
-                                    "Belum ada data",
-                                    style: TextStyle(color: Colors.grey),
+                                    ),
+                                    const SizedBox(width: 15),
+                                    Expanded(
+                                      child: _buildSummaryCard(
+                                        "Transaksi",
+                                        "$totalOrders Pesanan",
+                                        Icons.shopping_bag,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 15),
+                                _buildSummaryCard(
+                                  "Pesanan Aktif / Disewa",
+                                  "$activeOrders Kostum",
+                                  Icons.local_shipping,
+                                ),
+
+                                const SizedBox(height: 30),
+                                Text(
+                                  "Grafik Pendapatan $_selectedFilter",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: AppColors.primaryNavy,
                                   ),
                                 ),
-                            ],
+                                const SizedBox(height: 15),
+                                IncomeChart(
+                                  chartData: _stats?['chart_data'] ?? [],
+                                ),
+
+                                const SizedBox(height: 30),
+                                const Text(
+                                  "Kostum Sering Disewa",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: AppColors.primaryNavy,
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+
+                                if (_stats?['top_costumes'] != null &&
+                                    (_stats!['top_costumes'] as List)
+                                        .isNotEmpty)
+                                  ...(_stats!['top_costumes'] as List)
+                                      .map(
+                                        (item) => _buildPopularItem(
+                                          item['nama_kostum']?.toString() ?? '',
+                                          item['kategori']?.toString() ?? '',
+                                          "${item['total_disewa']} disewa",
+                                          item['foto_kostum']?.toString() ?? '',
+                                        ),
+                                      )
+                                      .toList()
+                                else
+                                  const Center(
+                                    child: Text(
+                                      "Belum ada data",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],

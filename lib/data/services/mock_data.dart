@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/costume_model.dart';
 
-const String baseUrl = "http://localhost/api_penyewaan";
+const String baseUrl = "http://172.16.115.146/api_penyewaan";
 const String imageBaseUrl = "$baseUrl/uploads/";
 
 List<Costume> allCostumes = [];

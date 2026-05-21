@@ -26,7 +26,7 @@ class _NotificationPageState extends State<NotificationPage> {
   Future<void> _fetchNotifications() async {
     try {
       final response = await http.get(
-        Uri.parse("http://localhost/api_penyewaan/get_notifications.php"),
+        Uri.parse("http://172.16.115.146/api_penyewaan/get_notifications.php"),
       );
 
       if (response.statusCode == 200) {

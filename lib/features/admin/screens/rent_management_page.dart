@@ -93,6 +93,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
       backgroundColor: AppColors.primaryNavy,
 
       appBar: AppBar(
+        toolbarHeight: 90,
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0),
           child: Image.asset(

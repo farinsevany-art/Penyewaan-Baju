@@ -108,6 +108,7 @@ class _EditStockPageState extends State<EditStockPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        toolbarHeight: 90,
         backgroundColor: AppColors.primaryNavy,
         elevation: 0,
         leading: Padding(

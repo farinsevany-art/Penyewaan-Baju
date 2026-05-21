@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart'; // 🔻 TAMBAHKAN IMPORT INI
 
 class AuthService {
-  static const String baseUrl = "http://localhost/api_penyewaan";
+  static const String baseUrl = "http://172.16.115.146/api_penyewaan";
 
   static Future<Map<String, dynamic>> login(
     String email,

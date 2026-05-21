@@ -19,15 +19,19 @@ class CategorySelectionPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.primaryNavy,
       appBar: AppBar(
+        toolbarHeight: 90,
         // Mengganti tombol back/arrow menjadi logo transparan
         leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0), // Memberi jarak dari sisi kiri layar
+          padding: const EdgeInsets.only(
+            left: 16.0,
+          ), // Memberi jarak dari sisi kiri layar
           child: Image.asset(
             'assets/images/Logotransparan.png',
             fit: BoxFit.contain,
           ),
         ),
-        leadingWidth: 48, // Menentukan lebar area leading agar logo tidak terpotong
+        leadingWidth:
+            48, // Menentukan lebar area leading agar logo tidak terpotong
         title: Text(
           "Pilih Kategori",
           style: Theme.of(

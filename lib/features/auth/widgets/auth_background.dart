@@ -3,6 +3,7 @@ import '../../../core/constants/colors.dart';
 
 class AuthBackground extends StatelessWidget {
   final Widget child;
+
   const AuthBackground({super.key, required this.child});
 
   @override
@@ -22,6 +23,7 @@ class AuthBackground extends StatelessWidget {
               ),
             ),
           ),
+
           SafeArea(child: child),
         ],
       ),

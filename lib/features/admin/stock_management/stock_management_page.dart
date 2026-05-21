@@ -50,6 +50,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 90,
         centerTitle: true,
         title: _isSearching
             ? TextField(
