@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class OrderService {
-  static const String baseUrl = "http://172.16.115.146/api_penyewaan";
+  static const String baseUrl = "http://192.168.18.13/api_penyewaan";
 
   // 1. Fungsi Checkout (Sudah ada sebelumnya)
   static Future<Map<String, dynamic>> checkoutPesanan(

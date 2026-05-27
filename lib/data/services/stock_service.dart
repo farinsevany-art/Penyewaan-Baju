@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../models/stock_model.dart';
 
 class StockService {
-  static const String baseUrl = "http://172.16.115.146/api_penyewaan";
+  static const String baseUrl = "http://192.168.18.13/api_penyewaan";
   static const String imageBaseUrl = "$baseUrl/uploads/";
 
   static Future<List<StockModel>> getStocks(int categoryId) async {

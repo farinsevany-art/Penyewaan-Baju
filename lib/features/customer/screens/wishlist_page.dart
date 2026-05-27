@@ -37,7 +37,7 @@ class WishlistPageState extends State<WishlistPage> {
         backgroundColor: Colors.white.withOpacity(0.9),
         elevation: 0.5,
         title: Text(
-          _isExploring ? 'Jelajahi Kostum' : 'Wishlist Saya',
+          _isExploring ? 'Jelajahi Kostum' : 'Favorit Saya',
           style: const TextStyle(
             fontFamily: 'Poppins',
             color: Color(0xFF0D1B3E),

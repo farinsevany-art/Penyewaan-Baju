@@ -348,7 +348,6 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             const SizedBox(width: 16),
 
-            // 🔻 DIGANTI MENJADI COLUMN AGAR BISA MENAMPUNG TEKS DESKRIPSI DI BAWAH NAMA 🔻
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
