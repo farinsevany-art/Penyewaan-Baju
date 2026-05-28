@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/costume_model.dart';
 
-const String baseUrl = "http://192.168.18.13/api_penyewaan";
+const String baseUrl = "http://10.136.173.149/api_penyewaan";
 const String imageBaseUrl = "$baseUrl/uploads/";
 
 List<Costume> allCostumes = [];
@@ -47,7 +47,12 @@ Future<void> fetchCostumesFromDB() async {
             existing.sizeStocks[currentSize] =
                 (existing.sizeStocks[currentSize] ?? 0) + costume.stock;
 
-            // 3. Gabungkan String Ukuran untuk Ditampilkan
+            // 🔻 3. SIMPAN GAMBAR SPESIFIK UNTUK UKURAN INI 🔻
+            if (costume.imageUrl != null) {
+              existing.sizeImages[currentSize] = costume.imageUrl!;
+            }
+
+            // 4. Gabungkan String Ukuran untuk Ditampilkan
             if (existing.size != null &&
                 !existing.size!.contains(currentSize)) {
               existing.size = "${existing.size}, $currentSize";
@@ -55,8 +60,15 @@ Future<void> fetchCostumesFromDB() async {
           } else {
             // Jika data pertama kali masuk map
             costume.sizeStocks[currentSize] = costume.stock;
-            if (costume.size == null || costume.size!.trim().isEmpty)
+
+            // 🔻 SIMPAN GAMBAR SPESIFIK UNTUK UKURAN INI JUGA 🔻
+            if (costume.imageUrl != null) {
+              costume.sizeImages[currentSize] = costume.imageUrl!;
+            }
+
+            if (costume.size == null || costume.size!.trim().isEmpty) {
               costume.size = currentSize;
+            }
             groupedCostumes[key] = costume;
           }
         }

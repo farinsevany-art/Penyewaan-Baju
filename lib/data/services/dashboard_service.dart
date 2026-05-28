@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class DashboardService {
-  static const String baseUrl = "http://192.168.18.13/api_penyewaan";
+  static const String baseUrl = "http://10.136.173.149/api_penyewaan";
 
   static Future<Map<String, dynamic>> getDashboardStats() async {
     final response = await http.get(

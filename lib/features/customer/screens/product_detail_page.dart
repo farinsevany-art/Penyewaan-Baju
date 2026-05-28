@@ -61,7 +61,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        // --- PERUBAHAN: DITAMBAHKAN TEKS "KUSUMA CANTIKA" DI SAMPING LOGO ---
         title: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -94,20 +93,30 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child:
-                      widget.costume.imageUrl != null &&
-                          widget.costume.imageUrl!.isNotEmpty
-                      ? Image.network(
-                          "$imageBaseUrl${widget.costume.imageUrl}",
-                          width: double.infinity,
-                          height: 350,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _buildErrorImage(),
-                        )
-                      : _buildErrorImage(),
+
+                // 🔻 PERBAIKAN: Menggunakan Builder agar gambar reaktif terhadap ukuran
+                Builder(
+                  builder: (context) {
+                    String currentImage =
+                        widget.costume.sizeImages[selectedSize] ??
+                        widget.costume.imageUrl ??
+                        "";
+
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: currentImage.isNotEmpty
+                          ? Image.network(
+                              "$imageBaseUrl$currentImage",
+                              width: double.infinity,
+                              height: 350,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => _buildErrorImage(),
+                            )
+                          : _buildErrorImage(),
+                    );
+                  },
                 ),
+
                 const SizedBox(height: 20),
 
                 Text(
@@ -302,7 +311,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       initialQuantity: quantity,
                       onConfirm: (selectedQty, startDate, endDate, days) {
                         setState(() {
-                          // 🔻 LOGIKA BARU: Cek berdasarkan ID DAN UKURAN 🔻
                           int index = cartItemsGlobal.indexWhere(
                             (item) =>
                                 item.id == widget.costume.id &&
@@ -310,16 +318,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           );
 
                           if (index != -1) {
-                            // Jika ID & Ukuran yang sama sudah ada, cukup tambahkan jumlahnya
                             cartItemsGlobal[index].quantity += selectedQty;
-                            // Update juga tanggalnya jika diperlukan
                             cartItemsGlobal[index].rentStartDate = startDate;
                             cartItemsGlobal[index].rentEndDate = endDate;
                             cartItemsGlobal[index].rentDays = days;
                           } else {
-                            // Jika kombinasi ID & Ukuran belum ada, buat objek baru (clone)
-                            // Gunakan instance baru agar data tidak menimpa satu sama lain
-                            // Jika kombinasi ID & Ukuran belum ada, buat objek baru (clone)
                             final newCartItem = Costume(
                               id: widget.costume.id,
                               name: widget.costume.name,
@@ -327,19 +330,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               imageUrl: widget.costume.imageUrl,
                               size: widget.costume.size,
                               description: widget.costume.description,
-
-                              // 🔻 TAMBAHKAN PARAMETER YANG DIMINTA DI SINI 🔻
                               category: widget.costume.category,
                               stock: widget.costume.stock,
                             );
 
-                            // (Lanjutkan dengan kode rentStartDate dsb di bawahnya...)
                             newCartItem.rentStartDate = startDate;
                             newCartItem.rentEndDate = endDate;
-                            // ... (kode Anda sebelumnya)
                             newCartItem.rentDays = days;
-                            newCartItem.selectedSize =
-                                selectedSize; // XL atau M
+                            newCartItem.selectedSize = selectedSize;
                             newCartItem.quantity = selectedQty;
                             newCartItem.isInCart = true;
 
@@ -347,7 +345,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           }
                         });
 
-                        // Berikan feedback dan tutup sheet
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

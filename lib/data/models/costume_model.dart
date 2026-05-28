@@ -8,6 +8,7 @@ class Costume {
   final String? description;
   String? size;
   Map<String, int> sizeStocks = {};
+  Map<String, String> sizeImages = {};
 
   bool isWishlisted;
   int quantity = 1;
