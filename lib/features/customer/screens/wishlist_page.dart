@@ -34,6 +34,7 @@ class WishlistPageState extends State<WishlistPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFB),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white.withOpacity(0.9),
         elevation: 0.5,
         title: Text(

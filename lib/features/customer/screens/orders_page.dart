@@ -67,6 +67,7 @@ class _OrdersPageState extends State<OrdersPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white.withOpacity(0.9),
         elevation: 0.5,
         title: const Text(

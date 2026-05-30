@@ -25,7 +25,6 @@ class _CartPageState extends State<CartPage> {
   double calculateTotal() {
     double total = 0;
     for (var item in cartItemsGlobal) {
-      // PERBAIKAN: Total harga = harga x jumlah x lama hari sewa
       total += item.price * item.quantity * item.rentDays;
     }
     return total;
@@ -41,22 +40,28 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Colors.transparent, // Transparan agar AuthBackground terlihat
+      backgroundColor: Colors.transparent,
+
+      // 🔻 PERBAIKAN: AppBar Putih, Teks Navy, dan Hapus Tombol Back 🔻
       appBar: AppBar(
-        title: const Text(
-          'Keranjang Saya',
-          style: TextStyle(
-            color: Color(0xFF0D1B3E),
+        backgroundColor: Colors.white, // Latar belakang putih
+        elevation: 0,
+
+        // INILAH KODE UNTUK MENGHAPUS TOMBOL BACK BAWAAN FLUTTER
+        automaticallyImplyLeading: false,
+
+        title: Text(
+          "Keranjang Saya",
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: const Color(0xFF0D1B3E), // Teks warna Navy
             fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+            fontSize: 18,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white.withOpacity(0.9),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF0D1B3E)),
       ),
-      // PERBAIKAN: Menggunakan AuthBackground
+
       body: AuthBackground(
         child: cartItemsGlobal.isEmpty
             ? const Center(
@@ -71,7 +76,6 @@ class _CartPageState extends State<CartPage> {
                   final item = cartItemsGlobal[index];
 
                   int maxStock = 1;
-                  // Memastikan batas limit stok untuk ukuran yang dipilih
                   if (item.selectedSize != null &&
                       item.sizeStocks.containsKey(item.selectedSize)) {
                     maxStock = item.sizeStocks[item.selectedSize!]!;
@@ -86,9 +90,7 @@ class _CartPageState extends State<CartPage> {
                     ),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(
-                        0.95,
-                      ), // Agak putih agar kontras dengan AuthBackground
+                      color: Colors.white.withOpacity(0.95),
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
@@ -133,7 +135,6 @@ class _CartPageState extends State<CartPage> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              // PERBAIKAN: Menampilkan Ukuran Spesifik dan Durasi Sewa
                               Text(
                                 "Uk. ${item.selectedSize ?? '-'} | ${item.rentDays} Hari",
                                 style: TextStyle(

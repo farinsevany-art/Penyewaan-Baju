@@ -36,14 +36,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     selectedSize = availableSizes.first;
   }
 
-  // MENGAMBIL SISA STOK BERDASARKAN UKURAN YANG DIKLIK SAAT INI
   int get currentStock =>
       widget.costume.sizeStocks[selectedSize] ?? widget.costume.stock;
 
   void _onSizeSelected(String newSize) {
     setState(() {
       selectedSize = newSize;
-      // Jika pengguna ganti ukuran, cek apakah jumlah keranjang melebihi stok ukuran baru
       if (quantity > currentStock) {
         quantity = currentStock > 0 ? currentStock : 1;
       }
@@ -93,8 +91,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-
-                // 🔻 PERBAIKAN: Menggunakan Builder agar gambar reaktif terhadap ukuran
                 Builder(
                   builder: (context) {
                     String currentImage =
@@ -116,9 +112,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     );
                   },
                 ),
-
                 const SizedBox(height: 20),
-
                 Text(
                   widget.costume.name,
                   style: const TextStyle(
@@ -137,8 +131,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                 ),
                 const SizedBox(height: 25),
-
-                // --- SISA STOK DITAMPILKAN DI SAMPING KANAN PILIHAN UKURAN ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -150,7 +142,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     ),
                     Text(
-                      "Sisa: $currentStock pcs", // Menggunakan stok dinamis
+                      "Sisa: $currentStock pcs",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -160,7 +152,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ],
                 ),
                 const SizedBox(height: 12),
-
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
@@ -209,7 +200,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   }).toList(),
                 ),
                 const SizedBox(height: 25),
-
                 const Text(
                   "Deskripsi",
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -223,157 +213,159 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     color: Colors.black87,
                   ),
                 ),
-                const SizedBox(height: 120),
+                const SizedBox(height: 40), // Jarak aman sebelum mentok bawah
               ],
             ),
           ),
         ),
       ),
 
-      bottomSheet: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFDF7F0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade200),
+      // 🔻 PERBAIKAN FINAL: Menggunakan bottomNavigationBar + SafeArea
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFDF7F0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
               ),
-              child: IconButton(
-                icon: Icon(
-                  widget.costume.isWishlisted
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: Colors.red,
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey.shade200),
                 ),
-                onPressed: () {
-                  setState(() {
-                    widget.costume.isWishlisted = !widget.costume.isWishlisted;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(width: 15),
-
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove, size: 18),
-                    onPressed: () {
-                      if (quantity > 1) setState(() => quantity--);
-                    },
+                child: IconButton(
+                  icon: Icon(
+                    widget.costume.isWishlisted
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                    color: Colors.red,
                   ),
-                  Text(
-                    "$quantity",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add, size: 18),
-                    onPressed: () {
-                      if (quantity < currentStock) setState(() => quantity++);
-                    },
-                  ),
-                ],
+                  onPressed: () {
+                    setState(() {
+                      widget.costume.isWishlisted =
+                          !widget.costume.isWishlisted;
+                    });
+                  },
+                ),
               ),
-            ),
-            const SizedBox(width: 15),
-
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    backgroundColor: Colors.transparent,
-                    isScrollControlled: true,
-                    builder: (context) => RentOptionsBottomSheet(
-                      costume: widget.costume,
-                      initialQuantity: quantity,
-                      onConfirm: (selectedQty, startDate, endDate, days) {
-                        setState(() {
-                          int index = cartItemsGlobal.indexWhere(
-                            (item) =>
-                                item.id == widget.costume.id &&
-                                item.selectedSize == selectedSize,
-                          );
-
-                          if (index != -1) {
-                            cartItemsGlobal[index].quantity += selectedQty;
-                            cartItemsGlobal[index].rentStartDate = startDate;
-                            cartItemsGlobal[index].rentEndDate = endDate;
-                            cartItemsGlobal[index].rentDays = days;
-                          } else {
-                            final newCartItem = Costume(
-                              id: widget.costume.id,
-                              name: widget.costume.name,
-                              price: widget.costume.price,
-                              imageUrl: widget.costume.imageUrl,
-                              size: widget.costume.size,
-                              description: widget.costume.description,
-                              category: widget.costume.category,
-                              stock: widget.costume.stock,
-                            );
-
-                            newCartItem.rentStartDate = startDate;
-                            newCartItem.rentEndDate = endDate;
-                            newCartItem.rentDays = days;
-                            newCartItem.selectedSize = selectedSize;
-                            newCartItem.quantity = selectedQty;
-                            newCartItem.isInCart = true;
-
-                            cartItemsGlobal.add(newCartItem);
-                          }
-                        });
-
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              "Berhasil menambah ${widget.costume.name} ($selectedSize) ke keranjang",
-                            ),
-                          ),
-                        );
+              const SizedBox(width: 15),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove, size: 18),
+                      onPressed: () {
+                        if (quantity > 1) setState(() => quantity--);
                       },
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0D1B3E),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  elevation: 0,
-                ),
-                icon: const Icon(Icons.shopping_bag_outlined),
-                label: const Text(
-                  "Sewa",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      "$quantity",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add, size: 18),
+                      onPressed: () {
+                        if (quantity < currentStock) setState(() => quantity++);
+                      },
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 15),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      isScrollControlled: true,
+                      builder: (context) => RentOptionsBottomSheet(
+                        costume: widget.costume,
+                        initialQuantity: quantity,
+                        onConfirm: (selectedQty, startDate, endDate, days) {
+                          setState(() {
+                            int index = cartItemsGlobal.indexWhere(
+                              (item) =>
+                                  item.id == widget.costume.id &&
+                                  item.selectedSize == selectedSize,
+                            );
+
+                            if (index != -1) {
+                              cartItemsGlobal[index].quantity += selectedQty;
+                              cartItemsGlobal[index].rentStartDate = startDate;
+                              cartItemsGlobal[index].rentEndDate = endDate;
+                              cartItemsGlobal[index].rentDays = days;
+                            } else {
+                              final newCartItem = Costume(
+                                id: widget.costume.id,
+                                name: widget.costume.name,
+                                price: widget.costume.price,
+                                imageUrl: widget.costume.imageUrl,
+                                size: widget.costume.size,
+                                description: widget.costume.description,
+                                category: widget.costume.category,
+                                stock: widget.costume.stock,
+                              );
+
+                              newCartItem.rentStartDate = startDate;
+                              newCartItem.rentEndDate = endDate;
+                              newCartItem.rentDays = days;
+                              newCartItem.selectedSize = selectedSize;
+                              newCartItem.quantity = selectedQty;
+                              newCartItem.isInCart = true;
+
+                              cartItemsGlobal.add(newCartItem);
+                            }
+                          });
+
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "Berhasil menambah ${widget.costume.name} ($selectedSize) ke keranjang",
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0D1B3E),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    elevation: 0,
+                  ),
+                  icon: const Icon(Icons.shopping_bag_outlined),
+                  label: const Text(
+                    "Sewa",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

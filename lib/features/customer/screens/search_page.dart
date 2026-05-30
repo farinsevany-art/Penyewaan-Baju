@@ -3,7 +3,7 @@ import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
 import '../../auth/widgets/auth_background.dart';
-import 'cart_page.dart'; // PASTIKAN IMPORT INI ADA
+import 'cart_page.dart';
 
 class SearchPage extends StatefulWidget {
   final String? searchQuery;
@@ -47,27 +47,36 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AuthBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.white.withOpacity(0.9),
-          elevation: 0.5,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black87),
-            onPressed: () => Navigator.pop(context),
+    // 🔻 PERBAIKAN: Scaffold diletakkan di paling luar agar menempel di atap layar
+    return Scaffold(
+      backgroundColor: Colors.white, // Latar belakang dasar putih
+      // 🔻 PERBAIKAN: AppBar diubah menjadi Putih Solid seperti halaman Pesanan
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0, // Hilangkan batas garis bayangan
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color(0xFF0D1B3E),
+            size: 20,
           ),
-          title: const Text(
-            'Cari Kostum',
-            style: TextStyle(
-              color: Colors.black87,
-              fontWeight: FontWeight.bold,
-              fontSize: 17,
-            ),
-          ),
-          centerTitle: true,
+          onPressed: () => Navigator.pop(context),
         ),
-        body: Column(
+        title: const Text(
+          'Cari Kostum',
+          style: TextStyle(
+            color: Color(0xFF0D1B3E),
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+            fontSize: 18,
+          ),
+        ),
+        centerTitle: true,
+      ),
+
+      // 🔻 PERBAIKAN: AuthBackground hanya membungkus area konten (body)
+      body: AuthBackground(
+        child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -75,6 +84,9 @@ class _SearchPageState extends State<SearchPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: Colors.grey.shade200,
+                  ), // Tambahan border halus
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -87,7 +99,7 @@ class _SearchPageState extends State<SearchPage> {
                   controller: _searchController,
                   onChanged: _runFilter,
                   decoration: const InputDecoration(
-                    hintText: 'Tokoh dan Wayang',
+                    hintText: 'Cari Tokoh dan Wayang...',
                     prefixIcon: Icon(Icons.search, color: Colors.grey),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 15),

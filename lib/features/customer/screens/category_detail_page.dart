@@ -4,6 +4,7 @@ import '../../../data/models/costume_model.dart';
 import '../../../data/services/mock_data.dart';
 import '../widgets/costume_card.dart';
 import 'product_detail_page.dart';
+import '../../auth/widgets/auth_background.dart';
 
 class CategoryDetailPage extends StatefulWidget {
   final String categoryTitle;
@@ -16,6 +17,7 @@ class CategoryDetailPage extends StatefulWidget {
 
 class _CategoryDetailPageState extends State<CategoryDetailPage> {
   late String _currentSelected;
+  String _searchQuery = "";
 
   @override
   void initState() {
@@ -25,23 +27,40 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Filter yang lebih aman dan robust (mengatasi null dan spasi)
     final filteredCostumes = allCostumes.where((item) {
+      bool matchCategory = false;
       final itemCategory = (item.category ?? '').trim().toLowerCase();
       final selectedCategory = _currentSelected.trim().toLowerCase();
 
-      return itemCategory == selectedCategory;
+      if (selectedCategory == 'semua') {
+        matchCategory = true;
+      } else {
+        matchCategory =
+            itemCategory == selectedCategory ||
+            itemCategory.contains(selectedCategory) ||
+            selectedCategory.contains(itemCategory);
+      }
+
+      bool matchSearch = true;
+      if (_searchQuery.isNotEmpty) {
+        final itemName = (item.name ?? '').toLowerCase();
+        matchSearch = itemName.contains(_searchQuery.toLowerCase());
+      }
+
+      return matchCategory && matchSearch;
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F5F2),
+      backgroundColor: Colors.transparent,
+
+      // 🔻 PERBAIKAN: Background diubah menjadi Putih 🔻
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        backgroundColor: Colors.white, // Menghilangkan blok hitam
+        elevation: 0, // Tidak ada bayangan agar menyatu rapi
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black87,
+            color: Color(0xFF0D1B3E),
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
@@ -49,13 +68,23 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
         title: SizedBox(
           height: 40,
           child: TextField(
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
             decoration: InputDecoration(
-              hintText: 'cari kostum',
+              hintText: 'Cari nama kostum...',
               hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
               prefixIcon: Icon(Icons.search, color: Colors.grey[400], size: 20),
               filled: true,
-              fillColor: Colors.white,
-              contentPadding: EdgeInsets.zero,
+              fillColor: const Color(
+                0xFFF5F5F5,
+              ), // Warna isian abu-abu muda lembut
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 0,
+                horizontal: 16,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
                 borderSide: BorderSide.none,
@@ -64,53 +93,55 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
-          _buildFilterTabs(),
-          const SizedBox(height: 15),
-          Expanded(
-            child: filteredCostumes.isEmpty
-                ? _buildEmpty(context)
-                : GridView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
+
+      body: AuthBackground(
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            _buildFilterTabs(),
+            const SizedBox(height: 15),
+            Expanded(
+              child: filteredCostumes.isEmpty
+                  ? _buildEmpty(context)
+                  : GridView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.62,
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 14,
+                          ),
+                      itemCount: filteredCostumes.length,
+                      itemBuilder: (context, index) {
+                        final item = filteredCostumes[index];
+                        return CostumeCard(
+                          costume: item,
+                          onWishlistToggle: () {
+                            setState(() {
+                              item.isWishlisted = !item.isWishlisted;
+                            });
+                          },
+                        );
+                      },
                     ),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.62,
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 14,
-                        ),
-                    itemCount: filteredCostumes.length,
-                    itemBuilder: (context, index) {
-                      final item = filteredCostumes[index];
-                      return CostumeCard(
-                        costume:
-                            item, // atau nama variabel kostum Anda di file ini (misal: kostum, data, dll)
-                        onWishlistToggle: () {
-                          setState(() {
-                            item.isWishlisted = !item.isWishlisted;
-                          });
-                        },
-                        // Jika masih ada baris onAddToCart di sini, biarkan saja atau hapus juga tidak apa-apa
-                      );
-                    },
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFilterTabs() {
     final categories = [
+      'Semua',
       'Tari Dewasa',
       'Tari Anak',
       'Raja & Ratu',
-      'Pewayangan',
+      'Wayang',
     ];
 
     return SingleChildScrollView(
@@ -131,10 +162,10 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                   _currentSelected = cat;
                 });
               },
-              selectedColor: Colors.black87,
+              selectedColor: const Color(0xFF0D1B3E),
               backgroundColor: Colors.white,
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
+                color: isSelected ? Colors.white : const Color(0xFF0D1B3E),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -166,6 +197,11 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
               fontWeight: FontWeight.bold,
               color: Color(0xFF0D1B3E),
             ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Coba ubah kata kunci pencarian atau kategori.',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
