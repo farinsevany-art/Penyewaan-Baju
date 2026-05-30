@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/costume_model.dart';
 
-const String baseUrl = "http://10.136.173.149/api_penyewaan";
-const String imageBaseUrl = "$baseUrl/uploads/";
+const String baseUrl = "https://api-krent-production.up.railway.app";
+const String imageBaseUrl = "$baseUrl/baca_gambar.php?nama=";
 
 List<Costume> allCostumes = [];
 List<Costume> cartItemsGlobal = [];
@@ -19,14 +19,17 @@ void resetAllData() {
 
 Future<void> fetchCostumesFromDB() async {
   try {
+    // 1. Melakukan HTTP GET Request ke Server Lokal
     final response = await http.get(Uri.parse("$baseUrl/get_stocks.php"));
 
     if (response.statusCode == 200) {
+      // 2. Menerima dan Memecah (Parsing) data JSON
       List data = json.decode(response.body);
 
       // --- LOGIKA PENGGABUNGAN KOSTUM & STOK ---
       Map<String, Costume> groupedCostumes = {};
 
+      // 3. Memasukkan data ke dalam list memori aplikasi
       for (var item in data) {
         Costume costume = Costume.fromJson(item);
 

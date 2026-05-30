@@ -351,7 +351,9 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
           backgroundColor: Colors.grey.shade200,
 
           backgroundImage: foto.isNotEmpty
-              ? NetworkImage("${OrderService.baseUrl}/uploads/profiles/$foto")
+              ? NetworkImage(
+                  "${OrderService.baseUrl}/baca_gambar.php?nama=profiles/$foto",
+                )
               : null,
 
           child: foto.isEmpty
@@ -419,7 +421,7 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
 
               child: foto.isNotEmpty
                   ? Image.network(
-                      "${OrderService.baseUrl}/uploads/$foto",
+                      "${OrderService.baseUrl}/baca_gambar.php?nama=$foto",
 
                       width: 70,
                       height: 70,

@@ -275,7 +275,7 @@ class _ManajemenPesananScreenState extends State<ManajemenPesananScreen>
                         image: customerPhoto.isNotEmpty
                             ? DecorationImage(
                                 image: NetworkImage(
-                                  "${OrderService.baseUrl}/uploads/profiles/$customerPhoto",
+                                  "${OrderService.baseUrl}/baca_gambar.php?nama=profiles/$customerPhoto",
                                 ),
                                 fit: BoxFit.cover,
                               )

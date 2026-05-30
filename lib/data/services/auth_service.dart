@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart'; // 🔻 TAMBAHKAN IMPORT INI
+import 'package:image_picker/image_picker.dart';
 
 class AuthService {
-  static const String baseUrl = "http://10.136.173.149/api_penyewaan";
+  static const String baseUrl = "https://api-krent-production.up.railway.app";
 
   static Future<Map<String, dynamic>> login(
     String email,

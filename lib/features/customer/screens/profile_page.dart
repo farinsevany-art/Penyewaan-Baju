@@ -279,7 +279,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 profileFoto != null && profileFoto!.isNotEmpty
                                 // 🔻 PERBAIKAN: Menggunakan AuthService.baseUrl agar otomatis menyesuaikan
                                 ? NetworkImage(
-                                    "${AuthService.baseUrl}/uploads/profiles/$profileFoto",
+                                    "${AuthService.baseUrl}/baca_gambar.php?nama=$profileFoto",
                                   )
                                 : const NetworkImage(
                                     "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",

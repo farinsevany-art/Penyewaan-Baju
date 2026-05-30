@@ -362,7 +362,7 @@ class _DashboardContentState extends State<DashboardContent> {
             borderRadius: BorderRadius.circular(8),
             child: foto.isNotEmpty
                 ? Image.network(
-                    "${DashboardService.baseUrl}/uploads/$foto",
+                    "${DashboardService.baseUrl}/baca_gambar.php?nama=$foto",
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,
